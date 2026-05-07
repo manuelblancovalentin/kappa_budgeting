@@ -1,6 +1,6 @@
 # Experiment Template
 
-Copy this structure when documenting a summarized experiment.
+Copy this structure when documenting an ablation experiment.
 
 ## Experiment title
 
@@ -23,9 +23,35 @@ What do we expect to happen?
 | Branch | `branch-name` |
 | Commit | `commit-hash` |
 | Dataset | Dataset |
-| Machine / hardware | Hardware |
+| Architecture | Architecture |
+| Precision | Precision |
+| Drift | `(alpha, beta)` range |
+| Budgeting variant | Variant |
+| Optimizer | Optimizer |
 | Environment | Environment |
-| Key parameters | Parameters |
+
+## Model Math
+
+Add the forward equations and loss.
+
+```text
+z1 = W1 x + b1
+a1 = relu(z1)
+y_hat = W2 a1 + b2
+L = ...
+```
+
+## Diagram
+
+Use Mermaid for the forward and backward paths.
+
+```mermaid
+flowchart LR
+    X["X"] -->|x| L1["Layer 1<br/>W1, b1"]
+    L1 -->|a1| LOSS["Loss"]
+    LOSS -->|g1| B1["Backpass Layer 1"]
+    B1 -->|update| L1
+```
 
 ## Procedure
 
@@ -37,9 +63,12 @@ What do we expect to happen?
 
 Add tables, plots, screenshots, or links to raw logs.
 
-| Metric | Baseline | New result |
+| Metric | Baseline | Budgeted |
 |---|---:|---:|
-| Metric 1 | TBD | TBD |
+| Final loss | TBD | TBD |
+| Saturation events | TBD | TBD |
+| Max throttle shift | TBD | TBD |
+| Mean update cosine | TBD | TBD |
 
 ## Interpretation
 
