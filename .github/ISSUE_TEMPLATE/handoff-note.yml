@@ -1,0 +1,44 @@
+name: Handoff Note
+description: Capture important continuity information before pausing or transferring work.
+title: "[Handoff]: "
+labels: ["handoff"]
+body:
+  - type: textarea
+    id: current_state
+    attributes:
+      label: Current state
+      description: What is the state of the project?
+    validations:
+      required: true
+
+  - type: textarea
+    id: works
+    attributes:
+      label: What works
+      description: What is currently functional or reproducible?
+    validations:
+      required: true
+
+  - type: textarea
+    id: broken
+    attributes:
+      label: What does not work
+      description: What is broken, incomplete, or uncertain?
+    validations:
+      required: true
+
+  - type: textarea
+    id: next
+    attributes:
+      label: Recommended next steps
+      description: What should the next person do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: avoid
+    attributes:
+      label: Things not to repeat
+      description: What failed attempts should future contributors avoid repeating?
+    validations:
+      required: false

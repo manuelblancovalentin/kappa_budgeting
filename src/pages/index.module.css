@@ -1,0 +1,70 @@
+.hero {
+  padding: 5rem 0 3rem;
+  text-align: left;
+  background: linear-gradient(135deg, #f7f8fb 0%, #eef2ff 100%);
+}
+
+.heroTitle {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.heroSubtitle {
+  max-width: 760px;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: #444;
+}
+
+.heroButtons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.statusBox {
+  margin: 3rem 0;
+  padding: 2rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 16px;
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.statusBox h2 {
+  margin-top: 0;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 4rem;
+}
+
+.card {
+  padding: 1.5rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 16px;
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+}
+
+.card h3 {
+  margin-top: 0;
+}
+
+.card p {
+  min-height: 90px;
+}
+
+@media screen and (max-width: 996px) {
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroTitle {
+    font-size: 2.25rem;
+  }
+}

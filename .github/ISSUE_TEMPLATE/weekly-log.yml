@@ -1,0 +1,36 @@
+name: Weekly Log
+description: Summarize weekly progress, blockers, and next steps.
+title: "[Weekly Log]: YYYY-MM-DD"
+labels: ["weekly-log"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened this week?
+    validations:
+      required: true
+
+  - type: textarea
+    id: progress
+    attributes:
+      label: Progress
+      description: What moved forward?
+    validations:
+      required: true
+
+  - type: textarea
+    id: blockers
+    attributes:
+      label: Blockers
+      description: What is stuck or unclear?
+    validations:
+      required: false
+
+  - type: textarea
+    id: next
+    attributes:
+      label: Next week
+      description: What should happen next?
+    validations:
+      required: true

@@ -1,0 +1,36 @@
+name: Decision Record
+description: Record an architecture, research, or workflow decision.
+title: "[Decision]: "
+labels: ["decision"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What problem forced this decision?
+    validations:
+      required: true
+
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decision
+      description: What did we decide?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other options were considered?
+    validations:
+      required: false
+
+  - type: textarea
+    id: consequences
+    attributes:
+      label: Consequences
+      description: What becomes easier, harder, or constrained?
+    validations:
+      required: false
