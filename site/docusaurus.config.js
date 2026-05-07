@@ -23,12 +23,12 @@ const config = {
   url: 'https://manuelblancovalentin.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/PROJECT_REPO_NAME/',
+  baseUrl: '/kappa_budgeting/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'manuelblancovalentin', // Usually your GitHub org/user name.
-  projectName: 'PROJECT_REPO_NAME', // Usually your repo name.
+  projectName: 'kappa_budgeting', // Usually your repo name.
 
   onBrokenLinks: 'throw',
 
@@ -83,7 +83,7 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: 'PROJECT_NAME Logbook',
+        title: 'KAPPA_BUDGETING Logbook',
         logo: {
           alt: 'Project Logo',
           src: 'img/logo.svg',
@@ -97,7 +97,7 @@ const config = {
           },
           {to: '/blog', label: 'Lab Log', position: 'left'},
           {
-            href: 'https://github.com/manuelblancovalentin/PROJECT_REPO_NAME',
+            href: 'https://github.com/manuelblancovalentin/kappa_budgeting',
             label: 'GitHub',
             position: 'right',
           },
@@ -116,7 +116,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} PROJECT NAME, Inc. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} KAPPA BUDGETING, Inc. Built with Docusaurus.`,
       },
       prism: {
         theme: prismThemes.github,
