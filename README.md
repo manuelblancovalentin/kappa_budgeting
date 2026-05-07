@@ -1,41 +1,26 @@
-# Website
+# $\kappa$-Budgeting: [ENABOL](https://github.com/manuelblancovalentin/ENABOL)
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+This repository contains the code and documentation for the actual mathematical implementation of the $\kappa$-Budgeting algorithm, as described in the paper "$\texttt{ENABOL}$: Enabling Stable On-Chip Learning via Adaptive Lipschitz Budgeting in Edge-AI Systems".
 
-## Installation
+For live updates, please refer to the Live Pages of this repo in [here](https://manuelblancovalentin.github.io/kappa_budgeting/).
 
-```bash
-yarn
+## Paper
+
+<object data="iccad2026-paper1079.pdf" type="application/pdf" width="700px" height="700px">
+    <embed src="iccad2026-paper1079.pdf">
+        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="iccad2026-paper1079.pdf">Download PDF</a>.</p>
+    </embed>
+</object>
+
+## Cite:
+If you find this work useful, please consider citing it:
+
+```
+@inproceedings{blanco-valentin2026enabol,
+  title={ENABOL: Enabling Stable On-Chip Learning via Adaptive Lipschitz Budgeting in Edge-AI Systems},
+  author={Manuel Blanco-Valentin and others},
+  conference={ICCAD},
+    year={2026}
+}
 ```
 
-## Local Development
-
-```bash
-yarn start
-```
-
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-## Build
-
-```bash
-yarn build
-```
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-## Deployment
-
-Using SSH:
-
-```bash
-USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```bash
-GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
