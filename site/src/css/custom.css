@@ -1,3 +1,5 @@
+@import 'katex/dist/katex.min.css';
+
 :root {
   --ifm-color-primary: #2b6cb0;
   --ifm-color-primary-dark: #285e9e;
@@ -12,4 +14,70 @@
 
 [data-theme='dark'] {
   --ifm-color-primary: #90cdf4;
+}
+
+.pseudo {
+  margin: 1.5rem 0;
+  border-top: 2px solid var(--ifm-color-emphasis-700);
+  border-bottom: 2px solid var(--ifm-color-emphasis-700);
+}
+
+.pseudo-title {
+  padding: 0.45rem 0.75rem;
+  font-weight: 600;
+}
+
+.pseudo-code {
+  border-top: 1px solid var(--ifm-color-emphasis-300);
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  padding: 0.35rem 0;
+  counter-reset: pseudo-line;
+}
+
+.pseudo-code ol {
+  margin: 0;
+  padding-left: 3.5rem;
+}
+
+.pseudo-code > ol {
+  position: relative;
+}
+
+.pseudo-code li {
+  position: relative;
+  margin: 0.2rem 0;
+  padding-left: 0.25rem;
+  list-style: none;
+}
+
+.pseudo-code li::marker {
+  content: none;
+  font-size: 0;
+}
+
+.pseudo-code li::before {
+  position: absolute;
+  left: -3.25rem;
+  width: 2.5rem;
+  color: var(--ifm-color-emphasis-600);
+  content: counter(pseudo-line) ":";
+  counter-increment: pseudo-line;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.pseudo-code .comment {
+  float: right;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.9em;
+}
+
+.pseudo-code .comment::before {
+  content: "▷ ";
+}
+
+.pseudo-caption {
+  padding: 0.45rem 0.75rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.9rem;
 }

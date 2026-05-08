@@ -1,0 +1,84 @@
+experiment:
+  id: "001_affine_single_dense"
+  name: "Affine single dense"
+  status: "planned"
+  seed: 1079
+
+dataset:
+  type: "affine"
+  n_train: 4096
+  n_test: 1024
+  input_dim: 4
+  output_dim: 2
+  x_distribution: "uniform"
+  x_min: 0.0
+  x_max: 1.0
+  noise_std: 0.0
+
+model:
+  architecture: "dense"
+  layers:
+    - name: "dense_1"
+      type: "dense"
+      input_dim: 4
+      output_dim: 2
+      activation: "linear"
+  loss: "mse"
+
+drift:
+  model: "x_drift = alpha * x + beta"
+  clipped: false
+  alpha_values: [1.0, 1.25, 1.5, 2.0, 3.0]
+  beta_values: [0.0, 0.25, 0.5, 1.0]
+
+fixed_point:
+  weights: "ap_fixed<12,4>"
+  biases: "ap_fixed<12,4>"
+  activations: "ap_fixed<12,4>"
+  gradients: "ap_fixed<16,6>"
+  accumulators: "ap_fixed<24,10>"
+  updates: "ap_fixed<16,6>"
+  rounding: "nearest"
+  overflow: "saturate"
+
+training:
+  optimizer: "sgd"
+  learning_rate: 0.01
+  batch_size: 16
+  pretrain_epochs: 100
+  online_epochs: 50
+
+controllers:
+  variants:
+    - "floating_reference"
+    - "fixed_point_baseline"
+    - "dynamic_global_throttle"
+    - "loose_kappa_plus_throttle"
+    - "global_static_kappa_scale"
+    - "legacy_row_col_projection_optional"
+  dynamic_global_throttle:
+    signal: "ema_curvature_proxy"
+    beta: 1.0
+    ema_decay: 0.95
+    alpha_min: 0.01
+    alpha_max: 1.0
+    eps: 1.0e-12
+  global_static_kappa_scale:
+    enabled: true
+    K_max: null
+    mode: "shared_scalar"
+  initial_kappa_strategy: "rail_driven"
+  rho: 0.8
+  alpha_weight_share: 0.9
+
+logging:
+  tensors: true
+  saturation_counts: true
+  activation_stats: true
+  gradient_stats: true
+  weight_norms: true
+  update_norms: true
+  curvature_proxy: true
+  alpha: true
+  update_cosine: true
+  hessian_metrics: true

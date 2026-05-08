@@ -1,6 +1,6 @@
-# Ablation Architecture
+# Closed-Loop Ablation Architecture
 
-The ablation harness should mirror the ENABOL training loop, but remain small enough to inspect every tensor. The first implementation target is software simulation, not HLS synthesis.
+The ablation harness should mirror the ENABOL online training loop, but remain small enough to inspect every tensor and compute exact curvature diagnostics. The first implementation target is software simulation, not HLS synthesis.
 
 ## Training Loop
 
@@ -11,41 +11,110 @@ Each experiment follows the same high-level flow:
 2. Train a small floating-point or high-precision reference model.
 3. Quantize or simulate fixed-point training with selected precisions.
 4. Apply input drift.
-5. Continue online training with one budgeting variant enabled.
-6. Log activations, gradients, norms, saturation, throttling, and loss.
+5. Continue online training with one controller variant enabled.
+6. Log loss, norms, curvature proxies, throttle, update geometry, saturation, and rails.
 ```
 
-The budgeted fixed-point loop should expose these switches:
+The online loop should operate on a flattened global parameter vector:
+
+```text
+theta = flatten(W1, b1, W2, b2, ...)
+G     = flatten(dL/dW1, dL/db1, dL/dW2, dL/db2, ...)
+```
+
+This makes global controllers easy to implement and lets us measure whether a method preserves the intended update direction.
+
+## Priority Controllers
+
+Implement these first:
 
 | Switch | Meaning |
 |---|---|
-| `row_projection` | Apply post-update row norm projection. |
-| `col_gradient_scaling` | Scale backpropagated gradients using column budgets. |
-| `throttling` | Reduce optimizer update magnitude before applying the update. |
-| `projection_mode` | `exact`, `power_of_two`, `global_uniform`, or `none`. |
-| `optimizer_state_projection` | Whether Adam state is transformed when weights are projected. |
-| `precision` | Fixed-point format for weights, activations, gradients, accumulators, and updates. |
+| `controller=none` | Baseline online training. |
+| `controller=dynamic_global_throttle` | Compute one scalar `alpha(t)` and scale the full update vector. |
+| `controller=global_static_kappa_scale` | If global gain exceeds `K_max`, scale all layers by one shared scalar. |
+| `controller=loose_kappa_plus_throttle` | Keep loose static rails and apply dynamic global throttle. |
+| `precision` | Fixed-point format or simulated fixed-point rails. |
+
+Legacy row/column kappa projection can be included later as `controller=legacy_row_col_projection` if it is already available or cheap to stub. It is not a first implementation requirement.
+
+## Dynamic Global Throttle
+
+At each online step:
+
+<div className="pseudo">
+  <div className="pseudo-title">Algorithm 1: DynamicGlobalThrottle</div>
+  <div className="pseudo-code">
+
+1. **input** current parameters $\theta(t)$, gradient $G(t)$, learning rate $\eta$
+2. **input** previous parameters $\theta(t-1)$, previous gradient $G(t-1)$
+3. $\Delta_{\mathrm{raw}}(t) \leftarrow -\eta G(t)$
+4. $C(t) \leftarrow \dfrac{\lVert G(t) - G(t-1) \rVert}{\lVert \theta(t) - \theta(t-1) \rVert + \varepsilon}$ <span className="comment">curvature proxy</span>
+5. $S(t) \leftarrow \operatorname{EMA}(C(t))$
+6. $\alpha(t) \leftarrow \operatorname{clamp}\left(\dfrac{1}{1 + \beta S(t)}, \alpha_{\min}, 1\right)$
+7. $\Delta_{\mathrm{actual}}(t) \leftarrow \alpha(t)\Delta_{\mathrm{raw}}(t)$
+8. $\theta(t+1) \leftarrow \theta(t) + \Delta_{\mathrm{actual}}(t)$
+9. **return** $\theta(t+1)$, $\alpha(t)$, $C(t)$
+
+  </div>
+  <div className="pseudo-caption">The scalar $\alpha(t)$ is shared globally across all layers.</div>
+</div>
+
+Because $\alpha(t)$ is global, it preserves the raw update direction:
+
+```math
+cos(\Delta_{\mathrm{actual}}, -G) \approx 1
+```
+
+unless fixed-point saturation, projection, or another mechanism distorts the update.
 
 ## Experiment 001: Single Dense Affine Regression
 
-This is the minimum test case. It isolates the behavior of row budgets, column budgets, and throttling without inter-layer interactions.
+This is the minimum test case. It isolates closed-loop update stability without inter-layer interactions.
 
 ```mermaid
 flowchart LR
-    X["X"] -->|x| L1["Dense 1<br/>W1, b1"]
-    L1 -->|y_hat = W1 x + b1| LOSS["MSE Loss<br/>L(y_hat, y)"]
-
-    LOSS -->|g_y = dL/dy_hat| B1["Backpass Dense 1<br/>g_W1 = x g_y^T<br/>g_b1 = g_y<br/>g_x = W1^T g_y"]
-    B1 -->|update W1, b1| L1
+    X["Input<br/>x"] -->|"x"| L1["Dense 1<br/>W1, b1"]
+    L1 -->|"y_hat"| LOSS["MSE Loss<br/>L"]
+    LOSS -->|"g_y"| B1["Backpass Dense 1<br/>gW1, gb1, gX"]
+    B1 -->|"gX"| X
+    B1 -.->|"update"| L1
 ```
 
 Math:
 
-```text
-x ~ U([0, 1]^d)
-y = A x + c
-y_hat = W1 x + b1
-L = mean((y_hat - y)^2)
+```math
+x \sim U([0, 1]^d)
+```
+
+```math
+y = Ax + c
+```
+
+```math
+\hat{y} = W_1x + b_1
+```
+
+```math
+L = \operatorname{mean}\left((\hat{y} - y)^2\right)
+```
+
+Backpass:
+
+```math
+g_y = \frac{\partial L}{\partial \hat{y}}
+```
+
+```math
+g_{W_1} = x g_y^T
+```
+
+```math
+g_{b_1} = g_y
+```
+
+```math
+g_x = W_1^T g_y
 ```
 
 Drift:
@@ -57,7 +126,7 @@ x_drift = alpha x + beta
 Primary question:
 
 ```text
-Can kappa budgeting keep online fixed-point training stable in a known linear system where the exact solution is known?
+Can dynamic global throttling keep online fixed-point training stable in a known linear system where the exact solution and Hessian are easy to inspect?
 ```
 
 ## Experiment 002: Two Dense Layers With ReLU
@@ -66,75 +135,128 @@ This introduces an intermediate activation and an inter-layer gradient path whil
 
 ```mermaid
 flowchart LR
-    X["X"] -->|x| L1["Dense 1<br/>W1, b1"]
-    L1 -->|z1 = W1 x + b1| R1["ReLU"]
-    R1 -->|a1 = relu(z1)| L2["Dense 2<br/>W2, b2"]
-    L2 -->|y_hat = W2 a1 + b2| LOSS["MSE Loss<br/>L(y_hat, y)"]
+    X["Input<br/>x"] -->|"x"| L1["Dense 1<br/>W1, b1"]
+    L1 -->|"z1"| R1["ReLU"]
+    R1 -->|"a1"| L2["Dense 2<br/>W2, b2"]
+    L2 -->|"y_hat"| LOSS["MSE Loss<br/>L"]
 
-    LOSS -->|g_y| B2["Backpass Dense 2<br/>g_W2, g_b2, g_a1"]
-    B2 -->|g_a1| BR["Backpass ReLU<br/>g_z1 = g_a1 1[z1 > 0]"]
-    BR -->|g_z1| B1["Backpass Dense 1<br/>g_W1, g_b1, g_x"]
+    LOSS -->|"g_y"| B2["Backpass Dense 2<br/>gW2, gb2, gA1"]
+    B2 -->|"g_a1"| BR["Backpass ReLU<br/>gZ1"]
+    BR -->|"g_z1"| B1["Backpass Dense 1<br/>gW1, gb1, gX"]
+    B1 -->|"gX"| X
 
-    B2 -->|update W2, b2| L2
-    B1 -->|update W1, b1| L1
+    B2 -.->|"update"| L2
+    B1 -.->|"update"| L1
 ```
 
 Teacher model:
 
-```text
-y = A2 relu(A1 x + c1) + c2
+```math
+y = A_2 \operatorname{relu}(A_1x + c_1) + c_2
 ```
 
 Student model:
 
-```text
-z1 = W1 x + b1
-a1 = relu(z1)
-y_hat = W2 a1 + b2
+```math
+z_1 = W_1x + b_1
+```
+
+```math
+a_1 = \operatorname{relu}(z_1)
+```
+
+```math
+\hat{y} = W_2a_1 + b_2
+```
+
+Backpass:
+
+```math
+g_y = \frac{\partial L}{\partial \hat{y}}
+```
+
+```math
+g_{W_2} = a_1 g_y^T
+```
+
+```math
+g_{b_2} = g_y
+```
+
+```math
+g_{a_1} = W_2^T g_y
+```
+
+```math
+g_{z_1} = g_{a_1}\,\mathbf{1}[z_1 > 0]
+```
+
+```math
+g_{W_1} = x g_{z_1}^T
+```
+
+```math
+g_{b_1} = g_{z_1}
+```
+
+```math
+g_x = W_1^T g_{z_1}
 ```
 
 Primary question:
 
 ```text
-When there is an intermediate activation, do layer-local projections and throttling distort early-layer learning more than late-layer learning?
+When there is an intermediate activation, can global throttling stabilize coupled layer dynamics without changing descent geometry?
 ```
 
-## Budgeting Variants
+## Comparison Variants
 
-The first matrix of variants should be small:
+The first matrix should be small and should not require rebuilding the old row/column machinery:
 
-| Variant | Row Projection | Column Scaling | Throttling | Projection |
-|---|---:|---:|---:|---|
-| Baseline fixed-point | off | off | off | none |
-| Throttle only | off | off | on | none |
-| Column only | off | on | off | power-of-two |
-| Row only exact | on | off | off | exact |
-| Row only shift | on | off | off | power-of-two |
-| Full local shift | on | on | on | power-of-two |
-| Global uniform shift | on | on | on | shared max shift |
+| Variant | Required Now | Purpose |
+|---|---:|---|
+| Floating reference | yes | Establish expected behavior without fixed-point limits. |
+| Fixed-point baseline | yes | Find regimes where online learning fails. |
+| Dynamic global throttle | yes | Test closed-loop stabilization while preserving update geometry. |
+| Loose kappa + throttle | yes | Test static safety rails plus dynamic control. |
+| Global static kappa scale | yes | Test global gain control without row/layer direction changes. |
+| Legacy row/column projection | optional | Compare against the old mechanism only if available or cheap to stub. |
 
-The key comparison is `Row only exact` versus `Row only shift`. If exact projection behaves well while shift projection fails, the issue is likely implementation coarseness rather than the kappa-budgeting idea itself.
+The key comparison is baseline fixed-point versus dynamic global throttle. Legacy row/column projection is useful for diagnosing direction distortion, but it is secondary.
 
 ## Required Logs
 
 Each run should produce machine-readable logs and notebook plots for:
 
 - loss before and after drift,
+- output error before and after drift,
+- global and per-layer weight norms,
+- global and per-layer gradient norms,
+- global and per-layer update norms,
+- curvature proxy `C(t)`,
+- EMA instability signal `S(t)`,
+- global throttle `alpha(t)`,
+- update cosine between actual update and `-G`,
 - activation min/max/percentiles per layer,
 - gradient min/max/percentiles per layer,
 - fixed-point saturation counts per tensor,
-- row L1 norms and column L1 norms,
-- `kappa_row` and `kappa_col`,
-- row projection factors,
-- column scaling factors,
-- throttle shifts,
-- update norm,
-- cosine similarity between raw update and budgeted update.
+- rail pressure fractions per tensor,
+- product gain or approximate forward gain,
+- optional Hessian norm, `lambda_max(H)`, `rho(I - eta H)`, and `rho(I - alpha eta H)`.
 
 The update cosine is important because it directly measures whether budgeting preserves descent direction:
 
-```text
-cos(theta) = <Delta_raw, Delta_budgeted> / (||Delta_raw||_2 ||Delta_budgeted||_2)
+```math
+\cos(\theta)
+=
+\frac{
+  \langle \Delta_{\mathrm{raw}}, \Delta_{\mathrm{budgeted}} \rangle
+}{
+  \lVert \Delta_{\mathrm{raw}} \rVert_2
+  \lVert \Delta_{\mathrm{budgeted}} \rVert_2
+}
 ```
 
 Values near 1 mean budgeting mostly rescales the update. Lower or negative values mean budgeting has substantially changed the direction.
+
+For dynamic global throttle alone, this value should stay near 1. If it does not, the fixed-point path or saturation logic is changing the update.
