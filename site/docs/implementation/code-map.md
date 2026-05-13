@@ -6,7 +6,7 @@ This repository is the new implementation and documentation home for the kappa-b
 
 | Path | Purpose |
 |---|---|
-| `kappa/` | Future Python package for reusable kappa-budgeting simulation code. |
+| `kappa/` | Python package for reusable kappa-budgeting simulation code. |
 | `workspace/ablations/` | Reproducible experiment workspaces, notebooks, configs, notes, and results. |
 | `site/docs/` | Docusaurus documentation for methodology, experiment logs, decisions, and handoff. |
 | `site/blog/` | Short lab-log entries for chronological updates. |
@@ -54,18 +54,26 @@ The recommended workflow is notebook-first, script-second:
 
 This keeps exploration easy while preserving enough structure for handoff and reproducibility.
 
-## Planned Python Package Shape
+## Python Package Shape
 
-The eventual `kappa/` package should separate concerns:
+The current `kappa/` package separates concerns as follows:
 
 ```text
 kappa/
-  fixed_point.py       # quantization, rails, saturation counters
-  datasets.py          # synthetic affine and teacher-network datasets
-  nn.py                # small dense networks and forward/backward helpers
-  budgeting.py         # kappa allocation and projection policies
-  training.py          # custom online training loops
-  logging.py           # tensor statistics and run artifacts
-  metrics.py           # saturation, norms, update cosine, recovery metrics
+  dataset.py       # synthetic affine datasets and plotting/export helpers
+  dtypes.py        # HLS-style ap_fixed/ap_ufixed/ap_int/ap_uint descriptors
+  precision.py     # layer-indexed PrecisionDict
+  quantization.py  # TensorFlow/NumPy quantization and rail statistics
+  nn.py            # small dense models and custom instrumented training loop
+  history.py       # FitHistory container and default plots
+  utils.py         # norms, Hessian helpers, stability metrics
 ```
 
+The future ENABOL comparison work may add:
+
+```text
+kappa/
+  budgeting.py     # kappa allocation and projection policies
+  metrics.py       # richer per-layer saturation and recovery metrics
+  training.py      # extracted trainer objects if nn.py grows too large
+```

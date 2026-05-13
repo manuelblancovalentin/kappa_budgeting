@@ -45,6 +45,8 @@ const sidebars = {
       items: [
         'implementation/code-map',
         'implementation/dataset',
+        'implementation/dtypes',
+        'implementation/precision',
         'implementation/nn',
         'implementation/architecture',
         'implementation/training-loop',
