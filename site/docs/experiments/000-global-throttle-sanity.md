@@ -1,6 +1,15 @@
+---
+id: global-throttle-sanity
+title: "Experiment 000A-B: Global Throttle Sanity Check"
+sidebar_label: "000A-B: Throttle + No Quantization"
+---
+
 # Experiment 000: One-Layer Global Throttle Sanity Check
 
-Status: Preliminary / Running  
+<p className="status-line">
+  Status:
+  <span className="status-badge status-badge--valid">Valid</span>
+</p>
 Notebook: [`workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_controler_no_quant.ipynb`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_controler_no_quant.ipynb)  
 
 ## Purpose

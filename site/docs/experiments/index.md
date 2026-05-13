@@ -4,13 +4,14 @@ The first month of experiments focuses on small synthetic systems that expose wh
 
 ## Experiment Table
 
-| ID | Name | Status | Workspace | Main Question |
-|---|---|---|---|---|
-| 000 | [One-layer global throttle sanity check](./000-global-throttle-sanity.md) | Preliminary / Running | [`workspace/ablations/000_global_throttle_sanity`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/102be154f09eef96536ea3dc6ca5ec7a16756979/workspace/ablations/000_global_throttle_sanity) | Can a global controller throttle the total learning rate and prevent one-layer divergence? |
-| 001A | One-layer no-bias float scale drift | Planned | [notes.md](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/001a_one_layer_no_bias_float_scale_drift/notes.md) | Does the controller enforce the known Hessian stability boundary under pure scale drift? |
-| 001B | One-layer fake fixed-point rails | Planned | TBD | Does throttling still help when instability is caused by quantization and saturation? |
-| 002A | Two-layer linear network | Planned | TBD | Can global throttling stabilize inter-layer coupling without activation nonlinearities? |
-| 002B | Two-layer ReLU teacher/student | Planned | [notes.md](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/002_two_layer_relu/notes.md) | Can global throttling stabilize coupled nonlinear layer dynamics without rotating the update? |
+| ID | Name | Status | Workspace `workspace/ablations` | Main Question |
+|---|---|:---:|---|---|
+| 000AB | [One-layer global throttle sanity check](./000-global-throttle-sanity.md) | <span className="status-badge status-badge--valid">Valid</span> | [`.../000_global_throttle_sanity`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/102be154f09eef96536ea3dc6ca5ec7a16756979/workspace/ablations/000_global_throttle_sanity) | Can a global controller throttle the total learning rate and prevent one-layer divergence? |
+| 000C | [One-layer global throttle with quantization](./000-global-throttle-sanity-quantization.md) | <span className="status-badge status-badge--planned">Planned</span> | `.../000_global_throttle_sanity` | Does throttling still help when the one-layer loop includes fake-fixed-point weights, updates, activations, and rails? |
+| 001A | One-layer no-bias float scale drift | <span className="status-badge status-badge--planned">Planned</span> | [notes.md](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/001a_one_layer_no_bias_float_scale_drift/notes.md) | Does the controller enforce the known Hessian stability boundary under pure scale drift? |
+| 001B | One-layer fake fixed-point rails | <span className="status-badge status-badge--planned">Planned</span> | TBD | Does throttling still help when instability is caused by quantization and saturation? |
+| 002A | Two-layer linear network | <span className="status-badge status-badge--planned">Planned</span> | TBD | Can global throttling stabilize inter-layer coupling without activation nonlinearities? |
+| 002B | Two-layer ReLU teacher/student | <span className="status-badge status-badge--planned">Planned</span> | [notes.md](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/002_two_layer_relu/notes.md) | Can global throttling stabilize coupled nonlinear layer dynamics without rotating the update? |
 
 ## Shared Hypothesis
 
@@ -56,6 +57,7 @@ Every experiment should report:
 | Step | Goal | Adds |
 |---|---|---|
 | 000 | Sanity-check instrumentation and controller | One layer, no bias, float, exploratory drift. |
+| 000B | Add the first fake-fixed-point path | Quantized weights, updates, activations, saturation counters, and update underflow checks. |
 | 001A | Clean curvature-only stability test | Pure scale drift, Hessian-selected learning rates. |
 | 001B | Numerical hardware-style failure | Fake fixed-point quantization, rails, saturation counters. |
 | 001C | More realistic affine drift | Bias and scale+shift drift. |

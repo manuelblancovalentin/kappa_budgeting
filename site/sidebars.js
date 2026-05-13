@@ -56,6 +56,7 @@ const sidebars = {
       items: [
         'experiments/index',
         'experiments/global-throttle-sanity',
+        'experiments/global-throttle-sanity-quantization',
         // 'experiments/experiment-template',
       ],
     },
