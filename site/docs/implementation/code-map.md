@@ -62,11 +62,10 @@ The eventual `kappa/` package should separate concerns:
 kappa/
   fixed_point.py       # quantization, rails, saturation counters
   datasets.py          # synthetic affine and teacher-network datasets
-  models.py            # small dense networks and forward/backward helpers
+  nn.py                # small dense networks and forward/backward helpers
   budgeting.py         # kappa allocation and projection policies
   training.py          # custom online training loops
   logging.py           # tensor statistics and run artifacts
   metrics.py           # saturation, norms, update cosine, recovery metrics
 ```
 
-Keep the first implementation simple. It is better to have one complete, inspectable ablation than a broad framework too early.

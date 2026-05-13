@@ -43,10 +43,11 @@ const sidebars = {
       type: 'category',
       label: 'Implementation',
       items: [
+        'implementation/code-map',
         'implementation/dataset',
+        'implementation/nn',
         'implementation/architecture',
         'implementation/training-loop',
-        'implementation/code-map',
       ],
     },
     {
