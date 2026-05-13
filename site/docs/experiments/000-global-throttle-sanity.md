@@ -73,6 +73,85 @@ print(dataset)
 X, Y = dataset.get()
 ```
 
+which renders:
+```bash
+AffineDataset(
+ [Input] X: 
+    Shape: (1000, 4)
+    Dtype: DataType.D2_FLOAT
+    X <- Uniform(-1, 1)
+ [Output] Y: 
+    Shape: (1000, 2)
+    Dtype: DataType.D2_FLOAT
+    Y <- X @ A.T + b
+ ---------
+  A = [[ 1.25 -0.75  0.5   0.2 ]
+       [-0.4   0.9   1.1  -0.6 ]]
+  b = [0. 0.]
+----------
+Analytic Hessian:
+  Lambda max: 1.0841
+  Eta max: 1.8448
+)
+```
+
+Note that the dataset object is also giving the analytical hessian metrics. This is important because it means that:
+```math
+\begin{aligned}
+\lambda_{\max}(H_{\text{nom}}) &\approx 1.0841 \\
+\eta_{\max}^{\text{nom}}=\frac{2}{\lambda_{\max}(H_{\text{nom}})} &\approx 1.8448.
+\end{aligned}
+```
+
+## Drift Model
+Now let's assume a learning rate of $\eta=0.5$. With no drift, the nominal margin is:
+
+```math
+\eta\lambda_{\max}(H_{\text{nom}}) = 1.0841 \cdot 0.5
+\approx 0.54 < 2.
+```
+
+However, with a gain drift of $\gamma=4$, the Hessian grows approximately as:
+```math
+\lambda_{\max}(H_{\text{drift}})
+\approx \gamma^2\lambda_{\max}(H_{\text{nom}})
+\approx 17.3456.
+```
+
+which means the post-drift margin is:
+
+```math
+\eta\lambda_{\max}(H_{\text{drift}})
+\approx 8.6728 > 2.
+```
+
+<div class="summary-box">
+  When drifting the input gain by a factor of 4, the previously stable learning rate of $0.5$ becomes unstable. This is the regime where we expect the global throttle controller to intervene and prevent divergence.
+</div>
+
+## Controller Behavior
+Given the instability introduced by the drift, what we basically expect is that the controller should choose a throttle $\alpha_t$ such that the effective learning rate $\alpha_t \eta$ is back in the stable region. In other words, we expect:
+```math
+\alpha_t\approx \frac{\chi}{\eta C_t^{\text{ctrl}}}.
+```
+
+With $\chi=1.5$ the ideal post-drift throttle:
+
+```math
+\alpha^\star
+\approx \frac{1.5}{8.6728}
+\approx 0.173.
+```
+
+Then:
+```math
+\alpha_t\eta\lambda_{\max}(H_{\text{drift}})
+\approx 1.5 < 2.
+```
+
+<div class="summary-box">
+  The global throttle reduces the optimal learning rate such that it stays in the stable region even after drift.
+</div>
 
 ## Model
 The student model is a one-layer linear network without bias:
