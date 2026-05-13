@@ -297,6 +297,52 @@ update_saturation_fraction_max
 update_underflow_fraction_max
 ```
 
+### Update Geometry Diagnostics
+
+Two metrics are especially important for the quantized global-throttle ablation:
+
+```text
+actual_update_norm
+update_cosine
+```
+
+`raw_update_norm` is the norm of the intended update before storage effects:
+
+```math
+\Delta\theta_{\mathrm{raw}}
+=
+-\alpha_t\eta G_t.
+```
+
+`actual_update_norm` is computed after the update has been applied and after any quantized variable storage has been enforced:
+
+```math
+\Delta\theta_{\mathrm{actual}}
+=
+\theta_{t+1}-\theta_t.
+```
+
+This catches silent learning death. A run can look numerically stable because the applied update has underflowed to zero; that is not a successful controller result.
+
+`update_cosine` compares the applied update to the intended update:
+
+```math
+\cos_t
+=
+\frac{
+\left\langle
+\Delta\theta_{\mathrm{actual}},
+\Delta\theta_{\mathrm{raw}}
+\right\rangle
+}{
+\left\|\Delta\theta_{\mathrm{actual}}\right\|_2
+\left\|\Delta\theta_{\mathrm{raw}}\right\|_2
++\varepsilon
+}.
+```
+
+For pure global throttling, this should stay close to 1 because the throttle scales the full update vector uniformly. If quantization, clipping, or a future row/column projection changes the update direction, this cosine should fall.
+
 ### Return Value
 
 ```python

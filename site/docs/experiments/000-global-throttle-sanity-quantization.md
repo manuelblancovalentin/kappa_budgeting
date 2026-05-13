@@ -9,9 +9,10 @@ sidebar_label: "000C: Throttle + Quantization"
 <p className="status-line">
   Status:
   <span className="status-badge status-badge--preliminary">Preliminary</span>
-  <span className="status-badge status-badge--planned">Planned</span>
+  <span className="status-badge status-badge--valid">Valid</span>
 </p>
 Workspace: `workspace/ablations/000_global_throttle_sanity/`  
+Notebook: [`workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_quantization_sanity.ipynb`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_quantization_sanity.ipynb)  
 Starting point: [Experiment 000](./000-global-throttle-sanity.md)
 
 ## Purpose
@@ -404,7 +405,7 @@ Later, after the quantization semantics stabilize, we can move some of this into
 
 Repeat Experiment 000 with quantization disabled.
 
-Expected result placeholder:
+Expected result:
 
 | Metric | Expected |
 |---|---|
@@ -413,11 +414,7 @@ Expected result placeholder:
 | Saturation | Exactly zero. |
 | Update cosine | Near 1. |
 
-Result figure placeholder:
-
-```text
-TODO: results/000C_0_float_reproduction.png
-```
+This run is reproduced inside the comparison figures below as the floating-point reference curve.
 
 ### 000C.1: Weight Quantization Only
 
@@ -435,7 +432,7 @@ Q_X, Q_Y, Q_G, Q_Delta, Q_acc
 
 Purpose: isolate whether stored weight precision alone prevents convergence.
 
-Expected result placeholder:
+Expected result:
 
 | Metric | Expected |
 |---|---|
@@ -454,7 +451,7 @@ Q_{\Delta}
 
 Purpose: identify update underflow and dead learning.
 
-Expected result placeholder:
+Expected result:
 
 | Metric | Expected |
 |---|---|
@@ -473,7 +470,7 @@ Q_W,\quad Q_{\Delta}
 
 Purpose: model the minimum realistic parameter/update path.
 
-Expected result placeholder:
+Expected result:
 
 | Metric | Expected |
 |---|---|
@@ -493,7 +490,7 @@ Use wide rails first.
 
 Purpose: confirm that quantization noise alone does not break the controller.
 
-Expected result placeholder:
+Expected result:
 
 | Metric | Expected |
 |---|---|
@@ -507,7 +504,7 @@ Use intentionally tight rails to create saturation.
 
 Purpose: test whether the global throttle prevents divergence when the numerical path is near hardware limits.
 
-Expected result placeholder:
+Expected result:
 
 | Metric | Expected |
 |---|---|
@@ -528,9 +525,10 @@ Each run should produce:
 6. Raw and throttled stability margins.
 7. Saturation fraction by tensor.
 8. Near-rail fraction by tensor.
-9. Applied update norm and update underflow fraction.
-10. Update cosine between intended and actual applied update.
-11. Useful lower/upper bounds for `alpha_t`.
+9. Raw and applied update norms.
+10. Update underflow fraction.
+11. Update cosine between intended and actual applied update.
+12. Useful lower/upper bounds for `alpha_t`.
 
 ## Interpretation Rules
 
@@ -546,18 +544,145 @@ If update cosine drops far below 1, the quantization or clipping path is changin
 
 ### Summary
 
-```text
-TODO: Add run summary after the first notebook is complete.
+The first run of Experiment 000C supports the fake-fixed-point implementation and the global-throttle hypothesis:
+
+- the dtype transfer plots match the expected fixed-point rails,
+- isolated weight/update quantization still converges under the controller,
+- full wide-rail fake-fixed-point training behaves almost like the floating-point reference,
+- full tight-rail fake-fixed-point training fails without the controller through a rail-driven oscillation,
+- the global throttle stabilizes the same tight-rail run and drives the loss and weight error back near zero.
+
+The most important finding is that the tight no-controller failure is not just ordinary curvature instability. It is a quantized closed-loop failure with heavy gradient saturation. The controller reduces the effective learning rate enough to keep the quantized update map usable.
+
+The comparison figures now include the two update-geometry diagnostics needed to read this result correctly:
+
+- `actual_update_norm`, which distinguishes real stabilized learning from silent update death,
+- `update_cosine`, which checks whether the applied quantized update still points in the same direction as the intended raw update.
+
+These panels are part of the regenerated PNGs used below.
+
+### Dtype Transfer Validation
+
+The first check validates the scalar quantizers directly.
+
+![Wide weight dtype transfer](../../../workspace/ablations/000_global_throttle_sanity/results/000c_dtype_transfer_wide_weight.png)
+
+`ap_fixed<16,6,AP_RND,AP_SAT>` has rails far outside the tested interval, so the quantized transfer curve follows the identity line. This is the expected wide-rail behavior.
+
+![Tight weight dtype transfer](../../../workspace/ablations/000_global_throttle_sanity/results/000c_dtype_transfer_tight_weight.png)
+
+`ap_fixed<8,3,AP_RND,AP_SAT>` clips near:
+
+```math
+[-4,\; 4-2^{-5}].
 ```
 
-### Figures
+The transfer curve saturates at both rails, which confirms that the weight quantizer is enforcing the expected representable interval.
+
+![Tight update dtype transfer](../../../workspace/ablations/000_global_throttle_sanity/results/000c_dtype_transfer_tight_update.png)
+
+`ap_fixed<10,2,AP_RND,AP_SAT>` clips near:
+
+```math
+[-2,\;2-2^{-8}].
+```
+
+This is intentionally tight for an update type. It is useful because it lets the ablation expose update clipping and underflow.
+
+### Isolated Quantization Paths
+
+![Isolated quantization paths](../../../workspace/ablations/000_global_throttle_sanity/results/000c_isolated_quantization_paths.png)
+
+This figure compares:
+
+- floating point with controller,
+- weight quantization only,
+- update quantization only,
+- weight plus update quantization.
+
+All four runs converge. The curves nearly overlap in loss, weight error, and gradient norm. This means the basic `PrecisionDict` hooks are not breaking the training loop.
+
+The update-only run does show update underflow later in training. That is expected: as gradients become small, some quantized updates fall below the update quantum. In this run the underflow is not fatal because the model has already reached the stable region.
+
+The new update-geometry panels make that distinction clearer. The applied update norm decays with the loss and weight error, and the update-only cosine degrades mainly in the late low-gradient regime where update underflow is active. That is different from an early instability where the update direction is corrupted before the model has learned.
+
+Important interpretation:
 
 ```text
-TODO: Add exported plots from workspace/ablations/000_b_global_throttle_sanity_quantization/results/.
+isolated quantization is not yet the hard failure mode
 ```
+
+The system still learns when only weights and/or updates are quantized with the selected wide formats.
+
+### Full Wide-Rail Fake-Fixed-Point Path
+
+![Full wide quantization](../../../workspace/ablations/000_global_throttle_sanity/results/000c_full_wide_quantization.png)
+
+This run turns on the full fake-fixed-point path with wide rails:
+
+```math
+Q_X,\quad Q_W,\quad Q_Y,\quad Q_G,\quad Q_{\Delta},\quad Q_{\mathrm{acc}}.
+```
+
+The wide fake-fixed-point run tracks the floating-point reference almost exactly:
+
+- loss converges,
+- weight error converges,
+- gradient norm decays,
+- weight and gradient saturation stay at zero,
+- update underflow is only a small transient.
+
+This is a useful sanity result. It says the fake-fixed-point path is not introducing an artificial failure when the rails and fractional precision are generous.
+
+### Full Tight-Rail Controller Ablation
+
+![Tight quantization controller ablation](../../../workspace/ablations/000_global_throttle_sanity/results/000c_tight_quantization_controller_ablation.png)
+
+This is the first hardware-style failure case.
+
+Without the controller, the tight quantized run enters a limit-cycle-like instability:
+
+- loss oscillates between high and lower values,
+- weight error oscillates instead of converging,
+- gradient norm remains large,
+- gradient saturation is often very high.
+
+This means the failure mode is not only:
+
+```math
+\eta\lambda_{\max}(H)>2.
+```
+
+It is also a rail-driven quantized learning failure. The gradient path is repeatedly hitting the fixed-point limits, so the optimizer is no longer following a smooth floating-point update field.
+
+With the controller enabled:
+
+- the initial transient is still visible,
+- `alpha_t` drops and then oscillates as the quantized dynamics settle,
+- loss converges near zero,
+- weight error converges near zero,
+- gradient norm decays,
+- sustained gradient saturation disappears,
+- update underflow is not the dominant final failure mode.
+
+The controlled tight run is therefore a meaningful success for this first ablation. The controller does not merely freeze learning; it lets the model continue adapting while keeping the quantized closed loop bounded.
+
+The refreshed figure should be read with the update panels as follows:
+
+- `actual_update_norm` should remain nonzero during recovery; otherwise the controller is only stopping the system by stopping learning.
+- `update_cosine` should remain close to 1 for the global throttle path, except where quantization clips or underflows the applied update.
+- A drop in `update_cosine` is evidence that the numerical path is changing the descent direction, which is the same diagnostic we will use later against row/column projection.
+
+In this tight-rail run, `actual_update_norm` is large during the recovery transient and then decays as the loss and gradient norm decay. The controlled run is therefore not just immediately frozen. However, `update_cosine` drops and oscillates after the initial recovery, which shows that the tight quantized update path no longer preserves the raw descent direction perfectly in the low-gradient regime. That is acceptable for this stress test, but it is exactly the kind of distortion we need to track when choosing realistic update precision.
 
 ### Conclusions
 
-```text
-TODO: State whether global throttling stabilizes the fake-fixed-point one-layer learner, and identify whether the limiting failure mode is saturation, update underflow, or both.
-```
+The results support three conclusions:
+
+1. The fake-fixed-point machinery is behaving correctly at the scalar dtype level and at the training-loop level.
+2. Wide fake-fixed-point precision preserves the floating-point controller behavior.
+3. Tight fake-fixed-point precision creates a rail-driven instability that the global throttle substantially stabilizes.
+
+For this first quantized one-layer experiment, the limiting failure mode is mostly gradient saturation under tight rails. Update underflow appears in some isolated update-quantized runs, but it is not the main failure mode of the successful tight controlled run.
+
+The update norm and cosine panels are now part of the experiment output. They should be checked every time the quantized controller appears to stabilize a run, because bounded loss alone is not enough to prove that the system is still learning or preserving the global descent geometry.
