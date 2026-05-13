@@ -334,19 +334,42 @@ The reason is diagnostic control. We need to turn quantization on and off indepe
 | `update_quantizer` | `alpha * eta * G` | Model optimizer/update precision. |
 | `accumulator_quantizer` | dot-product accumulator | Model MAC accumulation rails. |
 
-The training loop should expose a configuration object:
+The training loop should expose a layer-indexed `PrecisionDict`, not a flat config object. This keeps the experiment explicit now and scales to multilayer precision allocation later:
 
 ```python
-quant_config = QuantizationConfig(
-    enabled=True,
-    input_dtype="ap_fixed<12,4,AP_RND,AP_SAT>",
-    weight_dtype="ap_fixed<12,4,AP_RND,AP_SAT>",
-    activation_dtype="ap_fixed<12,5,AP_RND,AP_SAT>",
-    gradient_dtype="ap_fixed<16,6,AP_RND,AP_SAT>",
-    update_dtype="ap_fixed<16,4,AP_RND,AP_SAT>",
-    accumulator_dtype="ap_fixed<24,10,AP_RND,AP_SAT>",
+from kappa import dtypes, PrecisionDict
+
+precisions = PrecisionDict({
+    "input": {
+        "value": dtypes.ap_fixed(WL=12, IWL=4, QMODE="AP_RND", OMODE="AP_SAT"),
+    },
+    "dense0": {
+        "weight": dtypes.ap_fixed(WL=12, IWL=4, QMODE="AP_RND", OMODE="AP_SAT"),
+        "bias": None,
+        "activation": dtypes.ap_fixed(WL=12, IWL=5, QMODE="AP_RND", OMODE="AP_SAT"),
+        "gradient": dtypes.ap_fixed(WL=16, IWL=6, QMODE="AP_RND", OMODE="AP_SAT"),
+        "update": dtypes.ap_fixed(WL=16, IWL=4, QMODE="AP_RND", OMODE="AP_SAT"),
+        "accumulator": dtypes.ap_fixed(WL=24, IWL=10, QMODE="AP_RND", OMODE="AP_SAT"),
+    },
+    "loss": {
+        "value": dtypes.ap_fixed(WL=24, IWL=12, QMODE="AP_RND", OMODE="AP_SAT"),
+    },
+})
+```
+
+Then pass it to the trainer:
+
+```python
+h = model.train_instrumented(
+    X,
+    Y,
+    learning_rate=0.5,
+    use_controller=True,
+    precision_dict=precisions,
 )
 ```
+
+If `precision_dict=None`, the same trainer uses the original floating-point path.
 
 The minimum training-loop shape is:
 
