@@ -94,7 +94,6 @@ which returns
 ```bash
 [INFO] - Building model with input shape (4,) and output shape (2,)
 [INFO] - Added Dense layer with 2 units
-[INFO] - Added final Dense layer with 2 units for output
 Model: "LinearBlockModel"
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
 ┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
@@ -238,7 +237,7 @@ Next, we introduce the gain drift and continue training without the controller t
 # Phase 2: sensor gain drift
 gamma = 4.0
 Xd = gamma * X
-Yd = Y  # important: target remains clean
+Yd = gamma * Y  
 
 h_drift = model.train_instrumented(
     Xd,
