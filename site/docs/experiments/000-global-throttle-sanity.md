@@ -307,10 +307,10 @@ The result is shown in the image below, which confirms that the loss curve remai
 
 The notebook can be viewed directly on GitHub:
 
-<a href="https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_controler_no_quant.ipynb" target="_blank" rel="noreferrer">Open notebook on GitHub</a>
+<a href="https://github.com/manuelblancovalentin/kappa_budgeting/blob/102be154f09eef96536ea3dc6ca5ec7a16756979/workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_controler_no_quant.ipynb" target="_blank" rel="noreferrer">Open notebook on GitHub</a>
 
 <iframe
-  src="https://nbviewer.org/github/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_controler_no_quant.ipynb"
+  src="https://nbviewer.org/github/manuelblancovalentin/kappa_budgeting/blob/102be154f09eef96536ea3dc6ca5ec7a16756979/workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_controler_no_quant.ipynb"
   width="100%"
   height="900"
   style={{border: '1px solid var(--ifm-color-emphasis-300)', borderRadius: '6px'}}
