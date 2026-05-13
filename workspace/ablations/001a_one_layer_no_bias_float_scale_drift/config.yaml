@@ -1,0 +1,68 @@
+experiment:
+  id: "001a_one_layer_no_bias_float_scale_drift"
+  name: "One-layer no-bias float scale drift"
+  status: "planned"
+  seed: 1079
+
+dataset:
+  type: "linear_scale_drift"
+  n_train: 4096
+  n_test: 1024
+  input_dim: 4
+  output_dim: 2
+  x_distribution: "uniform"
+  x_min: 0.0
+  x_max: 1.0
+  drift:
+    model: "x_drift = gamma * x"
+    gamma_values: [1.0, 1.5, 2.0, 3.0]
+
+teacher:
+  equation: "y = A x"
+  bias: false
+
+student:
+  framework: "keras"
+  equation: "y_hat = W x"
+  layers:
+    - name: "dense_1"
+      type: "dense"
+      use_bias: false
+      input_dim: 4
+      output_dim: 2
+  loss: "mse"
+
+training:
+  optimizer: "sgd"
+  batch_size: 16
+  pretrain_steps: 1000
+  online_steps: 500
+  learning_rate_policy:
+    source: "hessian_boundary"
+    regimes:
+      safe: "0.5 * 2 / lambda_max_H_drift"
+      borderline: "0.9 * 2 / lambda_max_H_drift"
+      unstable: "1.2 * 2 / lambda_max_H_drift"
+
+controller:
+  variant: "dynamic_global_throttle"
+  signal: "ema_curvature_proxy"
+  beta: null
+  ema_decay: 0.95
+  alpha_min: 0.01
+  alpha_max: 1.0
+  eps: 1.0e-12
+
+logging:
+  loss: true
+  output_error: true
+  theta_norm: true
+  gradient_norm: true
+  raw_update_norm: true
+  actual_update_norm: true
+  curvature_proxy: true
+  alpha: true
+  effective_learning_rate: true
+  hessian_metrics: true
+  stability_margin: true
+  update_cosine: true

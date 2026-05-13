@@ -29,17 +29,23 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'Background',
+      label: 'Formulation',
       items: [
-        'background/overview',
-        'background/reading-list',
+        'formulation/overview',
+        'formulation/kappa-budgeting',
+        'formulation/lipschitzness-stability',
+        'formulation/global-throttle',
+        'formulation/how-this-fits',
+        'formulation/quantization',
       ],
     },
     {
       type: 'category',
       label: 'Implementation',
       items: [
+        'implementation/dataset',
         'implementation/architecture',
+        'implementation/training-loop',
         'implementation/code-map',
       ],
     },
@@ -48,6 +54,7 @@ const sidebars = {
       label: 'Experiments',
       items: [
         'experiments/index',
+        'experiments/global-throttle-sanity',
         'experiments/experiment-template',
       ],
     },

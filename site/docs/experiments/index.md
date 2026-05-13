@@ -1,4 +1,4 @@
-# Experiments
+# Index
 
 The first month of experiments focuses on small synthetic systems that expose when fixed-point online learning becomes unstable and whether dynamic closed-loop throttling prevents divergence while preserving update geometry.
 
@@ -6,8 +6,11 @@ The first month of experiments focuses on small synthetic systems that expose wh
 
 | ID | Name | Status | Workspace | Main Question |
 |---|---|---|---|---|
-| 001 | Affine single dense | Planned | [notes.md](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/001_affine_single_dense/notes.md) | Can global throttling stabilize a known linear system after input drift? |
-| 002 | Two-layer ReLU teacher/student | Planned | [notes.md](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/002_two_layer_relu/notes.md) | Can global throttling stabilize coupled layer dynamics without rotating the update? |
+| 000 | [One-layer global throttle sanity check](./000-global-throttle-sanity.md) | Preliminary / Running | [`workspace/00_tests.ipynb`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/00_tests.ipynb) | Can a global controller throttle the total learning rate and prevent one-layer divergence? |
+| 001A | One-layer no-bias float scale drift | Planned | [notes.md](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/001a_one_layer_no_bias_float_scale_drift/notes.md) | Does the controller enforce the known Hessian stability boundary under pure scale drift? |
+| 001B | One-layer fake fixed-point rails | Planned | TBD | Does throttling still help when instability is caused by quantization and saturation? |
+| 002A | Two-layer linear network | Planned | TBD | Can global throttling stabilize inter-layer coupling without activation nonlinearities? |
+| 002B | Two-layer ReLU teacher/student | Planned | [notes.md](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/002_two_layer_relu/notes.md) | Can global throttling stabilize coupled nonlinear layer dynamics without rotating the update? |
 
 ## Shared Hypothesis
 
@@ -47,6 +50,18 @@ Every experiment should report:
 | Global throttle `alpha(t)` | Shows controller intervention. |
 | Update cosine | Measures whether budgeting preserves descent direction. |
 | Hessian metrics | Validates whether `C(t)` tracks true curvature in toy models. |
+
+## Near-Term Roadmap
+
+| Step | Goal | Adds |
+|---|---|---|
+| 000 | Sanity-check instrumentation and controller | One layer, no bias, float, exploratory drift. |
+| 001A | Clean curvature-only stability test | Pure scale drift, Hessian-selected learning rates. |
+| 001B | Numerical hardware-style failure | Fake fixed-point quantization, rails, saturation counters. |
+| 001C | More realistic affine drift | Bias and scale+shift drift. |
+| 002A | Coupled linear dynamics | Two Dense layers, no activation. |
+| 002B | Nonlinear hidden representation | Two Dense layers with ReLU. |
+| 003 | ENABOL comparison | Loose kappa rails, legacy row/column projection if useful. |
 
 ## Initial Variant Matrix
 
