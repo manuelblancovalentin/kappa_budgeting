@@ -683,6 +683,12 @@ The results support three conclusions:
 2. Wide fake-fixed-point precision preserves the floating-point controller behavior.
 3. Tight fake-fixed-point precision creates a rail-driven instability that the global throttle substantially stabilizes.
 
-For this first quantized one-layer experiment, the limiting failure mode is mostly gradient saturation under tight rails. Update underflow appears in some isolated update-quantized runs, but it is not the main failure mode of the successful tight controlled run.
+<div class="summary-box">
+    <strong>Key takeaway:</strong> The controller is doing something useful. It is not just instantly freezing learning.
 
-The update norm and cosine panels are now part of the experiment output. They should be checked every time the quantized controller appears to stabilize a run, because bounded loss alone is not enough to prove that the system is still learning or preserving the global descent geometry.
+    The caveat is the update cosine panel. In the tight controlled run, cosine drops and oscillates after recovery. That means the tight quantized update path is no longer preserving the raw descent direction perfectly, especially once gradients are small. This is not fatal here because the model has already recovered, but it tells us the update dtype is probably too tight for clean late-stage learning.
+
+    One more caveat: the controlled stability margin alpha eta lambda_max is not always below 2 after the transient. For the simple quadratic theory, staying below 2 is the clean stability condition. The fact that the run still converges means the actual quantized nonlinear loop is more complicated than the pure float Hessian story. We should keep plotting this, but we should not claim the controller strictly enforces the quadratic GD bound in the tight quantized case.
+
+    Bottom line: this experiment is successful. It validates the quantization hooks, creates a meaningful tight-rail failure, and shows that the global throttle stabilizes it. The main next lesson is that “stable” is not enough: we also need update cosine and actual update norm to detect whether precision is preserving useful learning geometry.
+</div>
