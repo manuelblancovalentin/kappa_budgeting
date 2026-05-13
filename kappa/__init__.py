@@ -3,8 +3,10 @@ __author__ = 'Manuel Blanco Valentin'
 __url__ = 'https://manuelblancovalentin.github.io/kappa_budgeting/'
 
 from . import utils
+from . import dtypes
 from .dataset import AffineDataset
 from .nn import LinearBlockModel
+from .precision import PrecisionDict
 
 
 # Print a welcome message when the package is imported

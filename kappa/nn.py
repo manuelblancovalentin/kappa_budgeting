@@ -1,6 +1,6 @@
 from abc import ABC
 import tensorflow as tf
-from typing import Dict, Union, Optional, Tuple
+from typing import Any, Dict, Mapping, Union, Optional, Tuple
 
 import numpy as np
 
@@ -11,6 +11,8 @@ from .utils import flatten_tensors, half_mse_batch_loss, matrix_norms_np, tensor
                         hessian_metrics_np, stability_metrics_from_hessian
 
 from .history import FitHistory
+from .precision import PrecisionDict, ensure_precision_dict
+from .quantization import quantize_tensor, rail_stats
 
 @dataclass(eq=False)
 class BaseModel(ABC):
@@ -107,6 +109,7 @@ class BaseModel(ABC):
         use_controller: bool = False,
         compute_analytic_hessian: bool = True,
         reference_A: Optional[np.ndarray] = None,
+        precision_dict: Optional[PrecisionDict | Mapping[str, Mapping[str, Any]]] = None,
     ) -> FitHistory:
         """Custom instrumented training loop for ENABOL ablations.
 
@@ -137,6 +140,10 @@ class BaseModel(ABC):
             If True, compute analytic one-layer Hessian for current batch.
         reference_A : np.ndarray, optional
             Teacher matrix for logging ||W - A||_F in the one-layer case.
+        precision_dict : PrecisionDict or mapping, optional
+            Layer-indexed precision configuration. If None, the loop uses full
+            floating-point behavior and remains backward-compatible with the
+            original Experiment 000 notebooks.
 
         Returns
         -------
@@ -145,6 +152,10 @@ class BaseModel(ABC):
         """
         if self.model is None:
             raise ValueError("Model has not been built yet.")
+
+        precision = ensure_precision_dict(precision_dict)
+        if precision is not None:
+            precision.validate_model(self.model, allow_missing=True)
 
         X = np.asarray(X, dtype=np.float32)
         Y = np.asarray(Y, dtype=np.float32)
@@ -197,6 +208,12 @@ class BaseModel(ABC):
             'grad_is_finite': [],
             'theta_is_finite_before': [],
             'theta_is_finite_after': [],
+            'weight_saturation_fraction_max': [],
+            'weight_near_rail_fraction_max': [],
+            'gradient_saturation_fraction_max': [],
+            'gradient_near_rail_fraction_max': [],
+            'update_saturation_fraction_max': [],
+            'update_underflow_fraction_max': [],
             'diverged': []
         }
 
@@ -217,6 +234,7 @@ class BaseModel(ABC):
             print(f'  Stability margin target (chi): {chi}')
             print(f'  Use controller: {use_controller}')
             print(f'  Compute analytic Hessian: {compute_analytic_hessian}')
+            print(f'  PrecisionDict enabled: {precision is not None}')
             print(f'---------------------------------------------------------------')
 
         for epoch in range(epochs):
@@ -226,8 +244,17 @@ class BaseModel(ABC):
                 theta_before = flatten_tensors(trainable_vars)
 
                 with tf.GradientTape() as tape:
-                    y_pred = self.model(x_batch, training=True)
+                    if precision is None:
+                        y_pred = self.model(x_batch, training=True)
+                    else:
+                        y_pred = self._forward_with_precision(x_batch, precision, training=True)
                     loss_value = loss_fn(y_batch, y_pred)
+                    if precision is not None:
+                        loss_value = quantize_tensor(
+                            loss_value,
+                            precision.dtype("loss", "value"),
+                            ste=True,
+                        )
 
                 grads = tape.gradient(loss_value, trainable_vars)
 
@@ -236,6 +263,9 @@ class BaseModel(ABC):
                     tf.zeros_like(v) if g is None else g
                     for g, v in zip(grads, trainable_vars)
                 ]
+
+                if precision is not None:
+                    grads = self._quantize_gradients(grads, trainable_vars, precision)
 
                 grad_flat = flatten_tensors(grads)  # type: ignore
 
@@ -273,13 +303,39 @@ class BaseModel(ABC):
                 alpha = alpha_would if use_controller else 1.0
                 eta_eff = alpha * eta
 
+                update_saturation_max = 0.0
+                update_underflow_max = 0.0
+
                 # Apply actual update manually.
                 for var, grad in zip(trainable_vars, grads):
-                    var.assign_sub(eta_eff * grad)  # type: ignore
+                    if precision is None:
+                        var.assign_sub(eta_eff * grad)  # type: ignore
+                    else:
+                        layer_name, _ = self._layer_and_field_for_variable(var)
+                        update_dtype = precision.dtype(layer_name, "update")
+                        delta = -eta_eff * grad
+                        stats = rail_stats(delta.numpy(), update_dtype)
+                        update_saturation_max = max(update_saturation_max, stats.saturation_fraction)
+                        update_underflow_max = max(update_underflow_max, stats.underflow_fraction)
+                        delta = quantize_tensor(delta, update_dtype, ste=False)
+                        var.assign_add(delta)  # type: ignore
+                        self._quantize_variable_storage(var, precision)
 
                 theta_after = flatten_tensors(trainable_vars)
                 actual_update_flat = theta_after - theta_before
                 theta_is_finite_after = bool(np.all(np.isfinite(theta_after.numpy())))
+
+                weight_saturation_max, weight_near_rail_max = self._rail_max_for_variables(
+                    trainable_vars,
+                    precision,
+                    fields=("weight", "bias"),
+                )
+                gradient_saturation_max, gradient_near_rail_max = self._rail_max_for_tensors(
+                    grads,
+                    trainable_vars,
+                    precision,
+                    field="gradient",
+                )
 
                 # Metrics.
                 residual = y_pred - y_batch
@@ -379,6 +435,12 @@ class BaseModel(ABC):
                 history["grad_is_finite"].append(float(grad_is_finite))
                 history["theta_is_finite_before"].append(float(theta_is_finite_before))
                 history["theta_is_finite_after"].append(float(theta_is_finite_after))
+                history["weight_saturation_fraction_max"].append(float(weight_saturation_max))
+                history["weight_near_rail_fraction_max"].append(float(weight_near_rail_max))
+                history["gradient_saturation_fraction_max"].append(float(gradient_saturation_max))
+                history["gradient_near_rail_fraction_max"].append(float(gradient_near_rail_max))
+                history["update_saturation_fraction_max"].append(float(update_saturation_max))
+                history["update_underflow_fraction_max"].append(float(update_underflow_max))
                 history["curvature_for_control"].append(float(curvature_for_control))
                 history["diverged"].append(float(diverged))
 
@@ -416,6 +478,120 @@ class BaseModel(ABC):
 
         return FitHistory(**{k: np.asarray(v) for k, v in history.items()})
 
+    def _forward_with_precision(
+        self,
+        x: tf.Tensor,
+        precision: PrecisionDict,
+        *,
+        training: bool,
+    ) -> tf.Tensor:
+        if self.model is None:
+            raise ValueError("Model has not been built yet.")
+
+        z = quantize_tensor(x, precision.dtype("input", "value"), ste=True)
+        for layer in self.model.layers:
+            if isinstance(layer, tf.keras.layers.InputLayer):
+                continue
+
+            if isinstance(layer, tf.keras.layers.Dense):
+                kernel = quantize_tensor(layer.kernel, precision.dtype(layer.name, "weight"), ste=True)
+                z = tf.linalg.matmul(z, kernel)
+                z = quantize_tensor(z, precision.dtype(layer.name, "accumulator"), ste=True)
+                if layer.use_bias and layer.bias is not None:
+                    bias = quantize_tensor(layer.bias, precision.dtype(layer.name, "bias"), ste=True)
+                    z = z + bias
+                z = quantize_tensor(z, precision.dtype(layer.name, "activation"), ste=True)
+                continue
+
+            try:
+                z = layer(z, training=training)
+            except TypeError:
+                z = layer(z)
+            z = quantize_tensor(z, precision.dtype(layer.name, "activation"), ste=True)
+
+        return z
+
+    def _quantize_gradients(
+        self,
+        grads: list[tf.Tensor],
+        trainable_vars: list[tf.Variable],
+        precision: PrecisionDict,
+    ) -> list[tf.Tensor]:
+        out = []
+        for grad, var in zip(grads, trainable_vars):
+            layer_name, _ = self._layer_and_field_for_variable(var)
+            grad_dtype = precision.dtype(layer_name, "gradient")
+            out.append(quantize_tensor(grad, grad_dtype, ste=False))
+        return out
+
+    def _quantize_variable_storage(self, var: tf.Variable, precision: PrecisionDict) -> None:
+        layer_name, field_name = self._layer_and_field_for_variable(var)
+        dtype = precision.dtype(layer_name, field_name)
+        if dtype is not None:
+            var.assign(quantize_tensor(var, dtype, ste=False))
+
+    def _layer_and_field_for_variable(self, var: tf.Variable) -> tuple[str, str]:
+        if self.model is None:
+            raise ValueError("Model has not been built yet.")
+        for layer in self.model.layers:
+            if hasattr(layer, "kernel") and self._same_variable(var, layer.kernel):
+                return layer.name, "weight"
+            if hasattr(layer, "bias") and layer.bias is not None and self._same_variable(var, layer.bias):
+                return layer.name, "bias"
+            for layer_var in layer.trainable_variables:
+                if self._same_variable(var, layer_var):
+                    return layer.name, "value"
+        return "unknown", "value"
+
+    @staticmethod
+    def _same_variable(a: tf.Variable, b: tf.Variable) -> bool:
+        if a is b:
+            return True
+        a_path = getattr(a, "path", None)
+        b_path = getattr(b, "path", None)
+        if a_path is not None and b_path is not None:
+            return a_path == b_path
+        return getattr(a, "name", None) == getattr(b, "name", None)
+
+    def _rail_max_for_variables(
+        self,
+        vars_: list[tf.Variable],
+        precision: Optional[PrecisionDict],
+        *,
+        fields: tuple[str, ...],
+    ) -> tuple[float, float]:
+        if precision is None:
+            return 0.0, 0.0
+        sat_max = 0.0
+        near_max = 0.0
+        for var in vars_:
+            layer_name, field = self._layer_and_field_for_variable(var)
+            if field not in fields:
+                continue
+            stats = rail_stats(var.numpy(), precision.dtype(layer_name, field))
+            sat_max = max(sat_max, stats.saturation_fraction)
+            near_max = max(near_max, stats.near_rail_fraction)
+        return sat_max, near_max
+
+    def _rail_max_for_tensors(
+        self,
+        tensors: list[tf.Tensor],
+        trainable_vars: list[tf.Variable],
+        precision: Optional[PrecisionDict],
+        *,
+        field: str,
+    ) -> tuple[float, float]:
+        if precision is None:
+            return 0.0, 0.0
+        sat_max = 0.0
+        near_max = 0.0
+        for tensor, var in zip(tensors, trainable_vars):
+            layer_name, _ = self._layer_and_field_for_variable(var)
+            stats = rail_stats(tensor.numpy(), precision.dtype(layer_name, field))
+            sat_max = max(sat_max, stats.saturation_fraction)
+            near_max = max(near_max, stats.near_rail_fraction)
+        return sat_max, near_max
+
 @dataclass
 class LinearBlockModel(BaseModel):
     # blocks are defined as: [Dense] -> (Optional) [Activation] -> (Optional) [BatchNorm])
@@ -430,28 +606,38 @@ class LinearBlockModel(BaseModel):
         self.model = self._build_model(self.input_shape, self.output_shape, verbose=self.verbose)
 
     def _build_model(self, input_shape, output_shape, verbose=True) -> tf.keras.Model:
-        inputs = tf.keras.Input(shape=input_shape)
+        inputs = tf.keras.Input(shape=input_shape, name="model_input")
         
         if verbose: print(f'[INFO] - Building model with input shape {input_shape} and output shape {output_shape}')
         
         x = inputs
+        dense_idx = 0
+        activation_idx = 0
+        batchnorm_idx = 0
         for units in self.num_hidden:
-            x = tf.keras.layers.Dense(units, use_bias=self.use_bias)(x)
-            if verbose: print(f'[INFO] - Added Dense layer with {units} units')
+            layer_name = f"dense{dense_idx}"
+            x = tf.keras.layers.Dense(units, use_bias=self.use_bias, name=layer_name)(x)
+            if verbose: print(f'[INFO] - Added Dense layer {layer_name} with {units} units')
+            dense_idx += 1
             
             if self.activation is not None:
-                x = tf.keras.layers.Activation(self.activation)(x)
-                if verbose: print(f'[INFO] - Added Activation {self.activation if isinstance(self.activation, str) else self.activation.__class__.__name__} layer with activation ')
+                layer_name = f"activation{activation_idx}"
+                x = tf.keras.layers.Activation(self.activation, name=layer_name)(x)
+                if verbose: print(f'[INFO] - Added Activation layer {layer_name}')
+                activation_idx += 1
             
             if self.use_batchnorm:
-                x = tf.keras.layers.BatchNormalization()(x)
-                if verbose: print(f'[INFO] - Added BatchNormalization layer')
+                layer_name = f"batchnorm{batchnorm_idx}"
+                x = tf.keras.layers.BatchNormalization(name=layer_name)(x)
+                if verbose: print(f'[INFO] - Added BatchNormalization layer {layer_name}')
+                batchnorm_idx += 1
 
         # Check if output_shape is compatible with the last hidden layer
         if x.shape[-1] != output_shape[0]:
             # add a final Dense layer to match the output shape
-            x = tf.keras.layers.Dense(output_shape[0])(x)
+            layer_name = f"dense{dense_idx}"
+            x = tf.keras.layers.Dense(output_shape[0], use_bias=self.use_bias, name=layer_name)(x)
+            if verbose: print(f'[INFO] - Added final Dense layer {layer_name} with {output_shape[0]} units for output')
         
-        if verbose: print(f'[INFO] - Added final Dense layer with {output_shape[0]} units for output')
         model = tf.keras.Model(inputs=inputs, outputs=x, name=self.name)
         return model
