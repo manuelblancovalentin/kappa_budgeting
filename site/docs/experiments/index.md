@@ -6,7 +6,7 @@ The first month of experiments focuses on small synthetic systems that expose wh
 
 | ID | Name | Status | Workspace | Main Question |
 |---|---|---|---|---|
-| 000 | [One-layer global throttle sanity check](./000-global-throttle-sanity.md) | Preliminary / Running | [`workspace/00_tests.ipynb`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/00_tests.ipynb) | Can a global controller throttle the total learning rate and prevent one-layer divergence? |
+| 000 | [One-layer global throttle sanity check](./000-global-throttle-sanity.md) | Preliminary / Running | [`workspace/ablations/000_global_throttle_sanity`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/102be154f09eef96536ea3dc6ca5ec7a16756979/workspace/ablations/000_global_throttle_sanity) | Can a global controller throttle the total learning rate and prevent one-layer divergence? |
 | 001A | One-layer no-bias float scale drift | Planned | [notes.md](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/001a_one_layer_no_bias_float_scale_drift/notes.md) | Does the controller enforce the known Hessian stability boundary under pure scale drift? |
 | 001B | One-layer fake fixed-point rails | Planned | TBD | Does throttling still help when instability is caused by quantization and saturation? |
 | 002A | Two-layer linear network | Planned | TBD | Can global throttling stabilize inter-layer coupling without activation nonlinearities? |
