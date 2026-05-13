@@ -528,7 +528,8 @@ Each run should produce:
 9. Raw and applied update norms.
 10. Update underflow fraction.
 11. Update cosine between intended and actual applied update.
-12. Useful lower/upper bounds for `alpha_t`.
+12. Update phase distortion portrait.
+13. Useful lower/upper bounds for `alpha_t`.
 
 ## Interpretation Rules
 
@@ -539,6 +540,32 @@ If the throttled run is stable but the applied update norm becomes zero, that is
 If activation or input rails clip heavily, recovery may be impossible because the target information has been destroyed before the optimizer sees it.
 
 If update cosine drops far below 1, the quantization or clipping path is changing the descent direction. That is the same diagnostic we eventually want for legacy row/column kappa projection.
+
+The update phase portrait is an offline diagnostic, not a proposed hardware controller signal. It visualizes the same update distortion as a complex point:
+
+```math
+\beta_t
+=
+\arccos(c_t)
+```
+
+```math
+r_t
+=
+\frac{
+\left\|\Delta\theta_{\mathrm{actual}}\right\|_2
+}{
+\left\|\Delta\theta_{\mathrm{raw}}\right\|_2+\varepsilon
+}
+```
+
+```math
+p_t
+=
+r_t e^{i\beta_t}.
+```
+
+Ideal updates stay near the positive real axis. Update underflow collapses the radius toward zero. Direction distortion pushes the trajectory away from the axis.
 
 ## Results
 
@@ -560,6 +587,8 @@ The comparison figures now include the two update-geometry diagnostics needed to
 - `update_cosine`, which checks whether the applied quantized update still points in the same direction as the intended raw update.
 
 These panels are part of the regenerated PNGs used below.
+
+The notebook also generates phase-distortion figures for the isolated, wide, and tight quantized comparisons.
 
 ### Dtype Transfer Validation
 
@@ -606,6 +635,10 @@ The update-only run does show update underflow later in training. That is expect
 
 The new update-geometry panels make that distinction clearer. The applied update norm decays with the loss and weight error, and the update-only cosine degrades mainly in the late low-gradient regime where update underflow is active. That is different from an early instability where the update direction is corrupted before the model has learned.
 
+![Isolated quantization update phase](../../../workspace/ablations/000_global_throttle_sanity/results/000c_isolated_quantization_phase.png)
+
+The phase portrait shows the same behavior geometrically. The well-behaved paths stay close to the positive real axis. The update-only path moves inward and away from the axis later in training, matching the update-underflow and cosine diagnostics.
+
 Important interpretation:
 
 ```text
@@ -633,6 +666,10 @@ The wide fake-fixed-point run tracks the floating-point reference almost exactly
 - update underflow is only a small transient.
 
 This is a useful sanity result. It says the fake-fixed-point path is not introducing an artificial failure when the rails and fractional precision are generous.
+
+![Full wide quantization update phase](../../../workspace/ablations/000_global_throttle_sanity/results/000c_full_wide_quantization_phase.png)
+
+The wide-rail phase portrait stays close to the floating-point reference. This is the expected behavior when quantization does not significantly clip or rotate the applied update.
 
 ### Full Tight-Rail Controller Ablation
 
@@ -674,6 +711,10 @@ The refreshed figure should be read with the update panels as follows:
 - A drop in `update_cosine` is evidence that the numerical path is changing the descent direction, which is the same diagnostic we will use later against row/column projection.
 
 In this tight-rail run, `actual_update_norm` is large during the recovery transient and then decays as the loss and gradient norm decay. The controlled run is therefore not just immediately frozen. However, `update_cosine` drops and oscillates after the initial recovery, which shows that the tight quantized update path no longer preserves the raw descent direction perfectly in the low-gradient regime. That is acceptable for this stress test, but it is exactly the kind of distortion we need to track when choosing realistic update precision.
+
+![Tight quantization update phase](../../../workspace/ablations/000_global_throttle_sanity/results/000c_tight_quantization_phase.png)
+
+The tight-rail phase portrait makes the update distortion easier to see. The no-controller path stays at a compressed but nonzero radius while the loss oscillates. The controlled path moves inward as the model recovers, but it does not remain perfectly on the real axis. That residual angular motion is the quantized update-direction distortion seen in the cosine panel.
 
 ### Conclusions
 

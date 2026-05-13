@@ -187,6 +187,8 @@ class BaseModel(ABC):
             "raw_update_norm": [],
             "actual_update_norm": [],
             "update_cosine": [],
+            "update_angle_rad": [],
+            "update_radius_ratio": [],
             "curvature_proxy": [],
             "curvature_ema": [],
             "alpha": [],
@@ -345,7 +347,22 @@ class BaseModel(ABC):
                 grad_norm = tensor_l2_norm(grad_flat, eps)
                 raw_update_norm = tensor_l2_norm(raw_update_flat, eps)
                 actual_update_norm = tensor_l2_norm(actual_update_flat, eps)
-                update_cosine = safe_cosine(actual_update_flat, raw_update_flat, eps)
+                raw_update_norm_plain = tf.norm(raw_update_flat)
+                actual_update_norm_plain = tf.norm(actual_update_flat)
+                update_dot = tf.reduce_sum(actual_update_flat * raw_update_flat)
+                update_denom = raw_update_norm_plain * actual_update_norm_plain
+                update_cosine = tf.where(
+                    update_denom > eps,
+                    update_dot / update_denom,
+                    tf.constant(1.0, dtype=tf.float32),
+                )
+                update_cosine = tf.clip_by_value(update_cosine, -1.0, 1.0)
+                update_angle_rad = tf.acos(tf.clip_by_value(update_cosine, -1.0, 1.0))
+                update_radius_ratio = tf.where(
+                    raw_update_norm_plain > eps,
+                    actual_update_norm_plain / raw_update_norm_plain,
+                    tf.constant(0.0, dtype=tf.float32),
+                )
 
                 diverged = not (
                     loss_is_finite
@@ -415,6 +432,8 @@ class BaseModel(ABC):
                 history["raw_update_norm"].append(float(raw_update_norm.numpy()))
                 history["actual_update_norm"].append(float(actual_update_norm.numpy()))
                 history["update_cosine"].append(float(update_cosine.numpy()))
+                history["update_angle_rad"].append(float(update_angle_rad.numpy()))
+                history["update_radius_ratio"].append(float(update_radius_ratio.numpy()))
                 history["curvature_proxy"].append(float(curvature_proxy))
                 history["curvature_ema"].append(float(curvature_ema))
                 history["alpha"].append(float(alpha))

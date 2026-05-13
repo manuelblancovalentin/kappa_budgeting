@@ -271,6 +271,8 @@ grad_norm
 raw_update_norm
 actual_update_norm
 update_cosine
+update_angle_rad
+update_radius_ratio
 curvature_proxy
 curvature_ema
 alpha
@@ -304,6 +306,8 @@ Two metrics are especially important for the quantized global-throttle ablation:
 ```text
 actual_update_norm
 update_cosine
+update_angle_rad
+update_radius_ratio
 ```
 
 `raw_update_norm` is the norm of the intended update before storage effects:
@@ -342,6 +346,29 @@ This catches silent learning death. A run can look numerically stable because th
 ```
 
 For pure global throttling, this should stay close to 1 because the throttle scales the full update vector uniformly. If quantization, clipping, or a future row/column projection changes the update direction, this cosine should fall.
+
+The phase-distortion diagnostics are derived from the same quantities:
+
+```math
+\beta_t
+=
+\arccos(\cos_t)
+```
+
+```math
+r_t
+=
+\frac{
+\left\|\Delta\theta_{\mathrm{actual}}\right\|_2
+}{
+\left\|\Delta\theta_{\mathrm{raw}}\right\|_2
++\varepsilon
+}.
+```
+
+`update_angle_rad` stores `beta_t`; `update_radius_ratio` stores `r_t`.
+
+These are offline software diagnostics. They are meant to visualize and compare numerical update distortion during ablations. They are not currently proposed as hardware controller inputs because the high-precision raw update may not exist as a physical hardware signal.
 
 ### Return Value
 
