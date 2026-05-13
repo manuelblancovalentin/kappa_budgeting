@@ -122,7 +122,7 @@ which means the post-drift margin is:
 
 ```math
 \eta\lambda_{\max}(H_{\text{drift}})
-\approx 8.6728 > 2.
+\approx 8.6728 > 2
 ```
 
 <div class="summary-box">
