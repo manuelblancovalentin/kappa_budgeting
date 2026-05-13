@@ -316,7 +316,7 @@ Next, we introduce the gain drift and continue training without the controller t
 # Phase 2: sensor gain drift
 gamma = 4.0
 Xd = gamma * X
-Yd = gamma * Y  
+Yd = Y # important: target remains clean
 
 h_drift = model.train_instrumented(
     Xd,
