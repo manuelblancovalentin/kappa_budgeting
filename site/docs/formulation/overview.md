@@ -1,4 +1,6 @@
-# 📝 Overview
+# 🔎 Overview
+<StatusBadges statuses="todo;preliminary" />
+---
 
 This project studies how to make fixed-point online learning stable when a deployed model must keep training after its input distribution changes.
 

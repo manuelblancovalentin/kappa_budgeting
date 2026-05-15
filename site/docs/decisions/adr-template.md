@@ -1,8 +1,11 @@
 # ADR-0000: Decision Title
 
+<StatusBadges statuses="todo;placeholder" />
 Date: YYYY-MM-DD  
 Status: Proposed / Accepted / Deprecated / Superseded  
 People involved: NAME, NAME
+
+---
 
 ## Context
 

@@ -1,4 +1,6 @@
-# Models / NN Module Reference
+# 📦 Models / NN Module Reference
+<StatusBadges statuses="valid;inprogress" />
+---
 
 Source: [`enabol/nn.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/nn.py)
 

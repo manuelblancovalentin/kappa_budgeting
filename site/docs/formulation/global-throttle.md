@@ -1,4 +1,6 @@
 # 🎚️ The global throttle mechanism
+<StatusBadges statuses="todo;preliminary;inprogress" />
+---
 
 Instead of projecting each row/column independently, we introduce a single global scalar:
 

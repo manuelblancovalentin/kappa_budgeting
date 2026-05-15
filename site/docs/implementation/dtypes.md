@@ -1,4 +1,6 @@
-# Dtypes Module Reference
+# 🗄️ Dtypes Module Reference
+<StatusBadges statuses="valid;inprogress" />
+---
 
 Source: [`enabol/dtypes.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/dtypes.py)
 

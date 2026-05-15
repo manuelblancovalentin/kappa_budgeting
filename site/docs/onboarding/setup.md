@@ -1,4 +1,6 @@
 # Setup
+<StatusBadges statuses="preliminary" />
+---
 
 This page describes the baseline setup for working on ENABOL locally, including
 notebooks under `workspace/`.
@@ -63,7 +65,6 @@ python -m ipykernel install --user --name enabol --display-name "Python (enabol)
 Then select `Python (enabol)` in notebooks under `workspace/`.
 
 ## Verify the Setup
-
 From the repository root:
 
 ```bash

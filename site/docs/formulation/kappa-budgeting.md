@@ -1,4 +1,7 @@
 # ❌ Why κ row/col failed
+<StatusBadges statuses="revise;preliminary" />
+---
+
 In our initial experiments, we found that we had to disable $\kappa$-row projection (```RowScale{}``` block) to get any meaningful learning. This is because the original $\kappa$ mechanism was trying to enforce local gain constraints on each layer, row, or column. A simplified version is:
 ```math
 W_\ell \leftarrow \Pi_{\kappa_\ell}(W_\ell),

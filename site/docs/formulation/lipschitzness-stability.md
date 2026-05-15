@@ -1,4 +1,6 @@
 # 🌀 1-Lipschitz and stability
+<StatusBadges statuses="revise;preliminary" />
+---
 
 ## 1. The original idea of $\kappa$-per layer
 The original $\kappa$-budgeting idea is about controlling the network gain. For a network:

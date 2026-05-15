@@ -22,17 +22,21 @@ What do we expect to happen?
 |---|---|
 | Branch | `branch-name` |
 | Commit | `commit-hash` |
-| Dataset | Dataset |
-| Architecture | Architecture |
-| Precision | Precision |
+| Dataset ID | `DS-...` |
+| Model ID | `MDL-...` |
+| Precision map | Precision map / dtype registry entry |
 | Drift | `(alpha, beta)` range |
 | Budgeting variant | Variant |
 | Optimizer | Optimizer |
 | Environment | Environment |
 
+## Dataset And Model References
+
+Link to the dataset and model registry pages. Only restate equations here if the experiment changes or specializes them.
+
 ## Model Math
 
-Add the forward equations and loss.
+Add the forward equations and loss only when they are specific to this experiment.
 
 ```text
 z1 = W1 x + b1

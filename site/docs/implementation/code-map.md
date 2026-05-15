@@ -1,4 +1,6 @@
-# Code Map
+# 🗺️ Code Map
+<StatusBadges statuses="todo;preliminary;placeholder" />
+---
 
 This repository is the new implementation and documentation home for the kappa-budgeting ablations. Related legacy/generated code currently lives outside this repository and should be treated as reference material.
 

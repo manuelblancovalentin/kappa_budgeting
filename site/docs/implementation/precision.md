@@ -1,4 +1,6 @@
-# PrecisionDict Module Reference
+# 🧮 PrecisionDict Module Reference
+<StatusBadges statuses="valid;inprogress" />
+---
 
 Source: [`enabol/precision.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/precision.py)
 

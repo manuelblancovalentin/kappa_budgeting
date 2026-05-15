@@ -6,11 +6,21 @@ sidebar_label: "000A-B: Throttle + No Quantization"
 
 # Experiment 000: One-Layer Global Throttle Sanity Check
 
-<p className="status-line">
-  Status:
-  <span className="status-badge status-badge--valid">Valid</span>
-</p>
+<StatusBadges statuses="valid;inprogress" />
 Notebook: [`workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_controler_no_quant.ipynb`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_controler_no_quant.ipynb)  
+Workspace: `workspace/ablations/000_global_throttle_sanity/`
+
+---
+
+## Experiment Trace
+
+| Field | Value |
+|---|---|
+| Dataset | [`DS-AFFINE-LINEAR-000`](../datasets/affine-linear-000.md) |
+| Model | [`MDL-DENSE1-LINEAR-NOBIAS-000`](../models/dense1-linear-nobias-000.md) |
+| Training method | Dynamic global throttle, SGD-style online loop |
+| Precision mode | Floating point |
+| Drift | Input gain drift, `x_drift = gamma x`, with `gamma = 4` |
 
 ## Purpose
 

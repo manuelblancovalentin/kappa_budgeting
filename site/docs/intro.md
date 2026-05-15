@@ -2,7 +2,9 @@
 sidebar_position: 1
 ---
 
-# Project Overview
+# 🔎 Project Overview
+<StatusBadges statuses="todo;placeholder" />
+---
 
 This page should explain the project to someone joining it for the first time.
 

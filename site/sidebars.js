@@ -20,7 +20,7 @@ const sidebars = {
     'current-status',
     {
       type: 'category',
-      label: 'Onboarding',
+      label: '🚀 Onboarding',
       items: [
         'onboarding/setup',
         'onboarding/repo-map',
@@ -29,7 +29,7 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'Formulation',
+      label: '⟦♾️⟧ Formulation',
       items: [
         'formulation/overview',
         'formulation/kappa-budgeting',
@@ -41,7 +41,7 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'Implementation',
+      label: '🔩 Implementation',
       items: [
         'implementation/code-map',
         'implementation/dataset',
@@ -54,7 +54,23 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'Experiments',
+      label: '📚 Datasets',
+      items: [
+        'datasets/datasets-index',
+        'datasets/affine-linear-000',
+      ],
+    },
+    {
+      type: 'category',
+      label: '📦 Models',
+      items: [
+        'models/models-index',
+        'models/dense1-linear-nobias-000',
+      ],
+    },
+    {
+      type: 'category',
+      label: '🔬 Experiments',
       items: [
         'experiments/index',
         'experiments/global-throttle-sanity',
@@ -64,7 +80,7 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'Decisions',
+      label: '💡 Decisions',
       items: [
         'decisions/index',
         'decisions/adr-template',
@@ -72,14 +88,14 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'Meetings',
+      label: '📅 Meetings',
       items: [
         'meetings/index',
       ],
     },
     {
       type: 'category',
-      label: 'Handoff',
+      label: '🚚 Handoff',
       items: [
         'handoff/handoff-checklist',
         'handoff/known-issues',

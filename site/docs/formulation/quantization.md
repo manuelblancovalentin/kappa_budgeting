@@ -1,4 +1,6 @@
 # 🧮 Fixed-point quantization
+<StatusBadges statuses="todo;preliminary;inprogress" />
+---
 
 Eventually, the real hardware update must be quantized to the fixed-point format. This can be modeled as:
 

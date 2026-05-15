@@ -1,4 +1,6 @@
-# Dataset Module Reference
+# 📚 Dataset Module Reference
+<StatusBadges statuses="valid;inprogress" />
+---
 
 Source: [`enabol/dataset.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/dataset.py)
 

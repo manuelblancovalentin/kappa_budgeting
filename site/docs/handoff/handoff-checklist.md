@@ -1,5 +1,8 @@
 # Handoff Checklist
 
+<StatusBadges statuses="todo;placeholder" />
+---
+
 Use this before someone leaves the project, pauses work, graduates, goes on internship, or transfers ownership.
 
 ## Current project state is documented

@@ -1,4 +1,6 @@
 # 🗂️ How this fits into κ-budgeting
+<StatusBadges statuses="todo;revise" />
+---
 
 $\kappa$-budgeting is still useful as a static safety rail $\|W_\ell\|\leq \kappa_\ell$, since it bounds:
 

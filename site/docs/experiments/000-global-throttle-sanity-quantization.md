@@ -6,14 +6,22 @@ sidebar_label: "000C: Throttle + Quantization"
 
 # Experiment 000C: Global Throttle With Quantization
 
-<p className="status-line">
-  Status:
-  <span className="status-badge status-badge--preliminary">Preliminary</span>
-  <span className="status-badge status-badge--valid">Valid</span>
-</p>
+<StatusBadges statuses="preliminary; valid" />
 Workspace: `workspace/ablations/000_global_throttle_sanity/`  
 Notebook: [`workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_quantization_sanity.ipynb`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_quantization_sanity.ipynb)  
 Starting point: [Experiment 000](./000-global-throttle-sanity.md)
+
+---
+
+## Experiment Trace
+
+| Field | Value |
+|---|---|
+| Dataset | [`DS-AFFINE-LINEAR-000`](../datasets/affine-linear-000.md) |
+| Model | [`MDL-DENSE1-LINEAR-NOBIAS-000`](../models/dense1-linear-nobias-000.md) |
+| Training method | Dynamic global throttle, SGD-style online loop |
+| Precision mode | Fake fixed-point, staged from isolated paths to full tight rails |
+| Drift | Input gain drift, `x_drift = gamma x`, with `gamma = 4` |
 
 ## Purpose
 

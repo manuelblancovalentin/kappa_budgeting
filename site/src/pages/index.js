@@ -6,47 +6,62 @@ import styles from './index.module.css';
 
 const cards = [
   {
-    title: 'Current Status',
+    title: '📝 Current Status',
     description:
       'The canonical snapshot of what works, what is blocked, and what should happen next.',
     link: '/docs/current-status',
     cta: 'Read status',
   },
   {
-    title: 'Lab Log',
+    title: '📓 Lab Log',
     description:
       'Chronological progress notes: experiments, debugging sessions, weekly updates, and failed attempts.',
     link: '/blog',
     cta: 'Open log',
   },
   {
-    title: 'Onboarding',
+    title: '🚀 Onboarding',
     description:
       'Setup instructions, repository map, common commands, and first tasks for new contributors.',
     link: '/docs/onboarding/setup',
     cta: 'Start here',
   },
   {
-    title: 'Experiments',
+    title: '📚 Datasets',
+    description:
+      'Descriptions of datasets used in this project, including input distribution, target function, and drift support.',
+    link: '/docs/datasets',
+    cta: 'View datasets',
+  },
+  {
+    title: '📦 Models',
+    description:
+      'Descriptions of models used in this project, including architecture, training procedure, and performance.',
+    link: '/docs/models',
+    cta: 'View models',
+  },
+  {
+    title: '🔬 Experiments',
     description:
       'Experiment summaries, protocols, metrics, plots, and links to raw logs or notebooks.',
     link: '/docs/experiments',
     cta: 'View experiments',
   },
-  {
-    title: 'Decisions',
-    description:
-      'Architecture and research decision records so people do not rediscover the same tradeoffs.',
-    link: '/docs/decisions',
-    cta: 'Read decisions',
-  },
-  {
-    title: 'Handoff',
-    description:
-      'Continuity notes: known issues, next steps, and things not to repeat.',
-    link: '/docs/handoff/handoff-checklist',
-    cta: 'Open handoff',
-  },
+
+  // {
+  //   title: 'Decisions',
+  //   description:
+  //     'Architecture and research decision records so people do not rediscover the same tradeoffs.',
+  //   link: '/docs/decisions',
+  //   cta: 'Read decisions',
+  // },
+  // {
+  //   title: 'Handoff',
+  //   description:
+  //     'Continuity notes: known issues, next steps, and things not to repeat.',
+  //   link: '/docs/handoff/handoff-checklist',
+  //   cta: 'Open handoff',
+  // },
 ];
 
 function Card({title, description, link, cta}) {
@@ -69,20 +84,32 @@ export default function Home() {
       <main>
         <section className={styles.hero}>
           <div className="container">
-            <Heading as="h1" className={styles.heroTitle}>
-              PROJECT_NAME Logbook
-            </Heading>
-            <p className={styles.heroSubtitle}>
-              A living memory system for this project: current status, lab logs,
-              experiments, decisions, onboarding, and handoff notes.
-            </p>
-            <div className={styles.heroButtons}>
-              <Link className="button button--primary button--lg" to="/docs/current-status">
-                Current Status
-              </Link>
-              <Link className="button button--secondary button--lg" to="/blog">
-                Latest Lab Log
-              </Link>
+            <div className={styles.heroLayout}>
+              <div className={styles.heroLogoWrap} aria-hidden="true">
+                <img
+                  className={styles.heroLogo}
+                  src="/kappa_budgeting/img/logo.svg"
+                  alt=""
+                  loading="eager"
+                />
+              </div>
+              <div className={styles.heroContent}>
+                <Heading as="h1" className={styles.heroTitle}>
+                  Logbook
+                </Heading>
+                <p className={styles.heroSubtitle}>
+                  A living memory system for this project: current status, lab logs,
+                  experiments, decisions, onboarding, and handoff notes.
+                </p>
+                <div className={styles.heroButtons}>
+                  <Link className="button button--primary button--lg" to="/docs/current-status">
+                    Current Status
+                  </Link>
+                  <Link className="button button--secondary button--lg" to="/blog">
+                    Latest Lab Log
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>

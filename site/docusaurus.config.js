@@ -95,7 +95,7 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: 'κ-Budgeting Logbook',
+        title: 'ENABOL Logbook',
         logo: {
           alt: 'Project Logo',
           src: 'img/logo.svg',
@@ -128,7 +128,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} κ-BUDGETING, Inc. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} ENABOL Inc. Built with Docusaurus.`,
       },
       prism: {
         theme: prismThemes.github,

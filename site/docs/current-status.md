@@ -2,10 +2,13 @@
 sidebar_position: 2
 ---
 
-# Current Status
+# 📝 Current Status
+<StatusBadges statuses="todo;placeholder" />
 
 Last updated: YYYY-MM-DD  
 Owner: NAME
+
+---
 
 ## One-paragraph summary
 
