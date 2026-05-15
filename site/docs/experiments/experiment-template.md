@@ -1,8 +1,31 @@
+---
+status:
+  - draft
+tags:
+  - experiment
+  - template
+last_modified: 2026-05-15
+---
 # Experiment Template
+
+<PageMeta />
 
 Copy this structure when documenting an ablation experiment.
 
-## Experiment title
+## Experiment Title
+
+Use this ID format:
+
+```text
+EXP-<number><variant>-<method>-<precision>-<model>
+```
+
+Examples:
+
+```text
+EXP-000A-GLTHR-FLOAT-LIN1
+EXP-000B-GLTHR-QFX-LIN1
+```
 
 Date: YYYY-MM-DD  
 Owner: NAME  
@@ -20,6 +43,7 @@ What do we expect to happen?
 
 | Field | Value |
 |---|---|
+| Experiment ID | `EXP-...` |
 | Branch | `branch-name` |
 | Commit | `commit-hash` |
 | Dataset ID | `DS-...` |
@@ -87,6 +111,10 @@ What do the results mean?
 
 - [ ] Next action
 - [ ] Next action
+
+<Todo id="EXP-XXX-TODO-001" owner="open">
+Describe one concrete task that a collaborator can pick up.
+</Todo>
 
 ## Related links
 

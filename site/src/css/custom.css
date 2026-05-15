@@ -101,11 +101,49 @@
 }
 
 
-/* Experiment, dataset, and model status badges.
-   Usage in Markdown/MDX:
-   <StatusBadges statuses="preliminary; valid" />
-   <StatusBadges statuses="running" label="Dataset status:" />
-   <Badge status="planned" />
+
+.page-meta {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.5rem 0 1.25rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.95rem;
+}
+
+.page-meta .status-line {
+  margin: 0;
+}
+
+.page-meta__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.page-meta__label,
+.status-line__label {
+  font-weight: 650;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.page-meta__badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.page-meta__row--date time {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Experiment, dataset, model, and page metadata badges.
+   Use page frontmatter plus <PageMeta /> for normal pages:
+   status: [valid, inprogress]
+   tags: [experiment, global-throttle]
+   last_modified: 2026-05-15
+
+   Use <Badge status="planned" /> for compact table cells.
 */
 .status-line {
   display: flex;
@@ -175,6 +213,44 @@
   color: #1e40af;
 }
 
+
+.status-badge--experiment,
+.status-badge--experiment-registry,
+.status-badge--dataset,
+.status-badge--dataset-registry,
+.status-badge--model,
+.status-badge--model-registry,
+.status-badge--implementation,
+.status-badge--formulation,
+.status-badge--decision,
+.status-badge--meeting,
+.status-badge--handoff,
+.status-badge--onboarding,
+.status-badge--overview,
+.status-badge--status,
+.status-badge--template {
+  border-color: #bae6fd;
+  background: #f0f9ff;
+  color: #075985;
+}
+
+.status-badge--global-throttle,
+.status-badge--kappa-budgeting,
+.status-badge--stability,
+.status-badge--quantization,
+.status-badge--precision,
+.status-badge--dtypes,
+.status-badge--qfx,
+.status-badge--float,
+.status-badge--affine,
+.status-badge--linear,
+.status-badge--dense,
+.status-badge--lin1 {
+  border-color: #ddd6fe;
+  background: #f5f3ff;
+  color: #5b21b6;
+}
+
 .status-badge--not-run,
 .status-badge--draft {
   border-color: var(--ifm-color-emphasis-300);
@@ -206,3 +282,89 @@
   color: #fecaca;
 }
 
+
+.todo-callout {
+  margin: 1.25rem 0;
+  border: 1px solid #c4b5fd;
+  border-left: 4px solid #8b5cf6;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  background: #faf5ff;
+}
+
+.todo-callout__header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+
+.todo-callout__id {
+  border-radius: 999px;
+  padding: 0.12rem 0.45rem;
+  background: rgba(139, 92, 246, 0.12);
+  color: #5b21b6;
+  font-size: 0.78rem;
+}
+
+.todo-callout__owner {
+  color: #6b21a8;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.todo-callout__body > :last-child {
+  margin-bottom: 0;
+}
+
+[data-theme='dark'] .todo-callout {
+  border-color: #7c3aed;
+  background: rgba(139, 92, 246, 0.12);
+}
+
+[data-theme='dark'] .todo-callout__id {
+  background: rgba(196, 181, 253, 0.16);
+  color: #ddd6fe;
+}
+
+[data-theme='dark'] .todo-callout__owner {
+  color: #ddd6fe;
+}
+
+[data-theme='dark'] .status-badge--experiment,
+[data-theme='dark'] .status-badge--experiment-registry,
+[data-theme='dark'] .status-badge--dataset,
+[data-theme='dark'] .status-badge--dataset-registry,
+[data-theme='dark'] .status-badge--model,
+[data-theme='dark'] .status-badge--model-registry,
+[data-theme='dark'] .status-badge--implementation,
+[data-theme='dark'] .status-badge--formulation,
+[data-theme='dark'] .status-badge--decision,
+[data-theme='dark'] .status-badge--meeting,
+[data-theme='dark'] .status-badge--handoff,
+[data-theme='dark'] .status-badge--onboarding,
+[data-theme='dark'] .status-badge--overview,
+[data-theme='dark'] .status-badge--status,
+[data-theme='dark'] .status-badge--template {
+  border-color: #38bdf8;
+  background: rgba(14, 165, 233, 0.16);
+  color: #bae6fd;
+}
+
+[data-theme='dark'] .status-badge--global-throttle,
+[data-theme='dark'] .status-badge--kappa-budgeting,
+[data-theme='dark'] .status-badge--stability,
+[data-theme='dark'] .status-badge--quantization,
+[data-theme='dark'] .status-badge--precision,
+[data-theme='dark'] .status-badge--dtypes,
+[data-theme='dark'] .status-badge--qfx,
+[data-theme='dark'] .status-badge--float,
+[data-theme='dark'] .status-badge--affine,
+[data-theme='dark'] .status-badge--linear,
+[data-theme='dark'] .status-badge--dense,
+[data-theme='dark'] .status-badge--lin1 {
+  border-color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.16);
+  color: #ddd6fe;
+}

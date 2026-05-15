@@ -1,0 +1,149 @@
+todo:
+  label: TODO
+  permalink: /todo
+  description: Pages tagged TODO.
+
+placeholder:
+  label: Placeholder
+  permalink: /placeholder
+  description: Pages tagged Placeholder.
+
+revise:
+  label: Needs revision
+  permalink: /revise
+  description: Pages tagged Needs revision.
+
+overview:
+  label: Overview
+  permalink: /overview
+  description: Pages tagged Overview.
+
+status:
+  label: Status
+  permalink: /status
+  description: Pages tagged Status.
+
+formulation:
+  label: Formulation
+  permalink: /formulation
+  description: Pages tagged Formulation.
+
+kappa-budgeting:
+  label: Kappa budgeting
+  permalink: /kappa-budgeting
+  description: Pages tagged Kappa budgeting.
+
+stability:
+  label: Stability
+  permalink: /stability
+  description: Pages tagged Stability.
+
+global-throttle:
+  label: Global throttle
+  permalink: /global-throttle
+  description: Pages tagged Global throttle.
+
+quantization:
+  label: Quantization
+  permalink: /quantization
+  description: Pages tagged Quantization.
+
+implementation:
+  label: Implementation
+  permalink: /implementation
+  description: Pages tagged Implementation.
+
+dataset:
+  label: Dataset
+  permalink: /dataset
+  description: Pages tagged Dataset.
+
+dtypes:
+  label: DTypes
+  permalink: /dtypes
+  description: Pages tagged DTypes.
+
+precision:
+  label: Precision
+  permalink: /precision
+  description: Pages tagged Precision.
+
+model:
+  label: Model
+  permalink: /model
+  description: Pages tagged Model.
+
+dataset-registry:
+  label: Dataset registry
+  permalink: /dataset-registry
+  description: Pages tagged Dataset registry.
+
+affine:
+  label: Affine
+  permalink: /affine
+  description: Pages tagged Affine.
+
+linear:
+  label: Linear
+  permalink: /linear
+  description: Pages tagged Linear.
+
+model-registry:
+  label: Model registry
+  permalink: /model-registry
+  description: Pages tagged Model registry.
+
+dense:
+  label: Dense
+  permalink: /dense
+  description: Pages tagged Dense.
+
+lin1:
+  label: LIN1
+  permalink: /lin1
+  description: Pages tagged LIN1.
+
+experiment-registry:
+  label: Experiment registry
+  permalink: /experiment-registry
+  description: Pages tagged Experiment registry.
+
+experiment:
+  label: Experiment
+  permalink: /experiment
+  description: Pages tagged Experiment.
+
+float:
+  label: Float
+  permalink: /float
+  description: Pages tagged Float.
+
+qfx:
+  label: QFX
+  permalink: /qfx
+  description: Pages tagged QFX.
+
+decision:
+  label: Decision
+  permalink: /decision
+  description: Pages tagged Decision.
+
+meeting:
+  label: Meeting
+  permalink: /meeting
+  description: Pages tagged Meeting.
+
+handoff:
+  label: Handoff
+  permalink: /handoff
+  description: Pages tagged Handoff.
+
+onboarding:
+  label: Onboarding
+  permalink: /onboarding
+  description: Pages tagged Onboarding.
+
+template:
+  label: Template
+  permalink: /template
+  description: Template pages.
