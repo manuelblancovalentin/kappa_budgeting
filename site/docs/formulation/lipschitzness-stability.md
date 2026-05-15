@@ -73,9 +73,9 @@ L_{\max}.
 }
 ```
 
-<div class="summary-box">
-    <strong>Key insight:</strong> The original $\kappa$-budgeting idea was about controlling the static Lipschitz gain of the network. This is important for inference-time robustness and numerical stability.
-</div>
+<TBox type="summary" title="Key insight">
+The original $\kappa$-budgeting idea was about controlling the static Lipschitz gain of the network. This is important for inference-time robustness and numerical stability.
+</TBox>
 
 ## 2. The problem of online training
 But online training introduces a different map: not only
@@ -141,7 +141,6 @@ This is about how violently the gradient changes when the weights move.
 
 $\kappa$-budgeting mostly targets the first. The new throttle targets the second.
 
-## Summary box
-<div class="summary-box">
-    <strong>Key insight:</strong> We were controlling the static Lipschitz gain of the network, but the instability during online training is governed by the Lipschitzness of the gradient/update field. The new controller targets that closed-loop sensitivity.
-</div>
+<TBox type="summary" title="Key insight">
+We were controlling the static Lipschitz gain of the network, but the instability during online training is governed by the Lipschitzness of the gradient/update field. The new controller targets that closed-loop sensitivity.
+</TBox>

@@ -13,7 +13,7 @@ last_modified: 2026-05-15
 <PageMeta />
 ---
 
-This section is the registry of neural-network models used by ENABOL ablation experiments. Each model gets a stable ID so an experiment can be described as a composition of:
+This section is the registry of neural-network models used by <ENABOL /> ablation experiments. Each model gets a stable ID so an experiment can be described as a composition of:
 
 ```text
 Dataset + Model + Training method + Precision map + Drift/corruption

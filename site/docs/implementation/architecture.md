@@ -1,6 +1,6 @@
 # Closed-Loop Ablation Architecture
 
-The ablation harness should mirror the ENABOL online training loop, but remain small enough to inspect every tensor and compute exact curvature diagnostics. The first implementation target is software simulation, not HLS synthesis.
+The ablation harness should mirror the <ENABOL /> online training loop, but remain small enough to inspect every tensor and compute exact curvature diagnostics. The first implementation target is software simulation, not HLS synthesis.
 
 ## Training Loop
 

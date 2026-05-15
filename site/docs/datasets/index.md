@@ -13,7 +13,7 @@ last_modified: 2026-05-15
 <PageMeta />
 ---
 
-This section is the registry of datasets used by ENABOL ablation experiments. Each dataset gets a stable ID so experiment pages can reference the input distribution by name instead of re-explaining the full construction.
+This section is the registry of datasets used by <ENABOL /> ablation experiments. Each dataset gets a stable ID so experiment pages can reference the input distribution by name instead of re-explaining the full construction.
 
 Use dataset IDs in experiment trace blocks:
 

@@ -109,9 +109,8 @@ If:
 ```
 
 
-## Summary box
-<div class="summary-box">
-    <strong>Key insight:</strong> The row/column $\kappa$ projection was enforcing local numerical constraints, but the projection operator was not geometry-preserving. It could rotate the effective update in parameter space. For inference-time gain control that may be acceptable, but during online training it can interfere with the optimizer’s descent direction.
-</div>
+<TBox type="summary" title="Key insight">
+The row/column $\kappa$ projection was enforcing local numerical constraints, but the projection operator was not geometry-preserving. It could rotate the effective update in parameter space. For inference-time gain control that may be acceptable, but during online training it can interfere with the optimizer’s descent direction.
+</TBox>
 
 

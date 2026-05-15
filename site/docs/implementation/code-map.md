@@ -80,7 +80,7 @@ enabol/
   utils.py         # norms, Hessian helpers, stability metrics
 ```
 
-The future ENABOL comparison work may add:
+The future <ENABOL /> comparison work may add:
 
 ```text
 enabol/

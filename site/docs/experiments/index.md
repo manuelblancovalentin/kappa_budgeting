@@ -72,7 +72,7 @@ Every experiment should report:
 | 001C | More realistic affine drift | Bias and scale+shift drift. |
 | EXP-002A | Coupled linear dynamics | Two Dense layers, no activation. |
 | EXP-002B | Nonlinear hidden representation | Two Dense layers with ReLU. |
-| 003 | ENABOL comparison | Loose kappa rails, legacy row/column projection if useful. |
+| 003 |<ENABOL />comparison | Loose kappa rails, legacy row/column projection if useful. |
 
 ## Initial Variant Matrix
 

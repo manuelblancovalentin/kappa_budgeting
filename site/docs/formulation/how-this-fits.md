@@ -65,6 +65,6 @@ Then:
 
 But the key is that $\Pi_\kappa$ should be a loose guard rail, not the primary stabilizer applied aggressively every step.
 
-<div class="summary-box">
-    <strong>Key Insight:</strong> The throttle should prevent the system from hitting the $\kappa$ rails too violently. The $\kappa$ rails are still there as final protection. <b>So if we want, we can actually disable the $\kappa$ projection to spare hardware and computation and keep the global throttle as the main stabilizer.</b>
-</div>
+<TBox type="summary" title="Key insight">
+The throttle should prevent the system from hitting the $\kappa$ rails too violently. The $\kappa$ rails are still there as final protection. <b>So if we want, we can actually disable the $\kappa$ projection to spare hardware and computation and keep the global throttle as the main stabilizer.</b>
+</TBox>

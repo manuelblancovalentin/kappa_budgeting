@@ -231,9 +231,9 @@ The controller attempts to enforce:
 ## Caveat and summary
 The previous estimate is not perfect. It is very good for convex problems and things like a single-dense layer architecture, but it can be inaccurate for non-convex problems and more complex architectures. However, it is a simple and computationally cheap way to get a sense of the local curvature/sensitivity, which is what we need to adapt the learning rate and prevent divergence.
 
-<div class="summary-box">
-    <strong>Key insight:</strong> The global throttle mechanism preserves the geometry of the original gradient update, but it adaptively reduces the learning rate when the gradient field becomes stiff/sharp. This allows the model to keep learning without diverging, even under distribution shift.
-</div>
+<TBox type="summary" title="Key insight">
+The global throttle mechanism preserves the geometry of the original gradient update, but it adaptively reduces the learning rate when the gradient field becomes stiff/sharp. This allows the model to keep learning without diverging, even under distribution shift.
+</TBox>
 
 
 ## What happens for nonlinear / nonconvex networks?
@@ -327,9 +327,9 @@ So:
 }
 ```
 
-<div class="summary-box">
-    <strong>Key insight:</strong> For the linear case, this matches the true Hessian stability condition. For general networks, it becomes a local adaptive control rule.
-</div>
+<TBox type="summary" title="Key insight">
+For the linear case, this matches the true Hessian stability condition. For general networks, it becomes a local adaptive control rule.
+</TBox>
 
 
 ## Implementation
@@ -435,6 +435,6 @@ Layerwise versions are possible later:
 But the first version should be global because global scaling preserves update geometry.
 
 
-<div class="summary-box">
-    <strong>Key insight:</strong> The estimator can be accumulated layer by layer, but the control action is a single global scalar. That lets us keep hardware implementation simple and avoids layerwise distortion of the descent direction.
-</div>
+<TBox type="summary" title="Key insight">
+The estimator can be accumulated layer by layer, but the control action is a single global scalar. That lets us keep hardware implementation simple and avoids layerwise distortion of the descent direction.
+</TBox>

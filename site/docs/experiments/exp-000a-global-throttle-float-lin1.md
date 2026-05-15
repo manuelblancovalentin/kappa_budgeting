@@ -35,7 +35,7 @@ notebook_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main
 
 This is the first working sanity check for the dynamic global throttle idea.
 
-The goal is not yet to test quantization, fixed-point rails, multiple layers, or the full ENABOL hardware path. The goal is narrower:
+The goal is not yet to test quantization, fixed-point rails, multiple layers, or the full <ENABOL /> hardware path. The goal is narrower:
 
 > Can we build a custom Keras training loop that detects unstable online learning dynamics and globally throttles the learning update so training does not diverge?
 
@@ -111,9 +111,9 @@ which means the post-drift margin is:
 \approx 8.6728 > 2
 ```
 
-<div class="summary-box">
-  When drifting the input gain by a factor of 4, the previously stable learning rate of $0.5$ becomes unstable. This is the regime where we expect the global throttle controller to intervene and prevent divergence.
-</div>
+<TBox type="summary" title="Summary">
+When drifting the input gain by a factor of 4, the previously stable learning rate of $0.5$ becomes unstable. This is the regime where we expect the global throttle controller to intervene and prevent divergence.
+</TBox>
 
 ## Controller Behavior
 Given the instability introduced by the drift, what we basically expect is that the controller should choose a throttle $\alpha_t$ such that the effective learning rate $\alpha_t \eta$ is back in the stable region. In other words, we expect:
@@ -135,9 +135,9 @@ Then:
 \approx 1.5 < 2.
 ```
 
-<div class="summary-box">
-  The global throttle reduces the optimal learning rate such that it stays in the stable region even after drift.
-</div>
+<TBox type="summary" title="Summary">
+The global throttle reduces the optimal learning rate such that it stays in the stable region even after drift.
+</TBox>
 
 ## Model
 The student model is a one-layer linear network without bias:
@@ -362,9 +362,9 @@ The result is shown in the image below, which confirms that the loss curve remai
 
 ## Summary of Results
 
-<div class="summary-box">
-  <strong>Key Findings:</strong> This preliminary notebook supports the basic claim that a global controller can throttle the total learning rate and stabilize a one-layer online learning loop.
-</div>
+<TBox type="summary" title="Summary">
+<strong>Key Findings:</strong> This preliminary notebook supports the basic claim that a global controller can throttle the total learning rate and stabilize a one-layer online learning loop.
+</TBox>
 
 
 ## Notebook Preview

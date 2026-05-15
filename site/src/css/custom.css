@@ -87,20 +87,6 @@
 }
 
 
-/* Create a div with rounded corners and some color, like a summary box */
-.summary-box {
-  border: 2px solid red;
-  border-radius: 10px;
-  padding: 10px;
-  margin: 10px 0;
-  background-color: #ffe6e6;
-}
-
-.summary-box strong {
-  color: var(--ifm-color-primary-dark);
-}
-
-
 
 .page-meta {
   display: grid;

@@ -43,7 +43,7 @@ EXP-000A showed that a dynamic global throttle can stabilize a one-layer floatin
 - clipping or wrapping at fixed-point rails,
 - saturation and underflow diagnostics.
 
-The goal is not yet to reproduce the full ENABOL firmware path. The goal is narrower:
+The goal is not yet to reproduce the full <ENABOL /> firmware path. The goal is narrower:
 
 > Can the same global throttle stabilize a one-layer online learner when the update path is fake-fixed-point and the failure mode is numerical saturation, update underflow, or both?
 
@@ -742,12 +742,12 @@ The results support three conclusions:
 2. Wide fake-fixed-point precision preserves the floating-point controller behavior.
 3. Tight fake-fixed-point precision creates a rail-driven instability that the global throttle substantially stabilizes.
 
-<div class="summary-box">
-    <strong>Key takeaway:</strong> The controller is doing something useful. It is not just instantly freezing learning.
+<TBox type="summary" title="Summary">
+<strong>Key takeaway:</strong> The controller is doing something useful. It is not just instantly freezing learning.
 
-    The caveat is the update cosine panel. In the tight controlled run, cosine drops and oscillates after recovery. That means the tight quantized update path is no longer preserving the raw descent direction perfectly, especially once gradients are small. This is not fatal here because the model has already recovered, but it tells us the update dtype is probably too tight for clean late-stage learning.
+The caveat is the update cosine panel. In the tight controlled run, cosine drops and oscillates after recovery. That means the tight quantized update path is no longer preserving the raw descent direction perfectly, especially once gradients are small. This is not fatal here because the model has already recovered, but it tells us the update dtype is probably too tight for clean late-stage learning.
 
-    One more caveat: the controlled stability margin alpha eta lambda_max is not always below 2 after the transient. For the simple quadratic theory, staying below 2 is the clean stability condition. The fact that the run still converges means the actual quantized nonlinear loop is more complicated than the pure float Hessian story. We should keep plotting this, but we should not claim the controller strictly enforces the quadratic GD bound in the tight quantized case.
+One more caveat: the controlled stability margin alpha eta lambda_max is not always below 2 after the transient. For the simple quadratic theory, staying below 2 is the clean stability condition. The fact that the run still converges means the actual quantized nonlinear loop is more complicated than the pure float Hessian story. We should keep plotting this, but we should not claim the controller strictly enforces the quadratic GD bound in the tight quantized case.
 
-    Bottom line: this experiment is successful. It validates the quantization hooks, creates a meaningful tight-rail failure, and shows that the global throttle stabilizes it. The main next lesson is that “stable” is not enough: we also need update cosine and actual update norm to detect whether precision is preserving useful learning geometry.
-</div>
+Bottom line: this experiment is successful. It validates the quantization hooks, creates a meaningful tight-rail failure, and shows that the global throttle stabilizes it. The main next lesson is that “stable” is not enough: we also need update cosine and actual update norm to detect whether precision is preserving useful learning geometry.
+</TBox>

@@ -9,7 +9,7 @@ last_modified: 2026-05-15
 <PageMeta />
 ---
 
-This page describes the baseline setup for working on ENABOL locally, including
+This page describes the baseline setup for working on <ENABOL /> locally, including
 notebooks under `workspace/`.
 
 ## Requirements
@@ -51,7 +51,7 @@ pytest
 ```
 
 The `-e .` entry installs the local `enabol` package in editable mode. This
-means notebooks, scripts, and tests can import ENABOL without manually editing
+means notebooks, scripts, and tests can import <ENABOL /> without manually editing
 `sys.path`:
 
 ```python
@@ -80,6 +80,10 @@ python -m pytest
 ```
 
 ## Build the documentation site
+
+<TBox type="warning" title="Documentation is optional for test-only users">
+If you are only supposed to run experiments or tests, you probably do not need to build the documentation site. This section is mainly for active documentation/site developers.
+</TBox>
 
 The documentation site lives under `site/`, so run Node commands from that
 directory:

@@ -92,6 +92,6 @@ So:
 }
 ```
 
-<div class="summary-box">
-    <strong>Key Insight:</strong> Fixed-point precision gives a minimum useful update size. Stability gives a maximum safe update size. Online learning is possible only when these bounds overlap.
-</div>
+<TBox type="summary" title="Key insight">
+Fixed-point precision gives a minimum useful update size. Stability gives a maximum safe update size. Online learning is possible only when these bounds overlap.
+</TBox>
