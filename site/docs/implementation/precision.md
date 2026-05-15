@@ -1,5 +1,15 @@
+---
+status:
+  - valid
+  - inprogress
+tags:
+  - implementation
+  - precision
+  - quantization
+last_modified: 2026-05-15
+---
 # 🧮 PrecisionDict Module Reference
-<StatusBadges statuses="valid;inprogress" />
+<PageMeta />
 ---
 
 Source: [`enabol/precision.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/precision.py)

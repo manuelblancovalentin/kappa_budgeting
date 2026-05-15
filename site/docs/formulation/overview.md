@@ -1,5 +1,14 @@
+---
+status:
+  - preliminary
+tags:
+  - todo
+  - formulation
+  - overview
+last_modified: 2026-05-15
+---
 # 🔎 Overview
-<StatusBadges statuses="todo;preliminary" />
+<PageMeta />
 ---
 
 This project studies how to make fixed-point online learning stable when a deployed model must keep training after its input distribution changes.

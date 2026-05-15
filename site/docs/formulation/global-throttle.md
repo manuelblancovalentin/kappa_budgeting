@@ -1,5 +1,15 @@
+---
+status:
+  - preliminary
+  - inprogress
+tags:
+  - todo
+  - formulation
+  - global-throttle
+last_modified: 2026-05-15
+---
 # 🎚️ The global throttle mechanism
-<StatusBadges statuses="todo;preliminary;inprogress" />
+<PageMeta />
 ---
 
 Instead of projecting each row/column independently, we introduce a single global scalar:

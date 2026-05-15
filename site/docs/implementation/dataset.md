@@ -1,5 +1,14 @@
+---
+status:
+  - valid
+  - inprogress
+tags:
+  - implementation
+  - dataset
+last_modified: 2026-05-15
+---
 # 📚 Dataset Module Reference
-<StatusBadges statuses="valid;inprogress" />
+<PageMeta />
 ---
 
 Source: [`enabol/dataset.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/dataset.py)
@@ -369,7 +378,7 @@ print(h["lambda_max"])
 print(h["eta_max"])
 ```
 
-This is the diagnostic anchor for Experiment 000.
+This is the diagnostic anchor for EXP-000A.
 
 ### `__repr__()`
 

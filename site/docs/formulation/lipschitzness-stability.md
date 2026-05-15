@@ -1,5 +1,14 @@
+---
+status:
+  - preliminary
+tags:
+  - revise
+  - formulation
+  - stability
+last_modified: 2026-05-15
+---
 # 🌀 1-Lipschitz and stability
-<StatusBadges statuses="revise;preliminary" />
+<PageMeta />
 ---
 
 ## 1. The original idea of $\kappa$-per layer

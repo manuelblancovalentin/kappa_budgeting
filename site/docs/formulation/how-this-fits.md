@@ -1,5 +1,14 @@
+---
+status:
+  - draft
+tags:
+  - todo
+  - revise
+  - formulation
+last_modified: 2026-05-15
+---
 # 🗂️ How this fits into κ-budgeting
-<StatusBadges statuses="todo;revise" />
+<PageMeta />
 ---
 
 $\kappa$-budgeting is still useful as a static safety rail $\|W_\ell\|\leq \kappa_\ell$, since it bounds:

@@ -1,12 +1,15 @@
 ---
 sidebar_position: 2
+status:
+  - draft
+tags:
+  - todo
+  - placeholder
+  - status
+last_modified: 2026-05-15
 ---
-
 # 📝 Current Status
-<StatusBadges statuses="todo;placeholder" />
-
-Last updated: YYYY-MM-DD  
-Owner: NAME
+<PageMeta />
 
 ---
 

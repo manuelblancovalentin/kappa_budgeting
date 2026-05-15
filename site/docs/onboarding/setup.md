@@ -1,5 +1,12 @@
+---
+status:
+  - preliminary
+tags:
+  - onboarding
+last_modified: 2026-05-15
+---
 # Setup
-<StatusBadges statuses="preliminary" />
+<PageMeta />
 ---
 
 This page describes the baseline setup for working on ENABOL locally, including

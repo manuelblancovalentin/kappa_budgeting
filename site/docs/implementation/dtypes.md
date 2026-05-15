@@ -1,5 +1,15 @@
+---
+status:
+  - valid
+  - inprogress
+tags:
+  - implementation
+  - dtypes
+  - precision
+last_modified: 2026-05-15
+---
 # 🗄️ Dtypes Module Reference
-<StatusBadges statuses="valid;inprogress" />
+<PageMeta />
 ---
 
 Source: [`enabol/dtypes.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/dtypes.py)

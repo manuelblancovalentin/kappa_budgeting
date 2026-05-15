@@ -2,10 +2,15 @@
 id: models-index
 title: "Models"
 sidebar_label: "Index"
+status:
+  - valid
+  - inprogress
+tags:
+  - model-registry
+last_modified: 2026-05-15
 ---
-
 # Models
-<StatusBadges statuses="valid;inprogress" />
+<PageMeta />
 ---
 
 This section is the registry of neural-network models used by ENABOL ablation experiments. Each model gets a stable ID so an experiment can be described as a composition of:
@@ -24,7 +29,7 @@ Model: MDL-DENSE1-LINEAR-NOBIAS-000
 
 | Model ID | Name | Layers | Activation | Bias | Trainable Params | Status | Notes |
 |---|---|---:|---|---|---:|---|---|
-| [`MDL-DENSE1-LINEAR-NOBIAS-000`](./dense1-linear-nobias-000.md) | One Dense linear student, no bias | 1 Dense | None | No | 8 | Active | Used by Experiments 000A-B and 000C. |
+| [`MDL-DENSE1-LINEAR-NOBIAS-000`](./dense1-linear-nobias-000.md) | One Dense linear student, no bias | 1 Dense | None | No | 8 | Active | Used by EXP-000A and EXP-000B. |
 
 ## ID Convention
 

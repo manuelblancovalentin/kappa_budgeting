@@ -1,5 +1,14 @@
+---
+status:
+  - valid
+  - inprogress
+tags:
+  - implementation
+  - model
+last_modified: 2026-05-15
+---
 # 📦 Models / NN Module Reference
-<StatusBadges statuses="valid;inprogress" />
+<PageMeta />
 ---
 
 Source: [`enabol/nn.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/nn.py)
@@ -191,7 +200,7 @@ Backward compatibility rule:
 precision_dict=None
 ```
 
-must preserve the original Experiment 000 behavior.
+must preserve the original EXP-000A behavior.
 
 ### Main Step Block
 

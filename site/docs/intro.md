@@ -1,9 +1,15 @@
 ---
 sidebar_position: 1
+status:
+  - draft
+tags:
+  - todo
+  - placeholder
+  - overview
+last_modified: 2026-05-15
 ---
-
 # 🔎 Project Overview
-<StatusBadges statuses="todo;placeholder" />
+<PageMeta />
 ---
 
 This page should explain the project to someone joining it for the first time.

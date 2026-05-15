@@ -2,11 +2,18 @@
 id: affine-linear-000
 title: "DS-AFFINE-LINEAR-000: One-Layer Linear Teacher"
 sidebar_label: "DS-AFFINE-LINEAR-000"
+status:
+  - valid
+  - inprogress
+tags:
+  - dataset
+  - affine
+  - linear
+last_modified: 2026-05-15
 ---
-
 # DS-AFFINE-LINEAR-000: One-Layer Linear Teacher
 
-<StatusBadges statuses="valid;inprogress" />
+<PageMeta />
 ---
 
 ## Summary
@@ -22,7 +29,7 @@ This is the baseline synthetic regression dataset for the first global-throttle 
 | Output dimension | `d_out = 2` |
 | Bias | Disabled |
 | Default samples | `N = 1000` |
-| Default drift | `x_drift = gamma x`, with `gamma = 4` in Experiments 000A-B and 000C |
+| Default drift | `x_drift = gamma x`, with `gamma = 4` in EXP-000A and EXP-000B |
 
 ## Generation
 
@@ -68,6 +75,50 @@ x_4
 \end{bmatrix}.
 ```
 
+The following image shows scatter plots of the input $x$ and target $y$ distributions, as well as their histograms at the bottom.
+
+![Dataset](../../../workspace/ablations/exp_000_global_throttle_sanity/results/dataset.png)
+![Dataset histograms](../../../workspace/ablations/exp_000_global_throttle_sanity/results/dataset_hist.png)
+
+### Code to generate the dataset:
+
+If you need to understand the structure of this dataset, check [here](../implementation/dataset.md).
+
+```python
+import enabol 
+# Create the dataset
+dataset = enabol.AffineDataset(num_samples=1000, use_bias=False)
+# Plot it 
+dataset.plot()
+dataset.plot_histogram()
+print(dataset)
+
+# Get the data
+X, Y = dataset.get()
+```
+
+which renders:
+```bash
+AffineDataset(
+ [Input] X: 
+    Shape: (1000, 4)
+    Dtype: DataType.D2_FLOAT
+    X <- Uniform(-1, 1)
+ [Output] Y: 
+    Shape: (1000, 2)
+    Dtype: DataType.D2_FLOAT
+    Y <- X @ A.T + b
+ ---------
+  A = [[ 1.25 -0.75  0.5   0.2 ]
+       [-0.4   0.9   1.1  -0.6 ]]
+  b = [0. 0.]
+----------
+Analytic Hessian:
+  Lambda max: 1.0841
+  Eta max: 1.8448
+)
+```
+
 ## Drift Model
 
 The first drift model is pure input-gain drift:
@@ -107,8 +158,8 @@ That makes this dataset useful for checking whether a controller reacts coherent
 
 | Experiment | Role |
 |---|---|
-| [Experiment 000A-B](../experiments/000-global-throttle-sanity.md) | Float global-throttle sanity check. |
-| [Experiment 000C](../experiments/000-global-throttle-sanity-quantization.md) | Quantized global-throttle sanity check. |
+| [EXP-000A](../experiments/exp-000a-global-throttle-float-lin1.md) | Float global-throttle sanity check. |
+| [EXP-000B](../experiments/exp-000b-global-throttle-qfx-lin1.md) | Quantized global-throttle sanity check. |
 
 ## Implementation
 

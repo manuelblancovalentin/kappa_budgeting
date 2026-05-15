@@ -2,10 +2,15 @@
 id: datasets-index
 title: "Datasets"
 sidebar_label: "Index"
+status:
+  - valid
+  - inprogress
+tags:
+  - dataset-registry
+last_modified: 2026-05-15
 ---
-
 # Datasets
-<StatusBadges statuses="valid;inprogress" />
+<PageMeta />
 ---
 
 This section is the registry of datasets used by ENABOL ablation experiments. Each dataset gets a stable ID so experiment pages can reference the input distribution by name instead of re-explaining the full construction.
@@ -20,7 +25,7 @@ Dataset: DS-AFFINE-LINEAR-000
 
 | Dataset ID | Name | Type | Input |  Status | Used by |
 |---|---|---|---|---|---|
-| [`DS-AFFINE-LINEAR-000`](./affine-linear-000.md) | Affine linear, no bias | Synthetic regression | $x \sim \mathcal{U}([0,1]^4)$ | <Badge status="valid" /> | 000A-B and 000C. |
+| [`DS-AFFINE-LINEAR-000`](./affine-linear-000.md) | Affine linear, no bias | Synthetic regression | $x \sim \mathcal{U}([0,1]^4)$ | <Badge status="valid" /> | EXP-000A and EXP-000B. |
 
 ## ID Convention
 

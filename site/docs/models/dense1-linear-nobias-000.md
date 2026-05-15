@@ -2,11 +2,19 @@
 id: dense1-linear-nobias-000
 title: "MDL-DENSE1-LINEAR-NOBIAS-000: One Dense Linear Student"
 sidebar_label: "MDL-DENSE1-LINEAR-NOBIAS-000"
+status:
+  - valid
+  - inprogress
+tags:
+  - model
+  - dense
+  - linear
+  - lin1
+last_modified: 2026-05-15
 ---
-
 # MDL-DENSE1-LINEAR-NOBIAS-000: One Dense Linear Student
 
-<StatusBadges statuses="valid;inprogress" />
+<PageMeta />
 ---
 
 ## Summary
@@ -68,8 +76,8 @@ This model is useful because the one-layer no-bias regression loss has an exact 
 
 | Experiment | Role |
 |---|---|
-| [Experiment 000A-B](../experiments/000-global-throttle-sanity.md) | Float global-throttle sanity check. |
-| [Experiment 000C](../experiments/000-global-throttle-sanity-quantization.md) | Quantized global-throttle sanity check. |
+| [EXP-000A](../experiments/exp-000a-global-throttle-float-lin1.md) | Float global-throttle sanity check. |
+| [EXP-000B](../experiments/exp-000b-global-throttle-qfx-lin1.md) | Quantized global-throttle sanity check. |
 
 ## Implementation
 

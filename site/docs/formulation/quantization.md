@@ -1,5 +1,15 @@
+---
+status:
+  - preliminary
+  - inprogress
+tags:
+  - todo
+  - formulation
+  - quantization
+last_modified: 2026-05-15
+---
 # 🧮 Fixed-point quantization
-<StatusBadges statuses="todo;preliminary;inprogress" />
+<PageMeta />
 ---
 
 Eventually, the real hardware update must be quantized to the fixed-point format. This can be modeled as:

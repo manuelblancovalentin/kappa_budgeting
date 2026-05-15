@@ -1,6 +1,15 @@
+---
+status:
+  - draft
+tags:
+  - todo
+  - placeholder
+  - decision
+last_modified: 2026-05-15
+---
 # ADR-0000: Decision Title
 
-<StatusBadges statuses="todo;placeholder" />
+<PageMeta />
 Date: YYYY-MM-DD  
 Status: Proposed / Accepted / Deprecated / Superseded  
 People involved: NAME, NAME

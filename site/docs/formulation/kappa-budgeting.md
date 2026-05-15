@@ -1,5 +1,14 @@
+---
+status:
+  - preliminary
+tags:
+  - revise
+  - formulation
+  - kappa-budgeting
+last_modified: 2026-05-15
+---
 # ❌ Why κ row/col failed
-<StatusBadges statuses="revise;preliminary" />
+<PageMeta />
 ---
 
 In our initial experiments, we found that we had to disable $\kappa$-row projection (```RowScale{}``` block) to get any meaningful learning. This is because the original $\kappa$ mechanism was trying to enforce local gain constraints on each layer, row, or column. A simplified version is:
