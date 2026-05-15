@@ -1,15 +1,24 @@
 ---
-id: global-throttle-sanity-quantization
-title: "Experiment 000C: Global Throttle With Quantization"
-sidebar_label: "000C: Throttle + Quantization"
+id: exp-000b-global-throttle-qfx-lin1
+title: "EXP-000B: Global Throttle QFX LIN1"
+sidebar_label: "EXP-000B: GLTHR QFX LIN1"
+status:
+  - preliminary
+  - valid
+tags:
+  - experiment
+  - global-throttle
+  - quantization
+  - qfx
+  - lin1
+last_modified: 2026-05-15
 ---
+# EXP-000B: Global Throttle With Quantization
 
-# Experiment 000C: Global Throttle With Quantization
-
-<StatusBadges statuses="preliminary; valid" />
-Workspace: `workspace/ablations/000_global_throttle_sanity/`  
-Notebook: [`workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_quantization_sanity.ipynb`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/000_global_throttle_sanity/notebooks/affine_drift_quantization_sanity.ipynb)  
-Starting point: [Experiment 000](./000-global-throttle-sanity.md)
+<PageMeta />
+Workspace: `workspace/ablations/exp_000_global_throttle_sanity/`  
+Notebook: [`workspace/ablations/exp_000_global_throttle_sanity/notebooks/exp_000b_global_throttle_qfx_lin1.ipynb`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/exp_000_global_throttle_sanity/notebooks/exp_000b_global_throttle_qfx_lin1.ipynb)  
+Starting point: [EXP-000A](./exp-000a-global-throttle-float-lin1.md)
 
 ---
 
@@ -25,7 +34,7 @@ Starting point: [Experiment 000](./000-global-throttle-sanity.md)
 
 ## Purpose
 
-Experiment 000 showed that a dynamic global throttle can stabilize a one-layer floating-point online learning loop after input-gain drift. Experiment 000C adds the first hardware-style numerical effects:
+EXP-000A showed that a dynamic global throttle can stabilize a one-layer floating-point online learning loop after input-gain drift. EXP-000B adds the first hardware-style numerical effects:
 
 - finite precision weights,
 - finite precision updates,
@@ -80,7 +89,7 @@ The controlled floating-point update is:
 -\alpha_t \eta G_W(t).
 ```
 
-Experiment 000C replaces parts of this update with fake-fixed-point operators.
+EXP-000B replaces parts of this update with fake-fixed-point operators.
 
 ## Fixed-Point Operator
 
@@ -190,7 +199,7 @@ y_t
 \right).
 ```
 
-The global throttle is computed as in Experiment 000:
+The global throttle is computed as in EXP-000A:
 
 ```math
 C_t
@@ -282,7 +291,7 @@ q_{\Delta}
 }
 ```
 
-This is one of the main quantities to log in Experiment 000C.
+This is one of the main quantities to log in EXP-000B.
 
 ## Rail Statistics
 
@@ -409,22 +418,22 @@ Later, after the quantization semantics stabilize, we can move some of this into
 
 ## Experiment Matrix
 
-### 000C.0: Float Reproduction
+### EXP-000B.0: Float Reproduction
 
-Repeat Experiment 000 with quantization disabled.
+Repeat EXP-000A with quantization disabled.
 
 Expected result:
 
 | Metric | Expected |
 |---|---|
-| Loss | Matches Experiment 000. |
+| Loss | Matches EXP-000A. |
 | `alpha_t` | Drops after drift. |
 | Saturation | Exactly zero. |
 | Update cosine | Near 1. |
 
 This run is reproduced inside the comparison figures below as the floating-point reference curve.
 
-### 000C.1: Weight Quantization Only
+### EXP-000B.1: Weight Quantization Only
 
 Enable:
 
@@ -449,7 +458,7 @@ Expected result:
 | Saturation | Low unless rails are too tight. |
 | `alpha_t` | Similar to float unless quantization creates sharp jumps. |
 
-### 000C.2: Update Quantization Only
+### EXP-000B.2: Update Quantization Only
 
 Enable:
 
@@ -468,7 +477,7 @@ Expected result:
 | Useful interval | Lower bound may exceed upper bound. |
 | `alpha_t` | Too-small `alpha_t` may stabilize but also kill learning. |
 
-### 000C.3: Weights Plus Updates
+### EXP-000B.3: Weights Plus Updates
 
 Enable:
 
@@ -486,7 +495,7 @@ Expected result:
 | Saturation | Low for wide rails. |
 | Update cosine | Near 1 before clipping; lower if update quantization is coarse. |
 
-### 000C.4: Full Fake-Fixed-Point Path With Wide Rails
+### EXP-000B.4: Full Fake-Fixed-Point Path With Wide Rails
 
 Enable:
 
@@ -506,7 +515,7 @@ Expected result:
 | Saturation | Near zero. |
 | `alpha_t` | Similar to float, possibly noisier. |
 
-### 000C.5: Full Fake-Fixed-Point Path With Tight Rails
+### EXP-000B.5: Full Fake-Fixed-Point Path With Tight Rails
 
 Use intentionally tight rails to create saturation.
 
@@ -579,7 +588,7 @@ Ideal updates stay near the positive real axis. Update underflow collapses the r
 
 ### Summary
 
-The first run of Experiment 000C supports the fake-fixed-point implementation and the global-throttle hypothesis:
+The first run of EXP-000B supports the fake-fixed-point implementation and the global-throttle hypothesis:
 
 - the dtype transfer plots match the expected fixed-point rails,
 - isolated weight/update quantization still converges under the controller,
@@ -602,11 +611,11 @@ The notebook also generates phase-distortion figures for the isolated, wide, and
 
 The first check validates the scalar quantizers directly.
 
-![Wide weight dtype transfer](../../../workspace/ablations/000_global_throttle_sanity/results/000c_dtype_transfer_wide_weight.png)
+![Wide weight dtype transfer](../../../workspace/ablations/exp_000_global_throttle_sanity/results/exp_000b_dtype_transfer_wide_weight.png)
 
 `ap_fixed<16,6,AP_RND,AP_SAT>` has rails far outside the tested interval, so the quantized transfer curve follows the identity line. This is the expected wide-rail behavior.
 
-![Tight weight dtype transfer](../../../workspace/ablations/000_global_throttle_sanity/results/000c_dtype_transfer_tight_weight.png)
+![Tight weight dtype transfer](../../../workspace/ablations/exp_000_global_throttle_sanity/results/exp_000b_dtype_transfer_tight_weight.png)
 
 `ap_fixed<8,3,AP_RND,AP_SAT>` clips near:
 
@@ -616,7 +625,7 @@ The first check validates the scalar quantizers directly.
 
 The transfer curve saturates at both rails, which confirms that the weight quantizer is enforcing the expected representable interval.
 
-![Tight update dtype transfer](../../../workspace/ablations/000_global_throttle_sanity/results/000c_dtype_transfer_tight_update.png)
+![Tight update dtype transfer](../../../workspace/ablations/exp_000_global_throttle_sanity/results/exp_000b_dtype_transfer_tight_update.png)
 
 `ap_fixed<10,2,AP_RND,AP_SAT>` clips near:
 
@@ -628,7 +637,7 @@ This is intentionally tight for an update type. It is useful because it lets the
 
 ### Isolated Quantization Paths
 
-![Isolated quantization paths](../../../workspace/ablations/000_global_throttle_sanity/results/000c_isolated_quantization_paths.png)
+![Isolated quantization paths](../../../workspace/ablations/exp_000_global_throttle_sanity/results/exp_000b_isolated_quantization_paths.png)
 
 This figure compares:
 
@@ -643,7 +652,7 @@ The update-only run does show update underflow later in training. That is expect
 
 The new update-geometry panels make that distinction clearer. The applied update norm decays with the loss and weight error, and the update-only cosine degrades mainly in the late low-gradient regime where update underflow is active. That is different from an early instability where the update direction is corrupted before the model has learned.
 
-![Isolated quantization update phase](../../../workspace/ablations/000_global_throttle_sanity/results/000c_isolated_quantization_phase.png)
+![Isolated quantization update phase](../../../workspace/ablations/exp_000_global_throttle_sanity/results/exp_000b_isolated_quantization_phase.png)
 
 The phase portrait shows the same behavior geometrically. The well-behaved paths stay close to the positive real axis. The update-only path moves inward and away from the axis later in training, matching the update-underflow and cosine diagnostics.
 
@@ -657,7 +666,7 @@ The system still learns when only weights and/or updates are quantized with the 
 
 ### Full Wide-Rail Fake-Fixed-Point Path
 
-![Full wide quantization](../../../workspace/ablations/000_global_throttle_sanity/results/000c_full_wide_quantization.png)
+![Full wide quantization](../../../workspace/ablations/exp_000_global_throttle_sanity/results/exp_000b_full_wide_quantization.png)
 
 This run turns on the full fake-fixed-point path with wide rails:
 
@@ -675,13 +684,13 @@ The wide fake-fixed-point run tracks the floating-point reference almost exactly
 
 This is a useful sanity result. It says the fake-fixed-point path is not introducing an artificial failure when the rails and fractional precision are generous.
 
-![Full wide quantization update phase](../../../workspace/ablations/000_global_throttle_sanity/results/000c_full_wide_quantization_phase.png)
+![Full wide quantization update phase](../../../workspace/ablations/exp_000_global_throttle_sanity/results/exp_000b_full_wide_quantization_phase.png)
 
 The wide-rail phase portrait stays close to the floating-point reference. This is the expected behavior when quantization does not significantly clip or rotate the applied update.
 
 ### Full Tight-Rail Controller Ablation
 
-![Tight quantization controller ablation](../../../workspace/ablations/000_global_throttle_sanity/results/000c_tight_quantization_controller_ablation.png)
+![Tight quantization controller ablation](../../../workspace/ablations/exp_000_global_throttle_sanity/results/exp_000b_tight_quantization_controller_ablation.png)
 
 This is the first hardware-style failure case.
 
@@ -720,7 +729,7 @@ The refreshed figure should be read with the update panels as follows:
 
 In this tight-rail run, `actual_update_norm` is large during the recovery transient and then decays as the loss and gradient norm decay. The controlled run is therefore not just immediately frozen. However, `update_cosine` drops and oscillates after the initial recovery, which shows that the tight quantized update path no longer preserves the raw descent direction perfectly in the low-gradient regime. That is acceptable for this stress test, but it is exactly the kind of distortion we need to track when choosing realistic update precision.
 
-![Tight quantization update phase](../../../workspace/ablations/000_global_throttle_sanity/results/000c_tight_quantization_phase.png)
+![Tight quantization update phase](../../../workspace/ablations/exp_000_global_throttle_sanity/results/exp_000b_tight_quantization_phase.png)
 
 The tight-rail phase portrait makes the update distortion easier to see. The no-controller path stays at a compressed but nonzero radius while the loss oscillates. The controlled path moves inward as the model recovers, but it does not remain perfectly on the real axis. That residual angular motion is the quantized update-direction distortion seen in the cosine panel.
 
