@@ -1,6 +1,6 @@
 # Models / NN Module Reference
 
-Source: [`kappa/nn.py`](../../../kappa/nn.py)
+Source: [`enabol/nn.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/nn.py)
 
 This page documents the model and training-loop code block by block. It is written for people extending the ablation harness.
 
@@ -576,7 +576,7 @@ batchnorm1
 Usage:
 
 ```python
-model = kappa.LinearBlockModel(
+model = enabol.LinearBlockModel(
     dataset=dataset,
     num_hidden=[8, 2],
     activation="relu",

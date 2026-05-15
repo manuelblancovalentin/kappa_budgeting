@@ -70,9 +70,9 @@ The following image shows scatter plots of the input $x$ and target $y$ distribu
 If you need to understand the structure of this dataset, check [here](../implementation/dataset.md).
 
 ```python
-import kappa 
+import enabol 
 # Create the dataset
-dataset = kappa.AffineDataset(num_samples=1000, use_bias=False)
+dataset = enabol.AffineDataset(num_samples=1000, use_bias=False)
 # Plot it 
 dataset.plot()
 dataset.plot_histogram()
@@ -171,7 +171,7 @@ This keeps the Hessian and closed-loop stability story simple.
 
 ### Code to build the model:
 ```python
-model = kappa.LinearBlockModel(dataset=dataset, num_hidden=[dataset.A.shape[0]], 
+model = enabol.LinearBlockModel(dataset=dataset, num_hidden=[dataset.A.shape[0]], 
                                activation=None, use_batchnorm=False, verbose=True, 
                                use_bias=False, seed=0)
 model.summary()

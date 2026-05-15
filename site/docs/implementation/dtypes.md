@@ -1,10 +1,10 @@
 # Dtypes Module Reference
 
-Source: [`kappa/dtypes.py`](../../../kappa/dtypes.py)
+Source: [`enabol/dtypes.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/dtypes.py)
 
 This page documents the fixed-point dtype descriptors used by the quantized software ablations. These classes are intentionally small. They describe HLS-style numeric formats and provide NumPy quantization behavior.
 
-TensorFlow fake quantization lives in [`kappa/quantization.py`](../../../kappa/quantization.py).
+TensorFlow fake quantization lives in [`enabol/quantization.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/quantization.py).
 
 ## Constants
 
@@ -175,7 +175,7 @@ Factory method. Accepts either an existing dtype object or an HLS-style string.
 Examples:
 
 ```python
-from kappa.dtypes import HLSDataType
+from enabol.dtypes import HLSDataType
 
 t0 = HLSDataType.from_dtype("ap_fixed<12,4,AP_RND,AP_SAT>")
 t1 = HLSDataType.from_dtype("ap_ufixed<10,3>")

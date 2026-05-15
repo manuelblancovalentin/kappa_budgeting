@@ -1,6 +1,6 @@
 # PrecisionDict Module Reference
 
-Source: [`kappa/precision.py`](../../../kappa/precision.py)
+Source: [`enabol/precision.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/precision.py)
 
 `PrecisionDict` is the layer-indexed precision map used by quantized ablation experiments. It is deliberately explicit because future work will compare different precision assignments across layers.
 
@@ -66,7 +66,7 @@ value
 Example:
 
 ```python
-from kappa import dtypes, PrecisionDict
+from enabol import dtypes, PrecisionDict
 
 precisions = PrecisionDict({
     "input": {

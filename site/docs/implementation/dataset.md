@@ -1,6 +1,6 @@
 # Dataset Module Reference
 
-Source: [`kappa/dataset.py`](../../../kappa/dataset.py)
+Source: [`enabol/dataset.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/dataset.py)
 
 This page is a coder-facing reference for the dataset module. The goal is to make it easy to extend the synthetic datasets used in ablation experiments.
 
@@ -266,7 +266,7 @@ b =
 For no-bias experiments:
 
 ```python
-dataset = kappa.AffineDataset(use_bias=False)
+dataset = enabol.AffineDataset(use_bias=False)
 ```
 
 ### `__post_init__()`
@@ -285,7 +285,7 @@ Responsibilities:
 Usage:
 
 ```python
-dataset = kappa.AffineDataset(
+dataset = enabol.AffineDataset(
     num_samples=1000,
     A=np.array([[2.0, -1.0]]),
     b=np.array([0.0]),

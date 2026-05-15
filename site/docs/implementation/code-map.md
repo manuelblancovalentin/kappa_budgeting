@@ -6,7 +6,7 @@ This repository is the new implementation and documentation home for the kappa-b
 
 | Path | Purpose |
 |---|---|
-| `kappa/` | Python package for reusable kappa-budgeting simulation code. |
+| `enabol/` | Python package for reusable kappa-budgeting simulation code. |
 | `workspace/ablations/` | Reproducible experiment workspaces, notebooks, configs, notes, and results. |
 | `site/docs/` | Docusaurus documentation for methodology, experiment logs, decisions, and handoff. |
 | `site/blog/` | Short lab-log entries for chronological updates. |
@@ -56,10 +56,10 @@ This keeps exploration easy while preserving enough structure for handoff and re
 
 ## Python Package Shape
 
-The current `kappa/` package separates concerns as follows:
+The current `enabol/` package separates concerns as follows:
 
 ```text
-kappa/
+enabol/
   dataset.py       # synthetic affine datasets and plotting/export helpers
   dtypes.py        # HLS-style ap_fixed/ap_ufixed/ap_int/ap_uint descriptors
   precision.py     # layer-indexed PrecisionDict
@@ -72,7 +72,7 @@ kappa/
 The future ENABOL comparison work may add:
 
 ```text
-kappa/
+enabol/
   budgeting.py     # kappa allocation and projection policies
   metrics.py       # richer per-layer saturation and recovery metrics
   training.py      # extracted trainer objects if nn.py grows too large

@@ -338,7 +338,7 @@ The reason is diagnostic control. We need to turn quantization on and off indepe
 The training loop should expose a layer-indexed `PrecisionDict`, not a flat config object. This keeps the experiment explicit now and scales to multilayer precision allocation later:
 
 ```python
-from kappa import dtypes, PrecisionDict
+from enabol import dtypes, PrecisionDict
 
 precisions = PrecisionDict({
     "input": {
