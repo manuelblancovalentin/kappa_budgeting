@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "enabol"
+version = "0.1.0"
+dependencies = [
+    "matplotlib>=3.8,<4",
+    "numpy>=1.26,<3",
+    "tensorflow>=2.15,<3",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["enabol*"]
+namespaces = false
