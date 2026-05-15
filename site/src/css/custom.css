@@ -137,6 +137,23 @@
   font-variant-numeric: tabular-nums;
 }
 
+.page-meta__row--path {
+  align-items: baseline;
+}
+
+.page-meta__row--path code {
+  white-space: normal;
+  word-break: break-word;
+}
+
+.page-meta__row--path a {
+  text-decoration: none;
+}
+
+.page-meta__row--path a:hover {
+  text-decoration: underline;
+}
+
 /* Experiment, dataset, model, and page metadata badges.
    Use page frontmatter plus <PageMeta /> for normal pages:
    status: [valid, inprogress]
@@ -367,4 +384,94 @@
   border-color: #8b5cf6;
   background: rgba(139, 92, 246, 0.16);
   color: #ddd6fe;
+}
+
+.tbox {
+  --tbox-border: #bfdbfe;
+  --tbox-title-bg: #dbeafe;
+  --tbox-body-bg: #eff6ff;
+  --tbox-title-color: #1e3a8a;
+  --tbox-body-color: var(--ifm-font-color-base);
+  margin: 1.25rem 0;
+  overflow: hidden;
+  border: 1px solid var(--tbox-border);
+  border-radius: 8px;
+  background: var(--tbox-body-bg);
+}
+
+.tbox__title {
+  padding: 0.45rem 1rem;
+  background: var(--tbox-title-bg);
+  color: var(--tbox-title-color);
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.tbox__body {
+  padding: 0.85rem 1rem;
+  color: var(--tbox-body-color);
+  text-align: justify;
+}
+
+.tbox__body > :first-child {
+  margin-top: 0;
+}
+
+.tbox__body > :last-child {
+  margin-bottom: 0;
+}
+
+.tbox--summary {
+  --tbox-border: #bfdbfe;
+  --tbox-title-bg: #dbeafe;
+  --tbox-body-bg: #eff6ff;
+  --tbox-title-color: #1e40af;
+}
+
+.tbox--warning {
+  --tbox-border: #fca5a5;
+  --tbox-title-bg: #fecaca;
+  --tbox-body-bg: #fee2e2;
+  --tbox-title-color: #991b1b;
+}
+
+.tbox--todo {
+  --tbox-border: #c4b5fd;
+  --tbox-title-bg: #ddd6fe;
+  --tbox-body-bg: #f5f3ff;
+  --tbox-title-color: #5b21b6;
+}
+
+[data-theme='dark'] .tbox--summary {
+  --tbox-border: #2563eb;
+  --tbox-title-bg: rgba(37, 99, 235, 0.32);
+  --tbox-body-bg: rgba(37, 99, 235, 0.12);
+  --tbox-title-color: #bfdbfe;
+}
+
+[data-theme='dark'] .tbox--warning {
+  --tbox-border: #ef4444;
+  --tbox-title-bg: rgba(239, 68, 68, 0.32);
+  --tbox-body-bg: rgba(239, 68, 68, 0.12);
+  --tbox-title-color: #fecaca;
+}
+
+[data-theme='dark'] .tbox--todo {
+  --tbox-border: #8b5cf6;
+  --tbox-title-bg: rgba(139, 92, 246, 0.32);
+  --tbox-body-bg: rgba(139, 92, 246, 0.12);
+  --tbox-title-color: #ddd6fe;
+}
+
+.brand-name {
+  display: inline-block;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ifm-color-primary-darkest);
+}
+
+[data-theme='dark'] .brand-name {
+  color: var(--ifm-color-primary-lightest);
 }

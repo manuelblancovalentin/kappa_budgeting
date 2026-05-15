@@ -2,6 +2,8 @@ import MDXComponents from '@theme-original/MDXComponents';
 import StatusBadges, {Badge} from '@site/src/components/StatusBadges';
 import PageMeta from '@site/src/components/PageMeta';
 import Todo from '@site/src/components/Todo';
+import TBox from '@site/src/components/TBox';
+import BrandName from '@site/src/components/BrandName';
 
 export default {
   ...MDXComponents,
@@ -9,4 +11,8 @@ export default {
   Badge,
   PageMeta,
   Todo,
+  TBox,
+  BrandName,
+  ENABOL: BrandName,
+  enabol: BrandName,
 };
