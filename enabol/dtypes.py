@@ -132,6 +132,10 @@ class HLSDataType(ABC):
         pass
 
     @abstractmethod
+    def bin(self, value: Any) -> str:
+        pass
+
+    @abstractmethod
     def __call__(self, value: Any, *, return_int: bool = False) -> Any:
         pass
 
@@ -175,6 +179,10 @@ class ap_fixed(HLSDataType):
     def unsigned(self) -> "ap_ufixed":
         return ap_ufixed(self.WL, self.IWL, self.QMODE, self.OMODE, self.SAT_BITS)
 
+    def bin(self, value: Any) -> Any:
+        int_val = self(value, return_int=True)
+        return _binarize_np(int_val, self.WL, self.fractional_bits, np.shape(value))
+    
     def __call__(self, value: Any, *, return_int: bool = False) -> Any:
         return _quantize_np(value, self.WL, self.IWL, self.QMODE, self.OMODE, signed=True, return_int=return_int)
 
@@ -218,6 +226,10 @@ class ap_ufixed(HLSDataType):
 
     def unsigned(self) -> "ap_ufixed":
         return self
+    
+    def bin(self, value: Any) -> Any:
+        int_val = self(value, return_int=True)
+        return _binarize_np(int_val, self.WL, self.fractional_bits, np.shape(value))
 
     def __call__(self, value: Any, *, return_int: bool = False) -> Any:
         return _quantize_np(value, self.WL, self.IWL, self.QMODE, self.OMODE, signed=False, return_int=return_int)
@@ -243,6 +255,10 @@ class ap_int(HLSDataType):
     def unsigned(self) -> "ap_uint":
         return ap_uint(self.WL)
 
+    def bin(self, value: Any) -> Any:
+        int_val = self(value, return_int=True)
+        return _binarize_np(int_val, self.WL, 0, np.shape(value))
+
     def __call__(self, value: Any, *, return_int: bool = False) -> Any:
         return _quantize_np(value, self.WL, self.WL, "AP_TRN", "AP_WRAP", signed=True, return_int=return_int)
 
@@ -266,6 +282,10 @@ class ap_uint(HLSDataType):
 
     def unsigned(self) -> "ap_uint":
         return self
+
+    def bin(self, value: Any) -> Any:
+        int_val = self(value, return_int=True)
+        return _binarize_np(int_val, self.WL, 0, np.shape(value))
 
     def __call__(self, value: Any, *, return_int: bool = False) -> Any:
         return _quantize_np(value, self.WL, self.WL, "AP_TRN", "AP_WRAP", signed=False, return_int=return_int)
@@ -295,3 +315,35 @@ def _quantize_np(
         raise NotImplementedError(f"OMODE '{OMODE}' is not implemented")
     out = clipped.astype(np.int64) if return_int else clipped / scale
     return out.item() if np.ndim(value) == 0 else out
+
+
+
+def _binarize_np(int_val: Any, 
+                 WL: int,
+                 fractional_bits: int,
+                 shape: Tuple[int, ...]) -> np.ndarray:
+    # int_Val can be an array, so make sure to start with that
+    int_val = np.asarray(int_val, dtype=np.int64)
+    is_negative = int_val < 0
+    if WL < 64:
+        int_val = int_val & ((1 << WL) - 1)
+    # Flatten to 1D and convert each element to binary string, then reshape back
+    int_val = int_val.flatten()
+    is_negative = is_negative.flatten()
+    # Format each integer as a binary string with leading zeros to ensure it has WL bits
+    # But make sure to handle negative values correctly! 
+    # For negative values, we want to represent them in two's complement form, which means we should add 2^WL to them before converting to binary if they are negative
+    int_val = np.where(is_negative, int_val + (1 << WL), int_val)
+    # However this might add an extra bit for negative numbers if WL is not large enough, so we need to mask it again to ensure we only keep the least significant WL bits
+    int_val = int_val & ((1 << WL) - 1)
+    # Remember that two's complement also adds a +1 to the LSB, so do that
+    int_val = np.where(is_negative, int_val + 1, int_val)
+    bin_strs = [format(x, f"0{WL}b") for x in int_val]
+    # The actual format in our case is: 0bXXX.xxx, where XXX is the IWL bits and xxx is the fractional bits. So we need to insert a dot at the right place
+    if fractional_bits > 0:
+        bin_strs = [s[:-fractional_bits] + "." + s[-fractional_bits:] for s in bin_strs]
+    # Add the 0b prefix to indicate binary (if positive) or 1b for negative
+    bin_strs = ["0b" + s if not is_neg else "1b" + s for (s, is_neg) in zip(bin_strs, is_negative)]
+    # reshape back into numpy array of objects (strings)
+    bin_array = np.array(bin_strs, dtype=object).reshape(shape)
+    return bin_array.item() if len(shape) == 0 else bin_array
