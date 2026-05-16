@@ -157,3 +157,13 @@ training:
   label: Training
   permalink: /training
   description: Pages tagged Training.
+
+history:
+  label: History
+  permalink: /history
+  description: Pages tagged History.
+
+utils:
+  label: Utils
+  permalink: /utils
+  description: Pages tagged Utils.
