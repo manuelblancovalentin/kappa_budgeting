@@ -75,7 +75,9 @@ class PrecisionDict(dict[str, dict[str, HLSDataType | None]]):
                 lines.append(f"    {field}: {dtype}")
         lines.append(")")
         return "\n".join(lines)
-
+    
+    def __repr__(self) -> str:
+        return self.describe()
 
 def ensure_precision_dict(precision: PrecisionDict | Mapping[str, Mapping[str, Any]] | None) -> PrecisionDict | None:
     if precision is None:
