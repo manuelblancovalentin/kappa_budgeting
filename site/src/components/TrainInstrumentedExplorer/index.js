@@ -234,44 +234,44 @@ function StaticNode({node, top}) {
 function TopDiagram({selected, setSelected}) {
   return (
     <div className="train-flow train-flow--top" aria-label="train_instrumented top-level flow">
-      <svg className="train-flow__edges" viewBox="0 0 420 980" aria-hidden="true">
+      <svg className="train-flow__edges" viewBox="0 0 420 1080" aria-hidden="true">
         <defs>
           <marker id="train-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
             <path d="M 0 0 L 10 5 L 0 10 z" />
           </marker>
         </defs>
-        <path d="M210 68 L210 110" />
-        <path d="M210 178 L210 218" />
-        <path d="M210 350 L210 394" />
-        <path d="M210 462 L210 506" />
-        <path d="M210 574 L210 618" />
-        <path d="M210 686 L210 730" />
-        <path d="M210 798 L210 842" />
-        <path d="M210 910 L210 938" />
-        <path className="train-flow__edge--true" d="M210 318 L210 350" />
-        <path className="train-flow__edge--false" d="M130 268 L58 268 L58 944 L116 944" />
-        <path className="train-flow__edge--loop" d="M304 868 L370 868 L370 268 L294 268" />
+        <path d="M210 86 L210 112" />
+        <path d="M210 186 L210 190" />
+        <path d="M210 498 L210 532" />
+        <path d="M210 600 L210 634" />
+        <path d="M210 702 L210 736" />
+        <path d="M210 804 L210 838" />
+        <path d="M210 906 L210 940" />
+        <path d="M210 1008 L210 1030" />
+        <path className="train-flow__edge--true" d="M210 390 L210 430" />
+        <path className="train-flow__edge--false" d="M111 290 L58 290 L58 1048 L116 1048" />
+        <path className="train-flow__edge--loop" d="M304 956 L370 956 L370 290 L309 290" />
       </svg>
 
       <div className="train-flow__terminal" style={{top: 20}}>Start</div>
-      <FlowNode block={blocks.setup} top={118} active={selected === 'setup'} onClick={() => setSelected('setup')} />
-      <div className="train-flow__diamond" style={{top: 218}}>
+      <FlowNode block={blocks.setup} top={120} active={selected === 'setup'} onClick={() => setSelected('setup')} />
+      <div className="train-flow__diamond" style={{top: 220}}>
         <strong>More batches?</strong>
         <span>epoch / batch loop</span>
       </div>
-      <div className="train-flow__branch train-flow__branch--true" style={{top: 324}}>true</div>
-      <div className="train-flow__branch train-flow__branch--false" style={{top: 246, left: 32}}>false</div>
+      <div className="train-flow__branch train-flow__branch--true" style={{top: 394}}>true</div>
+      <div className="train-flow__branch train-flow__branch--false" style={{top: 266, left: 30}}>false</div>
       {topFlow.map((key, index) => (
         <FlowNode
           key={key}
           block={blocks[key]}
-          top={350 + index * 112}
+          top={430 + index * 102}
           active={selected === key}
           onClick={() => setSelected(key)}
         />
       ))}
-      <div className="train-flow__branch train-flow__branch--loop" style={{top: 834}}>next batch</div>
-      <div className="train-flow__terminal" style={{top: 936}}>Return FitHistory</div>
+      <div className="train-flow__branch train-flow__branch--loop" style={{top: 930}}>next batch</div>
+      <div className="train-flow__terminal" style={{top: 1030}}>Return FitHistory</div>
     </div>
   );
 }
