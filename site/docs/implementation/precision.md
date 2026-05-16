@@ -7,14 +7,16 @@ tags:
   - precision
   - quantization
 last_modified: 2026-05-15
+source: "enabol/precision.py"
+source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/precision.py"
 ---
 # 🧮 PrecisionDict Module Reference
 <PageMeta />
 ---
 
-Source: [`enabol/precision.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/precision.py)
-
-`PrecisionDict` is the layer-indexed precision map used by quantized ablation experiments. It is deliberately explicit because future work will compare different precision assignments across layers.
+<TBox type="summary" title="What this page covers">
+This page is a coder-facing reference for `enabol/precision.py`: the explicit layer-indexed `PrecisionDict`, reserved precision scopes, dtype parsing, model validation, and usage patterns for per-layer quantization studies.
+</TBox>
 
 ## Imports
 

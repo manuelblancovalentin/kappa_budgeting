@@ -6,14 +6,39 @@ tags:
   - implementation
   - model
 last_modified: 2026-05-15
+source: "enabol/nn.py"
+source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/nn.py"
 ---
 # 📦 Models / NN Module Reference
 <PageMeta />
 ---
 
-Source: [`enabol/nn.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/nn.py)
+<TBox type="summary" title="What this page covers">
+This page is a coder-facing reference for `enabol/nn.py`: the shared `BaseModel`, the current dense-only `LinearBlockModel`, quantization hooks, and the custom instrumented training loop. It also tracks model families from `old_enabol/nn.py` that have not been ported yet.
+</TBox>
 
-This page documents the model and training-loop code block by block. It is written for people extending the ablation harness.
+## Model Coverage
+
+This table tracks active model classes and legacy model families that are still missing from the current `enabol` module. Priority is intentionally blank for implemented models.
+
+| Model family | Class / source | Status | Priority | Notes / Documentation |
+|---|---|---|---|---|
+| Base model and training harness | `BaseModel` | <Badge status="valid" /> |  | Internal parent class documented below. |
+| Dense linear blocks | `LinearBlockModel` | <Badge status="valid" /> |  | [`MDL-DENSE1-LINEAR-NOBIAS-000`](../models/dense1-linear-nobias-000.md) |
+| Generic MLP | `MLPModel` | <Badge status="missing" /> | <Badge status="priority-high" /> | Needed for two-layer and deeper dense ablations. |
+| Bounded activation layers | `ClippedReLU`, `ClippedReLUAdaptive` | <Badge status="missing" /> | <Badge status="priority-medium" /> | Needed when activation rails become part of the controller study. |
+| Fusion CNN family | `FusionModel`, `TinyFusionModel`, `NanoFusionModel`, `NanoFusionModel16` | <Badge status="missing" /> | <Badge status="priority-medium" /> | Useful for TinyML image-like regression once dense ablations are stable. |
+| Generic CNN classifier | `CNN` | <Badge status="missing" /> | <Badge status="priority-medium" /> | Useful once MNIST/Fashion-MNIST/CIFAR datasets are ported. |
+| Jet tagging MLP | `JetTaggingModel` | <Badge status="missing" /> | <Badge status="priority-medium" /> | Relevant to hls4ml/physics workflows. |
+| Autoencoders | `AEModel`, `cAEModel` | <Badge status="missing" /> | <Badge status="priority-low" /> | Port only if reconstruction experiments return. |
+
+<TBox type="todo" title="Model TODOs">
+
+- [ ] Port a minimal `MLPModel` or extend `LinearBlockModel` enough to support two-layer dense experiments.
+- [ ] Decide whether bounded activations belong in `nn.py` or a separate `activations.py`.
+- [ ] Add model registry pages only when a model is used by an experiment.
+
+</TBox>
 
 ## Imports
 

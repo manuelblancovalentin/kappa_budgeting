@@ -29,7 +29,7 @@ notebook_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main
 | Model | [`MDL-DENSE1-LINEAR-NOBIAS-000`](../models/dense1-linear-nobias-000.md) |
 | Training method | Dynamic global throttle, SGD-style online loop |
 | Precision mode | Floating point |
-| Drift | Input gain drift, `x_drift = gamma x`, with `gamma = 4` |
+| Drift | Input gain drift, $x' = \gamma x$, with $\gamma = 4$ |
 
 ## Purpose
 
@@ -50,38 +50,12 @@ If you need to understand the structure of this dataset, check [here](../impleme
 import enabol 
 # Create the dataset
 dataset = enabol.AffineDataset(num_samples=1000, use_bias=False)
-# Plot it 
-dataset.plot()
-dataset.plot_histogram()
-print(dataset)
 
 # Get the data
 X, Y = dataset.get()
 ```
 
-which renders:
-```bash
-AffineDataset(
- [Input] X: 
-    Shape: (1000, 4)
-    Dtype: DataType.D2_FLOAT
-    X <- Uniform(-1, 1)
- [Output] Y: 
-    Shape: (1000, 2)
-    Dtype: DataType.D2_FLOAT
-    Y <- X @ A.T + b
- ---------
-  A = [[ 1.25 -0.75  0.5   0.2 ]
-       [-0.4   0.9   1.1  -0.6 ]]
-  b = [0. 0.]
-----------
-Analytic Hessian:
-  Lambda max: 1.0841
-  Eta max: 1.8448
-)
-```
-
-Note that the dataset object is also giving the analytical hessian metrics. This is important because it means that:
+Note that the dataset object also contains the analytical hessian metrics. This is important because it means that:
 ```math
 \begin{aligned}
 \lambda_{\max}(H_{\text{nom}}) &\approx 1.0841 \\
@@ -156,8 +130,9 @@ model.summary()
 
 which returns 
 
-```bash
-[INFO] - Building model with input shape (4,) and output shape (2,)
+<Terminal
+  title="model summary"
+  content={`[INFO] - Building model with input shape (4,) and output shape (2,)
 [INFO] - Added Dense layer with 2 units
 Model: "LinearBlockModel"
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
@@ -169,8 +144,8 @@ Model: "LinearBlockModel"
 └─────────────────────────────────┴────────────────────────┴───────────────┘
  Total params: 8 (32.00 B)
  Trainable params: 8 (32.00 B)
- Non-trainable params: 0 (0.00 B)
-```
+ Non-trainable params: 0 (0.00 B)`}
+/>
 
 
 ## Current Notebook Flow

@@ -1,4 +1,20 @@
+---
+status:
+  - preliminary
+  - inprogress
+tags:
+  - implementation
+  - architecture
+  - global-throttle
+last_modified: 2026-05-15
+---
 # Closed-Loop Ablation Architecture
+<PageMeta />
+---
+
+<TBox type="summary" title="What this page covers">
+This page records the conceptual architecture of the closed-loop ablation harness: the online loop, priority controller variants, required diagnostics, and the first dense experiments. It is design guidance rather than a code API reference.
+</TBox>
 
 The ablation harness should mirror the <ENABOL /> online training loop, but remain small enough to inspect every tensor and compute exact curvature diagnostics. The first implementation target is software simulation, not HLS synthesis.
 

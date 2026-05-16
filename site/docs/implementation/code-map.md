@@ -11,6 +11,10 @@ last_modified: 2026-05-15
 <PageMeta />
 ---
 
+<TBox type="summary" title="What this page covers">
+This page maps the active package, experiment workspace, documentation site, and external reference code. Use it as the first stop when deciding where new implementation, notes, or generated outputs should live.
+</TBox>
+
 This repository is the new implementation and documentation home for the kappa-budgeting ablations. Related legacy/generated code currently lives outside this repository and should be treated as reference material.
 
 ## Main Repository

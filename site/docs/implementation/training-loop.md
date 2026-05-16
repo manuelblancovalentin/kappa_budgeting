@@ -1,6 +1,21 @@
+---
+status:
+  - preliminary
+tags:
+  - implementation
+  - training
+  - global-throttle
+last_modified: 2026-05-15
+source: "enabol/nn.py"
+source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/nn.py"
+---
 # Custom Training Loop
+<PageMeta />
+---
 
-This page will document the software training harness used by the ablation experiments.
+<TBox type="summary" title="What this page covers">
+This page summarizes the custom online-training loop used by the ablation harness. The implementation currently lives in `BaseModel.train_instrumented(...)`, while this page keeps the controller logic and logged diagnostics readable at a glance.
+</TBox>
 
 The first target is Experiment 1A: a one-layer, no-bias, floating-point linear regression test with scale drift.
 

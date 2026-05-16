@@ -16,8 +16,8 @@ notebooks under `workspace/`.
 
 - Python 3.11 or newer.
 - `pip` from the same Python environment you plan to use.
-- Node.js 20 or newer, only if you want to run the documentation site.
-- `nvm`, recommended for matching the documentation site's Node version.
+- (<b>Optional</b>) Node.js 20 or newer, only if you want to run the documentation site.
+- (<b>Optional</b>) `nvm`, recommended for matching the documentation site's Node version.
 
 ## Clone the repository
 
@@ -30,10 +30,18 @@ cd ENABOL
 
 Create and activate a Python environment for the project:
 
-```bash
-conda create -n enabol python=3.11
-conda activate enabol
-```
+> #### Using [Conda](https://docs.conda.io/en/latest/) or [Mamba](https://mamba.readthedocs.io/en/latest/) (Recommended):
+>```bash
+>conda create -n enabol python=3.11
+>conda activate enabol
+>```
+
+> #### Using [venv](https://docs.python.org/3/library/venv.html):
+>```bash
+>python -m venv enabol-env
+>source enabol-env/bin/activate  # On Windows: enabol-env\Scripts\activate
+>```
+
 
 Install the development requirements from the repository root:
 
@@ -78,6 +86,11 @@ From the repository root:
 python -c "import enabol; print(enabol.__file__)"
 python -m pytest
 ```
+
+Which should print a message like:
+<Terminal title="import check">
+[INFO] - ENABOL imported successfully! Version: 0.1.0, URL: https://manuelblancovalentin.github.io/ENABOL/
+</Terminal>
 
 ## Build the documentation site
 

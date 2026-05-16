@@ -7,14 +7,16 @@ tags:
   - dtypes
   - precision
 last_modified: 2026-05-15
+source: "enabol/dtypes.py"
+source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/dtypes.py"
 ---
 # 🗄️ Dtypes Module Reference
 <PageMeta />
 ---
 
-Source: [`enabol/dtypes.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/dtypes.py)
-
-This page documents the fixed-point dtype descriptors used by the quantized software ablations. These classes are intentionally small. They describe HLS-style numeric formats and provide NumPy quantization behavior.
+<TBox type="summary" title="What this page covers">
+This page is a coder-facing reference for `enabol/dtypes.py`: HLS-style numeric descriptors, NumPy quantization behavior, rounding modes, overflow modes, and extension points for future precision experiments.
+</TBox>
 
 TensorFlow fake quantization lives in [`enabol/quantization.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/quantization.py).
 

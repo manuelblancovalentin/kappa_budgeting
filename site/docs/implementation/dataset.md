@@ -6,14 +6,40 @@ tags:
   - implementation
   - dataset
 last_modified: 2026-05-15
+source: "enabol/dataset.py"
+source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/dataset.py"
 ---
 # 📚 Dataset Module Reference
 <PageMeta />
 ---
 
-Source: [`enabol/dataset.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/dataset.py)
+<TBox type="summary" title="What this page covers">
+This page is a coder-facing reference for `enabol/dataset.py`: the shared `BaseDataset` interface, plotting/export helpers, and the currently implemented synthetic affine dataset. The experiment-facing mathematical description of the affine dataset lives in the dataset registry page, so this page focuses on code structure and extension points.
+</TBox>
 
-This page is a coder-facing reference for the dataset module. The goal is to make it easy to extend the synthetic datasets used in ablation experiments.
+## Dataset Coverage
+
+This table tracks what exists in the active `enabol` module and what still needs to be ported from `old_enabol/dataset.py`. Priority is intentionally blank for implemented datasets.
+
+| Dataset family | Class / source | Status | Priority | Notes / Documentation |
+|---|---|---|---|---|
+| Synthetic affine regression | `AffineDataset` | <Badge status="valid" /> |  | [`DS-AFFINE-LINEAR-000`](../datasets/affine-linear-000.md) |
+| Simple synthetic regression | `LinearDataset`, `PolynomialDataset` | <Badge status="missing" /> | <Badge status="priority-high" /> | Useful for controlled ablations before image/audio datasets. |
+| Simple classification | `LinearClassificationDataset` | <Badge status="missing" /> | <Badge status="priority-medium" /> | Useful once classification losses are added to the harness. |
+| MNIST / Fashion-MNIST | `MNISTDataset`, `FashionMNISTDataset` | <Badge status="missing" /> | <Badge status="priority-medium" /> | Good first image-classification benchmarks. |
+| CIFAR-10 | `CIFAR10Dataset` | <Badge status="missing" /> | <Badge status="priority-medium" /> | Higher-dimensional image benchmark after MNIST path is stable. |
+| TinyML ToyADMOS / MSWC-style audio | `TinyMLToyADMOSDataset`; future MSWC loader | <Badge status="missing" /> | <Badge status="priority-medium" /> | Important for TinyML realism; needs careful preprocessing docs. |
+| Jet tagging | `JetTaggingDataset` | <Badge status="missing" /> | <Badge status="priority-medium" /> | Relevant to hls4ml/physics workflows. |
+| MedMNIST | `MedMNISTDataset` | <Badge status="missing" /> | <Badge status="priority-low" /> | Useful later for medical-image style examples. |
+| H5 / Fusion / ImageNet loaders | `H5Dataset`, `FusionDataset`, `ImageNetDataset` | <Badge status="missing" /> | <Badge status="priority-low" /> | Port only when a concrete experiment needs them. |
+
+<TBox type="todo" title="Dataset TODOs">
+
+- [ ] Port the simplest synthetic datasets first: linear, polynomial, and linear classification.
+- [ ] Decide whether image/audio datasets belong in core `enabol` or optional extras with heavier dependencies.
+- [ ] Add registry pages only when a dataset is actually used by an experiment.
+
+</TBox>
 
 ## Imports And Dependencies
 
@@ -240,45 +266,15 @@ class AffineDataset(BaseDataset):
     use_bias: bool = True
 ```
 
-This is the current main dataset for the global-throttle ablations.
+`AffineDataset` is the only dataset currently implemented in the active module. Its experiment-level definition, default teacher matrix, plots, drift model, and usage in EXP-000A / EXP-000B are documented in [`DS-AFFINE-LINEAR-000`](../datasets/affine-linear-000.md).
 
-It implements:
+This implementation page only records the code responsibilities:
 
-```math
-x \sim \mathcal{U}([0,1]^{d_{\mathrm{in}}})
-```
-
-```math
-y = Ax + b.
-```
-
-### Defaults
-
-Default teacher matrix:
-
-```math
-A =
-\begin{bmatrix}
-1.25 & -0.75 & 0.50 & 0.20 \\
--0.40 & 0.90 & 1.10 & -0.60
-\end{bmatrix}
-```
-
-Default bias:
-
-```math
-b =
-\begin{bmatrix}
-0.35 \\
--0.25
-\end{bmatrix}.
-```
-
-For no-bias experiments:
-
-```python
-dataset = enabol.AffineDataset(use_bias=False)
-```
+- generate `X` and `Y`,
+- set `input_type` and `output_type`,
+- expose `reference_weight_matrix` and `reference_bias_vector`,
+- expose `analytic_hessian` for the one-layer no-bias sanity tests,
+- provide an experiment-readable `__repr__()`.
 
 ### `__post_init__()`
 
@@ -296,13 +292,8 @@ Responsibilities:
 Usage:
 
 ```python
-dataset = enabol.AffineDataset(
-    num_samples=1000,
-    A=np.array([[2.0, -1.0]]),
-    b=np.array([0.0]),
-    use_bias=False,
-    seed=1,
-)
+dataset = enabol.AffineDataset(num_samples=1000, use_bias=False, seed=1)
+X, Y = dataset.get()
 ```
 
 ### `reference_weight_matrix`
@@ -327,7 +318,7 @@ def reference_bias_vector(self) -> np.ndarray:
     return self.b
 ```
 
-Use this once we reintroduce bias terms into the ablations.
+Use this once bias terms are reintroduced into the ablations.
 
 ### `analytic_hessian`
 
@@ -337,30 +328,7 @@ def analytic_hessian(self) -> dict[str, np.ndarray | float]:
     ...
 ```
 
-For one-layer no-bias linear regression:
-
-```math
-\hat{y}=Wx
-```
-
-with:
-
-```math
-\mathcal{L}
-=
-\frac{1}{2N}
-\left\|
-\hat{Y}-Y
-\right\|_F^2,
-```
-
-the Hessian is:
-
-```math
-H = I_{d_{\mathrm{out}}} \otimes \frac{X^T X}{N}.
-```
-
-The property returns:
+For the current one-layer no-bias linear regression tests, this returns:
 
 ```python
 {
@@ -370,15 +338,7 @@ The property returns:
 }
 ```
 
-Usage:
-
-```python
-h = dataset.analytic_hessian
-print(h["lambda_max"])
-print(h["eta_max"])
-```
-
-This is the diagnostic anchor for EXP-000A.
+This is the diagnostic anchor for [`EXP-000A`](../experiments/exp-000a-global-throttle-float-lin1.md).
 
 ### `__repr__()`
 
@@ -388,15 +348,7 @@ Returns a multi-line summary:
 print(dataset)
 ```
 
-Includes:
-
-- input shape,
-- output shape,
-- data tags,
-- teacher `A`,
-- teacher `b`,
-- analytic Hessian `lambda_max`,
-- nominal maximum stable learning rate.
+Includes shape, data tags, teacher parameters, analytic Hessian `lambda_max`, and nominal maximum stable learning rate.
 
 ## Extension Checklist
 

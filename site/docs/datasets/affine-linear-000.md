@@ -75,11 +75,6 @@ x_4
 \end{bmatrix}.
 ```
 
-The following image shows scatter plots of the input $x$ and target $y$ distributions, as well as their histograms at the bottom.
-
-![Dataset](../../../workspace/ablations/exp_000_global_throttle_sanity/results/dataset.png)
-![Dataset histograms](../../../workspace/ablations/exp_000_global_throttle_sanity/results/dataset_hist.png)
-
 ### Code to generate the dataset:
 
 If you need to understand the structure of this dataset, check [here](../implementation/dataset.md).
@@ -98,9 +93,10 @@ X, Y = dataset.get()
 ```
 
 which renders:
-```bash
-AffineDataset(
- [Input] X: 
+<Terminal
+  title="dataset summary"
+  content={`AffineDataset(
+  [Input] X: 
     Shape: (1000, 4)
     Dtype: DataType.D2_FLOAT
     X <- Uniform(-1, 1)
@@ -108,16 +104,22 @@ AffineDataset(
     Shape: (1000, 2)
     Dtype: DataType.D2_FLOAT
     Y <- X @ A.T + b
- ---------
+  ---------------------------------
   A = [[ 1.25 -0.75  0.5   0.2 ]
        [-0.4   0.9   1.1  -0.6 ]]
   b = [0. 0.]
-----------
-Analytic Hessian:
-  Lambda max: 1.0841
-  Eta max: 1.8448
-)
-```
+  ---------------------------------
+  Analytic Hessian:
+    Lambda max: 1.0841
+    Eta max: 1.8448
+)`}
+/>
+
+The following image shows scatter plots of the input $x$ and target $y$ distributions, as well as their histograms at the bottom.
+
+![Dataset](../../../workspace/ablations/exp_000_global_throttle_sanity/results/dataset.png)
+![Dataset histograms](../../../workspace/ablations/exp_000_global_throttle_sanity/results/dataset_hist.png)
+
 
 ## Drift Model
 
