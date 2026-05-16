@@ -53,7 +53,7 @@ from .dtypes import HLSDataType, ap_fixed, ap_int, ap_ufixed, ap_uint
 
 ## Data Classes
 
-### `RailStats`
+#### `RailStats`
 
 ```python
 @dataclass(frozen=True)
@@ -79,7 +79,7 @@ These values are used as software observables for quantized ablations. They are 
 
 ## Public Functions
 
-### `quantize_np(x, dtype)`
+#### `quantize_np(x, dtype)`
 
 ```python
 def quantize_np(x: Any, dtype: HLSDataType | None) -> Any:
@@ -102,7 +102,7 @@ W_q = quantize_np(W, weight_dtype)
 
 This path delegates to the dtype implementation in `dtypes.py`, so it is the reference behavior for NumPy-side checks.
 
-### `quantize_tensor(x, dtype, *, ste=True)`
+#### `quantize_tensor(x, dtype, *, ste=True)`
 
 ```python
 def quantize_tensor(x: tf.Tensor, dtype: HLSDataType | None, *, ste: bool = True) -> tf.Tensor:
@@ -136,7 +136,7 @@ x_q = quantize_tensor(x, activation_dtype, ste=True)
 The straight-through estimator is useful for ablation studies, but it is not the same thing as hardware arithmetic. It lets us study the effect of quantized forward/update values while still allowing TensorFlow to produce gradients.
 </TBox>
 
-### `rail_stats(x, dtype, *, near_ratio=0.95)`
+#### `rail_stats(x, dtype, *, near_ratio=0.95)`
 
 ```python
 def rail_stats(x: Any, dtype: HLSDataType | None, *, near_ratio: float = 0.95) -> RailStats:
@@ -187,7 +187,7 @@ print(stats.near_rail_fraction)
 
 These helpers are implementation details. They are documented because anyone adding new HLS dtype behavior must keep the TensorFlow path aligned with `dtypes.py`.
 
-### `_quantize_tensor_value(x, dtype)`
+#### `_quantize_tensor_value(x, dtype)`
 
 ```python
 def _quantize_tensor_value(x: tf.Tensor, dtype: HLSDataType) -> tf.Tensor:
@@ -225,7 +225,7 @@ Supported dtype families:
 
 Unsupported dtype classes raise `TypeError`.
 
-### `_round_tensor(x, qmode)`
+#### `_round_tensor(x, qmode)`
 
 ```python
 def _round_tensor(x: tf.Tensor, qmode: str) -> tf.Tensor:
@@ -244,7 +244,7 @@ TensorFlow implementation of supported HLS-style rounding modes.
 
 Unsupported modes raise `NotImplementedError`.
 
-### `_clip_tensor(x, WL, *, signed)`
+#### `_clip_tensor(x, WL, *, signed)`
 
 ```python
 def _clip_tensor(x: tf.Tensor, WL: int, *, signed: bool) -> tf.Tensor:
@@ -271,7 +271,7 @@ This is used for `AP_SAT`, `AP_SAT_ZERO`, and `AP_SAT_SYM` in the current implem
 `AP_SAT`, `AP_SAT_ZERO`, and `AP_SAT_SYM` currently use the same TensorFlow clipping path. If future experiments depend on the subtle differences between these modes, update this function and add tests against the NumPy dtype behavior.
 </TBox>
 
-### `_wrap_tensor(x, WL, *, signed)`
+#### `_wrap_tensor(x, WL, *, signed)`
 
 ```python
 def _wrap_tensor(x: tf.Tensor, WL: int, *, signed: bool) -> tf.Tensor:

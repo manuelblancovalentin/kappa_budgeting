@@ -1,5 +1,5 @@
 ---
-sidebar_label: "🧮 precision.py"
+sidebar_label: "🎯 precision.py"
 status:
   - valid
   - inprogress
@@ -11,7 +11,7 @@ last_modified: 2026-05-15
 source: "enabol/precision.py"
 source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/precision.py"
 ---
-# 🧮 PrecisionDict Module Reference
+# 🎯 PrecisionDict Module Reference
 <PageMeta />
 ---
 
@@ -19,7 +19,15 @@ source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/e
 This page is a coder-facing reference for `enabol/precision.py`: the explicit layer-indexed `PrecisionDict`, reserved precision scopes, dtype parsing, model validation, and usage patterns for per-layer quantization studies.
 </TBox>
 
-## Imports
+## Module Map
+
+| Group | Objects | Purpose |
+|---|---|---|
+| Constants | `RESERVED_NAMES` | Semantic scopes that should not be ordinary layer names. |
+| Class | `PrecisionDict` | Explicit layer/field precision map. |
+| Module-level functions | `ensure_precision_dict(...)` | Normalize user input into a `PrecisionDict`. |
+
+## Imports And Dependencies
 
 ```python
 from collections.abc import Mapping
@@ -32,7 +40,7 @@ from .dtypes import HLSDataType
 
 The only package-level dependency is `HLSDataType`, which parses strings and validates dtype objects.
 
-## Reserved Names
+## Constants
 
 ```python
 RESERVED_NAMES = {"loss", "input", "__default__"}
@@ -50,7 +58,9 @@ Meaning:
 
 No Keras layer should be named `input` or `loss`.
 
-## `PrecisionDict`
+## Classes
+
+### `PrecisionDict`
 
 ```python
 class PrecisionDict(dict[str, dict[str, HLSDataType | None]]):
@@ -117,7 +127,7 @@ should print:
 
 Strings and dtype objects can be mixed. `None` means explicitly float/no quantization.
 
-## `__init__(data)`
+#### `__init__(data)`
 
 ```python
 def __init__(self, data: Mapping[str, Mapping[str, Any]] | None = None):
@@ -148,7 +158,7 @@ Stored internally as:
 }
 ```
 
-## `_parse_dtype(dtype)`
+#### `_parse_dtype(dtype)`
 
 ```python
 @staticmethod
@@ -168,7 +178,7 @@ This is why notebook configs can be concise:
 "weight": "ap_fixed<12,4,AP_RND,AP_SAT>"
 ```
 
-## `dtype(layer_name, field, default=None)`
+#### `dtype(layer_name, field, default=None)`
 
 ```python
 def dtype(self, layer_name: str, field: str, default=None):
@@ -203,7 +213,7 @@ loss_t = precisions.dtype("loss", "value")
 
 Missing fields default to floating point in the training loop because the returned dtype is `None`.
 
-## `has(layer_name, field)`
+#### `has(layer_name, field)`
 
 ```python
 def has(self, layer_name: str, field: str) -> bool:
@@ -219,7 +229,7 @@ if precisions.has("dense0", "update"):
     ...
 ```
 
-## `layers()`
+#### `layers()`
 
 ```python
 def layers(self) -> list[str]:
@@ -234,7 +244,7 @@ Example:
 ["input", "dense0", "loss"]
 ```
 
-## `fields(layer_name)`
+#### `fields(layer_name)`
 
 ```python
 def fields(self, layer_name: str) -> list[str]:
@@ -247,7 +257,7 @@ Useful for debugging:
 print(precisions.fields("dense0"))
 ```
 
-## `validate_model(model, allow_missing=True)`
+#### `validate_model(model, allow_missing=True)`
 
 ```python
 def validate_model(self, model: tf.keras.Model, *, allow_missing: bool = True) -> None:
@@ -283,7 +293,7 @@ allow_missing=False
 
 only when you want a fully specified hardware-style precision map.
 
-## `describe()`
+#### `describe()`
 
 ```python
 def describe(self) -> str:
@@ -298,7 +308,9 @@ print(precisions.describe())
 
 Useful in notebooks so the exact precision map appears next to the plots.
 
-## `ensure_precision_dict(precision)`
+## Module-Level Functions
+
+### `ensure_precision_dict(precision)`
 
 ```python
 def ensure_precision_dict(precision):

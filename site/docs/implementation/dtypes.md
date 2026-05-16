@@ -19,11 +19,21 @@ source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/e
 This page is a coder-facing reference for `enabol/dtypes.py`: HLS-style numeric descriptors, NumPy quantization behavior, rounding modes, overflow modes, and extension points for future precision experiments.
 </TBox>
 
+## Module Map
+
+| Group | Objects | Purpose |
+|---|---|---|
+| Constants | `VALID_QMODES`, `VALID_OMODES` | Supported HLS-style rounding and overflow mode names. |
+| Module-level helper functions | `_fraction_bits`, `_scale`, `_round_by_qmode`, `_clip_int`, `_wrap_int`, `_quantize_np` | Shared NumPy-side implementation details. |
+| Base class | `HLSDataType` | Common parser/interface for dtype descriptors. |
+| Fixed-point descriptors | `ap_fixed`, `ap_ufixed` | Signed and unsigned fixed-point formats. |
+| Integer descriptors | `ap_int`, `ap_uint` | Signed and unsigned integer formats. |
+
 TensorFlow fake quantization lives in [`enabol/quantization.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/quantization.py).
 
 ## Constants
 
-### `VALID_QMODES`
+#### `VALID_QMODES`
 
 ```python
 VALID_QMODES = {
@@ -38,7 +48,7 @@ VALID_QMODES = {
 
 Supported rounding modes. These names mirror HLS `ap_fixed` conventions.
 
-### `VALID_OMODES`
+#### `VALID_OMODES`
 
 ```python
 VALID_OMODES = {
@@ -51,11 +61,11 @@ VALID_OMODES = {
 
 Supported overflow modes. The first quantization ablations should use `AP_SAT` because saturation is easier to interpret than wraparound.
 
-## Helper Functions
+## Module-Level Helper Functions
 
 These helpers are internal but important if you need to extend dtype behavior.
 
-### `_fraction_bits(WL, IWL)`
+#### `_fraction_bits(WL, IWL)`
 
 ```python
 def _fraction_bits(WL: int, IWL: int) -> int:
@@ -70,7 +80,7 @@ F = WL - IWL.
 
 If `IWL >= WL`, the type has no fractional bits.
 
-### `_scale(F)`
+#### `_scale(F)`
 
 ```python
 def _scale(F: int) -> float:
@@ -85,7 +95,7 @@ Returns:
 
 Used to move between real values and integer fixed-point storage.
 
-### `_round_by_qmode(x_scaled, qmode)`
+#### `_round_by_qmode(x_scaled, qmode)`
 
 ```python
 def _round_by_qmode(x_scaled: np.ndarray, qmode: str) -> np.ndarray:
@@ -105,7 +115,7 @@ AP_RND_ZERO  -> ties toward zero
 
 If a new rounding mode is needed, add it here and mirror it in `quantization.py` for TensorFlow tensors.
 
-### `_clip_int(v, WL, signed)`
+#### `_clip_int(v, WL, signed)`
 
 ```python
 def _clip_int(v: np.ndarray, WL: int, signed: bool) -> np.ndarray:
@@ -126,7 +136,7 @@ Unsigned:
 [0, 2^{WL}-1].
 ```
 
-### `_wrap_int(v, WL, signed)`
+#### `_wrap_int(v, WL, signed)`
 
 ```python
 def _wrap_int(v: np.ndarray, WL: int, signed: bool) -> np.ndarray:
@@ -135,7 +145,7 @@ def _wrap_int(v: np.ndarray, WL: int, signed: bool) -> np.ndarray:
 
 Applies modulo wraparound in the integer domain. For signed types, values above the sign bit are interpreted as negative two's-complement values.
 
-### `_quantize_np(...)`
+#### `_quantize_np(...)`
 
 ```python
 def _quantize_np(
@@ -167,7 +177,9 @@ real_values = t([0.1, 0.2, 12.0])
 raw_ints = t([0.1, 0.2, 12.0], return_int=True)
 ```
 
-## `HLSDataType`
+## Classes
+
+### `HLSDataType`
 
 ```python
 @dataclass(frozen=True)
@@ -177,7 +189,7 @@ class HLSDataType(ABC):
 
 Abstract base class for all dtype descriptors.
 
-### `from_dtype(dtype, **kwargs)`
+#### `from_dtype(dtype, **kwargs)`
 
 ```python
 @staticmethod
@@ -199,7 +211,7 @@ t2 = HLSDataType.from_dtype("ap_int<16>")
 
 Used by `PrecisionDict`, so YAML/string configs can become dtype objects automatically.
 
-### Abstract Methods
+#### Abstract Methods
 
 Every dtype must implement:
 
@@ -213,7 +225,7 @@ __call__(value, return_int=False)
 
 These methods let the rest of the package query rails, construct related dtypes, and quantize values without caring about the concrete dtype class.
 
-## `ap_fixed`
+### `ap_fixed`
 
 ```python
 @dataclass(frozen=True)
@@ -227,7 +239,7 @@ class ap_fixed(HLSDataType):
 
 Signed fixed-point type.
 
-### `__post_init__()`
+#### `__post_init__()`
 
 Validates:
 
@@ -235,7 +247,7 @@ Validates:
 - `QMODE` is supported,
 - `OMODE` is supported.
 
-### `fractional_bits`
+#### `fractional_bits`
 
 ```python
 @property
@@ -243,7 +255,7 @@ def fractional_bits(self) -> int:
     return WL - IWL
 ```
 
-### `quantum`
+#### `quantum`
 
 ```python
 @property
@@ -253,7 +265,7 @@ def quantum(self) -> float:
 
 This is the minimum representable spacing.
 
-### `value_range()`
+#### `value_range()`
 
 ```python
 def value_range(self) -> Tuple[float, float]:
@@ -266,15 +278,15 @@ Returns:
 [-2^{IWL-1}, 2^{IWL-1}-2^{-F}].
 ```
 
-### `double_precision()`
+#### `double_precision()`
 
 Returns a wider signed fixed-point dtype with doubled word length and integer length.
 
-### `signed()` and `unsigned()`
+#### `signed()` and `unsigned()`
 
 `signed()` returns itself. `unsigned()` returns the corresponding `ap_ufixed`.
 
-### `__call__(value, return_int=False)`
+#### `__call__(value, return_int=False)`
 
 Quantizes NumPy-compatible values.
 
@@ -283,7 +295,7 @@ t = dtypes.ap_fixed(12, 4, "AP_RND", "AP_SAT")
 xq = t([0.1, 0.2, 32.0])
 ```
 
-## `ap_ufixed`
+### `ap_ufixed`
 
 Unsigned fixed-point type. Same fields as `ap_fixed`, but the range is:
 
@@ -299,7 +311,7 @@ Example:
 act_t = dtypes.ap_ufixed(10, 4, "AP_RND", "AP_SAT")
 ```
 
-## `ap_int`
+### `ap_int`
 
 ```python
 @dataclass(frozen=True)
@@ -315,7 +327,7 @@ Signed integer type. Range:
 
 Use this for integer counters or raw integer-domain tests.
 
-## `ap_uint`
+### `ap_uint`
 
 Unsigned integer type. Range:
 
@@ -323,7 +335,7 @@ Unsigned integer type. Range:
 [0, 2^{WL}-1].
 ```
 
-## Extension Checklist
+## Extension Notes
 
 When extending this file:
 

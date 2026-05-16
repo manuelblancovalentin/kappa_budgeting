@@ -54,7 +54,7 @@ from typing import Sequence, Optional, Dict, Any
 
 ## Tensor Geometry Functions
 
-### `flatten_tensors(tensors)`
+#### `flatten_tensors(tensors)`
 
 ```python
 def flatten_tensors(tensors: Sequence[tf.Tensor]) -> tf.Tensor:
@@ -84,7 +84,7 @@ grad_vec = flatten_tensors(grads)
 
 If all inputs are `None` or the list is empty, it returns an empty `tf.float32` tensor.
 
-### `tensor_l2_norm(x, eps=1e-12)`
+#### `tensor_l2_norm(x, eps=1e-12)`
 
 ```python
 def tensor_l2_norm(x: tf.Tensor, eps: float = 1e-12) -> tf.Tensor:
@@ -100,7 +100,7 @@ grad_norm = tensor_l2_norm(grad_vec)
 update_norm = tensor_l2_norm(delta_actual)
 ```
 
-### `safe_cosine(a, b, eps=1e-12)`
+#### `safe_cosine(a, b, eps=1e-12)`
 
 ```python
 def safe_cosine(a: tf.Tensor, b: tf.Tensor, eps: float = 1e-12) -> tf.Tensor:
@@ -130,7 +130,7 @@ The update cosine is useful in software because we can compare the raw intended 
 
 ## Matrix Diagnostic Functions
 
-### `spectral_norm_np(W)`
+#### `spectral_norm_np(W)`
 
 ```python
 def spectral_norm_np(W: np.ndarray) -> float:
@@ -148,7 +148,7 @@ Behavior:
 | non-finite array | `np.nan`. |
 | failed SVD | `np.nan`. |
 
-### `matrix_norms_np(W)`
+#### `matrix_norms_np(W)`
 
 ```python
 def matrix_norms_np(W: np.ndarray) -> dict[str, float]:
@@ -182,7 +182,7 @@ If any value in `W` is non-finite, every returned norm is `np.nan`.
 
 ## Hessian And Stability Functions
 
-### `analytic_single_dense_hessian(...)`
+#### `analytic_single_dense_hessian(...)`
 
 ```python
 def analytic_single_dense_hessian(
@@ -230,7 +230,7 @@ H = analytic_single_dense_hessian(X_batch, d_out=2, keras_mse_scaling=False)
 metrics = hessian_metrics_np(H)
 ```
 
-### `hessian_metrics_np(H)`
+#### `hessian_metrics_np(H)`
 
 ```python
 def hessian_metrics_np(H: np.ndarray) -> Dict[str, float]:
@@ -249,7 +249,7 @@ Computes core Hessian metrics after symmetrizing defensively:
 
 These are used to compare the cheap online curvature proxy against true local curvature in toy experiments.
 
-### `stability_metrics_from_hessian(H, eta, alpha=1.0)`
+#### `stability_metrics_from_hessian(H, eta, alpha=1.0)`
 
 ```python
 def stability_metrics_from_hessian(
@@ -298,7 +298,7 @@ should remain below `2`.
 
 ## Loss Helpers
 
-### `half_mse_batch_loss(y_true, y_pred)`
+#### `half_mse_batch_loss(y_true, y_pred)`
 
 ```python
 def half_mse_batch_loss(y_true: tf.Tensor, y_pred: tf.Tensor) -> tf.Tensor:

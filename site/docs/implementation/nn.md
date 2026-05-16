@@ -18,6 +18,15 @@ source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/e
 This page is a coder-facing reference for `enabol/nn.py`: the shared `BaseModel`, the current dense-only `LinearBlockModel`, quantization hooks, and the custom instrumented training loop. It also tracks model families from `old_enabol/nn.py` that have not been ported yet.
 </TBox>
 
+## Module Map
+
+| Group | Objects | Purpose |
+|---|---|---|
+| Base class | `BaseModel` | Owns dataset linkage, Keras model object, simple training, and the instrumented online loop. |
+| BaseModel public methods | `summary`, `reinitialize_weights`, `train`, `train_instrumented` | User-facing model utilities and training entry points. |
+| BaseModel precision helpers | `_forward_with_precision`, `_quantize_gradients`, `_quantize_variable_storage`, rail helpers | Internal fake-quantization and diagnostic hooks. |
+| Implemented model | `LinearBlockModel` | Dense-only model family used by the current ablation experiments. |
+
 ## Model Coverage
 
 This table tracks active model classes and legacy model families that are still missing from the current `enabol` module. Priority is intentionally blank for implemented models.
@@ -41,7 +50,7 @@ This table tracks active model classes and legacy model families that are still 
 
 </TBox>
 
-## Imports
+## Imports And Dependencies
 
 ```python
 from abc import ABC
@@ -73,7 +82,9 @@ Important utilities:
 | `analytic_single_dense_hessian` | Exact Hessian for one-layer no-bias regression. |
 | `stability_metrics_from_hessian` | Computes `eta * lambda_max` and update-map spectral radius. |
 
-## `BaseModel`
+## Classes
+
+### `BaseModel`
 
 ```python
 @dataclass(eq=False)
@@ -94,7 +105,7 @@ class BaseModel(ABC):
 
 Subclasses are responsible for constructing `self.model`.
 
-## `__post_init__()`
+#### `__post_init__()`
 
 ```python
 def __post_init__(self):
@@ -111,7 +122,7 @@ dataset.X.shape == (1000, 4)
 model.input_shape == (4,)
 ```
 
-## `_compile(...)`
+#### `_compile(...)`
 
 ```python
 def _compile(self, optimizer=None, loss=None, metrics=None, **kwargs):
@@ -122,7 +133,7 @@ Thin wrapper over `self.model.compile(...)`.
 
 Used by the simple `train()` method. The instrumented ablation loop does not use Keras optimizer application because it needs direct control over every update.
 
-## `summary()`
+#### `summary()`
 
 ```python
 def summary(self) -> None:
@@ -137,7 +148,7 @@ Usage:
 model.summary()
 ```
 
-## `reinitialize_weights()`
+#### `reinitialize_weights()`
 
 ```python
 def reinitialize_weights(self):
@@ -154,7 +165,7 @@ model.reinitialize_weights()
 
 Used before comparing baseline and controller runs so they start from comparable initial conditions.
 
-## `train(...)`
+#### `train(...)`
 
 ```python
 def train(self, X, Y, epochs=10, batch_size=32) -> dict[str, np.ndarray]:
@@ -171,7 +182,7 @@ Simple Keras-style training loop:
 
 This is mostly a convenience method. Ablation work should use `train_instrumented()`.
 
-## `train_instrumented(...)`
+#### `train_instrumented(...)`
 
 ```python
 def train_instrumented(
@@ -196,7 +207,7 @@ def train_instrumented(
 
 This is the main ablation loop.
 
-### Inputs
+##### Inputs
 
 | Argument | Purpose |
 |---|---|
@@ -209,7 +220,7 @@ This is the main ablation loop.
 | `reference_A` | Teacher matrix for one-layer weight error. |
 | `precision_dict` | Optional `PrecisionDict`; `None` means full floating point. |
 
-### Setup Block
+##### Setup Block
 
 The method:
 
@@ -228,7 +239,7 @@ precision_dict=None
 
 must preserve the original EXP-000A behavior.
 
-### Main Step Block
+##### Main Step Block
 
 At each batch:
 
@@ -245,7 +256,7 @@ grad_flat = flatten(grads)
 
 If `precision_dict` is present, the forward path uses `_forward_with_precision()` and gradients are passed through `_quantize_gradients()`.
 
-### Curvature Proxy Block
+##### Curvature Proxy Block
 
 ```python
 dG = grad_flat - prev_grad
@@ -267,7 +278,7 @@ Control signal:
 curvature_for_control = max(curvature_proxy, curvature_ema)
 ```
 
-### Controller Block
+##### Controller Block
 
 ```python
 alpha_would = min(1.0, chi / (eta * (curvature_for_control + eps)))
@@ -277,7 +288,7 @@ eta_eff = alpha * eta
 
 If `use_controller=False`, the loop still logs `alpha_would` so we can see whether the controller would have intervened.
 
-### Update Block
+##### Update Block
 
 Floating-point path:
 
@@ -296,7 +307,7 @@ self._quantize_variable_storage(var, precision)
 
 This is where update quantization and stored-weight quantization happen.
 
-### Metric Block
+##### Metric Block
 
 The loop logs:
 
@@ -336,7 +347,7 @@ update_saturation_fraction_max
 update_underflow_fraction_max
 ```
 
-### Update Geometry Diagnostics
+##### Update Geometry Diagnostics
 
 Two metrics are especially important for the quantized global-throttle ablation:
 
@@ -407,7 +418,7 @@ r_t
 
 These are offline software diagnostics. They are meant to visualize and compare numerical update distortion during ablations. They are not currently proposed as hardware controller inputs because the high-precision raw update may not exist as a physical hardware signal.
 
-### Return Value
+##### Return Value
 
 ```python
 return FitHistory(**{k: np.asarray(v) for k, v in history.items()})
@@ -420,7 +431,7 @@ h = model.train_instrumented(...)
 h.plot_results()
 ```
 
-## `_forward_with_precision(...)`
+#### `_forward_with_precision(...)`
 
 ```python
 def _forward_with_precision(self, x, precision, *, training):
@@ -448,7 +459,7 @@ Extension point:
 
 If Conv layers are added, implement their explicit forward path here.
 
-## `_quantize_gradients(...)`
+#### `_quantize_gradients(...)`
 
 ```python
 def _quantize_gradients(self, grads, trainable_vars, precision):
@@ -463,7 +474,7 @@ For each gradient:
 
 Missing gradient dtype means floating point gradient.
 
-## `_quantize_variable_storage(...)`
+#### `_quantize_variable_storage(...)`
 
 ```python
 def _quantize_variable_storage(self, var, precision):
@@ -478,7 +489,7 @@ After the update is applied, this quantizes the stored variable:
 
 This models fixed-point storage.
 
-## `_layer_and_field_for_variable(...)`
+#### `_layer_and_field_for_variable(...)`
 
 ```python
 def _layer_and_field_for_variable(self, var) -> tuple[str, str]:
@@ -500,7 +511,7 @@ dense0/bias   -> ("dense0", "bias")
 
 This function is central to `PrecisionDict` integration. If a new layer type has special trainable variables, update this mapping.
 
-## `_same_variable(a, b)`
+#### `_same_variable(a, b)`
 
 ```python
 @staticmethod
@@ -512,7 +523,7 @@ Defensive Keras variable comparison helper. It first checks identity, then tries
 
 This avoids fragile behavior across Keras/TensorFlow versions.
 
-## `_rail_max_for_variables(...)`
+#### `_rail_max_for_variables(...)`
 
 ```python
 def _rail_max_for_variables(self, vars_, precision, *, fields):
@@ -528,7 +539,7 @@ weight_saturation_fraction_max
 weight_near_rail_fraction_max
 ```
 
-## `_rail_max_for_tensors(...)`
+#### `_rail_max_for_tensors(...)`
 
 ```python
 def _rail_max_for_tensors(self, tensors, trainable_vars, precision, *, field):
@@ -544,7 +555,7 @@ gradient_saturation_fraction_max
 gradient_near_rail_fraction_max
 ```
 
-## `LinearBlockModel`
+### `LinearBlockModel`
 
 ```python
 @dataclass
@@ -564,7 +575,7 @@ Each block is:
 Dense -> optional Activation -> optional BatchNorm
 ```
 
-## `LinearBlockModel.__post_init__()`
+#### `__post_init__()`
 
 ```python
 def __post_init__(self):
@@ -574,7 +585,7 @@ def __post_init__(self):
 
 Builds the Keras model immediately after dataclass initialization.
 
-## `_build_model(input_shape, output_shape, verbose=True)`
+#### `_build_model(input_shape, output_shape, verbose=True)`
 
 ```python
 def _build_model(self, input_shape, output_shape, verbose=True) -> tf.keras.Model:
@@ -622,7 +633,7 @@ model = enabol.LinearBlockModel(
 )
 ```
 
-## Extension Checklist
+## Extension Notes
 
 When adding a new model class:
 

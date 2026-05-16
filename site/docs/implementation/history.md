@@ -82,9 +82,7 @@ Expected keys depend on the training loop. Current one-layer ablations commonly 
 | `stability_margin_lambda_raw` | Raw `eta * lambda_max(H)` margin. |
 | `alpha_would` | Controller throttle that would be applied, even in baseline runs. |
 
-## Class Methods
-
-### `__repr__()`
+#### `__repr__()`
 
 ```python
 def __repr__(self) -> str:
@@ -101,13 +99,13 @@ Example output:
 <Terminal
   title="FitHistory repr"
   content={`FitHistory:
-  loss: (1200,)
-  grad_norm: (1200,)
-  curvature_proxy: (1200,)
-  alpha_would: (1200,)`}
+    loss: (1200,)
+    grad_norm: (1200,)
+    curvature_proxy: (1200,)
+    alpha_would: (1200,)`}
 />
 
-### `plot_results(title=None)`
+#### `plot_results(title=None)`
 
 ```python
 def plot_results(self, title=None):

@@ -18,6 +18,14 @@ source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/e
 This page is a coder-facing reference for `enabol/dataset.py`: the shared `BaseDataset` interface, plotting/export helpers, and the currently implemented synthetic affine dataset. The experiment-facing mathematical description of the affine dataset lives in the dataset registry page, so this page focuses on code structure and extension points.
 </TBox>
 
+## Module Map
+
+| Group | Objects | Purpose |
+|---|---|---|
+| Enum tags | `DataType` | Describe whether inputs/outputs are image, 1D, 2D, class, or float data. |
+| Base class | `BaseDataset` | Common dataset interface used by model wrappers and export helpers. |
+| Implemented dataset | `AffineDataset` | Synthetic affine regression data used by the current sanity experiments. |
+
 ## Dataset Coverage
 
 This table tracks what exists in the active `enabol` module and what still needs to be ported from `old_enabol/dataset.py`. Priority is intentionally blank for implemented datasets.
@@ -61,7 +69,9 @@ from .utils import analytic_single_dense_hessian, hessian_metrics_np
 
 The important dependency is `utils.py`, which provides the analytic Hessian helper used by `AffineDataset`.
 
-## `DataType`
+## Classes
+
+### `DataType`
 
 ```python
 class DataType(Enum):
@@ -84,7 +94,7 @@ dataset.output_type
 
 When adding a new dataset, set these tags in `__post_init__()` after generating `X` and `Y`.
 
-## `BaseDataset`
+### `BaseDataset`
 
 ```python
 @dataclass
@@ -104,7 +114,7 @@ class BaseDataset:
 - `self.input_type`,
 - `self.output_type`.
 
-### `input_shape`
+#### `input_shape`
 
 ```python
 @property
@@ -114,7 +124,7 @@ def input_shape(self) -> Tuple[int, ...]:
 
 Used by `BaseModel.__post_init__()` to infer the Keras input shape.
 
-### `output_shape`
+#### `output_shape`
 
 ```python
 @property
@@ -124,7 +134,7 @@ def output_shape(self) -> Tuple[int, ...]:
 
 Used by `LinearBlockModel` to decide whether it needs a final output Dense layer.
 
-### `reference_weight_matrix`
+#### `reference_weight_matrix`
 
 ```python
 @property
@@ -135,7 +145,7 @@ def reference_weight_matrix(self) -> np.ndarray:
 
 Subclasses should return the teacher matrix used to generate targets. This is used by experiment plots and `train_instrumented(..., reference_A=...)`.
 
-### `reference_bias_vector`
+#### `reference_bias_vector`
 
 ```python
 @property
@@ -146,7 +156,7 @@ def reference_bias_vector(self) -> np.ndarray:
 
 Subclasses should return the teacher bias. For no-bias tests this should be zeros.
 
-### `get()`
+#### `get()`
 
 ```python
 def get(self) -> Tuple[np.ndarray, np.ndarray]:
@@ -159,7 +169,7 @@ Primary notebook API:
 X, Y = dataset.get()
 ```
 
-### `to_numpy()`
+#### `to_numpy()`
 
 ```python
 def to_numpy(self) -> Tuple[np.ndarray, np.ndarray]:
@@ -168,7 +178,7 @@ def to_numpy(self) -> Tuple[np.ndarray, np.ndarray]:
 
 Alias for `get()`. Useful if we later support datasets backed by another object and want an explicit conversion call.
 
-### `to_txt(prefix)`
+#### `to_txt(prefix)`
 
 ```python
 def to_txt(self, prefix: str = "dataset") -> None:
@@ -189,7 +199,7 @@ affine_nominal_X.txt
 affine_nominal_Y.txt
 ```
 
-### `to_dat(prefix)`
+#### `to_dat(prefix)`
 
 ```python
 def to_dat(self, prefix: str = "dataset") -> None:
@@ -207,7 +217,7 @@ tb_output_predictions.dat
 
 Use this when exporting a synthetic dataset toward firmware/HLS tests.
 
-### `plot(max_points)`
+#### `plot(max_points)`
 
 ```python
 def plot(self, max_points: int = 100) -> None:
@@ -232,7 +242,7 @@ dataset.plot(max_points=200)
 
 When adding a new dataset type, either reuse existing tags or add a new branch here.
 
-### `plot_histogram(bins)`
+#### `plot_histogram(bins)`
 
 ```python
 def plot_histogram(self, bins: Optional[int] = None) -> None:
@@ -247,7 +257,7 @@ Usage:
 dataset.plot_histogram(bins=40)
 ```
 
-### `__repr__()`
+#### `__repr__()`
 
 ```python
 @abstractmethod
@@ -257,7 +267,7 @@ def __repr__(self) -> str:
 
 Subclasses should provide a compact experiment-readable summary.
 
-## `AffineDataset`
+### `AffineDataset`
 
 ```python
 @dataclass
@@ -277,7 +287,7 @@ This implementation page only records the code responsibilities:
 - expose `analytic_hessian` for the one-layer no-bias sanity tests,
 - provide an experiment-readable `__repr__()`.
 
-### `__post_init__()`
+#### `__post_init__()`
 
 Responsibilities:
 
@@ -297,7 +307,7 @@ dataset = enabol.AffineDataset(num_samples=1000, use_bias=False, seed=1)
 X, Y = dataset.get()
 ```
 
-### `reference_weight_matrix`
+#### `reference_weight_matrix`
 
 ```python
 @property
@@ -311,7 +321,7 @@ Used for:
 h = model.train_instrumented(..., reference_A=dataset.reference_weight_matrix)
 ```
 
-### `reference_bias_vector`
+#### `reference_bias_vector`
 
 ```python
 @property
@@ -321,7 +331,7 @@ def reference_bias_vector(self) -> np.ndarray:
 
 Use this once bias terms are reintroduced into the ablations.
 
-### `analytic_hessian`
+#### `analytic_hessian`
 
 ```python
 @property
@@ -341,7 +351,7 @@ For the current one-layer no-bias linear regression tests, this returns:
 
 This is the diagnostic anchor for [`EXP-000A`](../experiments/exp-000a-global-throttle-float-lin1.md).
 
-### `__repr__()`
+#### `__repr__()`
 
 Returns a multi-line summary:
 
@@ -351,7 +361,7 @@ print(dataset)
 
 Includes shape, data tags, teacher parameters, analytic Hessian `lambda_max`, and nominal maximum stable learning rate.
 
-## Extension Checklist
+## Extension Notes
 
 When adding a new dataset:
 
