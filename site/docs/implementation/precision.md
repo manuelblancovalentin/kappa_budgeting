@@ -9,7 +9,7 @@ tags:
   - quantization
 last_modified: 2026-05-15
 source: "enabol/precision.py"
-source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/precision.py"
+source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master/enabol/precision.py"
 ---
 # 🎯 PrecisionDict Module Reference
 <PageMeta />

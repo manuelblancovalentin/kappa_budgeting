@@ -7,7 +7,7 @@ tags:
   - global-throttle
 last_modified: 2026-05-15
 source: "enabol/nn.py"
-source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/nn.py"
+source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master/enabol/nn.py"
 ---
 # Custom Training Loop
 <PageMeta />

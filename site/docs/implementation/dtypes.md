@@ -9,7 +9,7 @@ tags:
   - precision
 last_modified: 2026-05-15
 source: "enabol/dtypes.py"
-source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/dtypes.py"
+source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master/enabol/dtypes.py"
 ---
 # 🗄️ Dtypes Module Reference
 <PageMeta />
@@ -29,7 +29,7 @@ This page is a coder-facing reference for `enabol/dtypes.py`: HLS-style numeric 
 | Fixed-point descriptors | `ap_fixed`, `ap_ufixed` | Signed and unsigned fixed-point formats. |
 | Integer descriptors | `ap_int`, `ap_uint` | Signed and unsigned integer formats. |
 
-TensorFlow fake quantization lives in [`enabol/quantization.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/quantization.py).
+TensorFlow fake quantization lives in [`enabol/quantization.py`](https://github.com/manuelblancovalentin/kappa_budgeting/blob/master/enabol/quantization.py).
 
 ## Constants
 

@@ -8,7 +8,7 @@ tags:
   - history
 last_modified: 2026-05-16
 source: "enabol/history.py"
-source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/enabol/history.py"
+source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master/enabol/history.py"
 ---
 # 📈 History Module Reference
 <PageMeta />

@@ -14,7 +14,7 @@ tags:
 last_modified: 2026-05-15
 workspace: "workspace/ablations/exp_000_global_throttle_sanity/"
 notebook: "workspace/ablations/exp_000_global_throttle_sanity/notebooks/exp_000b_global_throttle_qfx_lin1.ipynb"
-notebook_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/main/workspace/ablations/exp_000_global_throttle_sanity/notebooks/exp_000b_global_throttle_qfx_lin1.ipynb"
+notebook_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master/workspace/ablations/exp_000_global_throttle_sanity/notebooks/exp_000b_global_throttle_qfx_lin1.ipynb"
 ---
 # EXP-000B: Global Throttle With Quantization
 
