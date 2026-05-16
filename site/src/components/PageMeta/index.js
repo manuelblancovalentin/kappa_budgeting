@@ -29,7 +29,7 @@ function formatDate(value) {
   return String(value);
 }
 
-export default function PageMeta({showStatus = true, showTags = true, showLastModified = true, showWorkspace = true, showNotebook = true}) {
+export default function PageMeta({showStatus = true, showTags = true, showLastModified = true, showWorkspace = true, showNotebook = true, showSource = true}) {
   const {frontMatter} = useDoc();
   const status = asList(frontMatter.status);
   const tags = asList(frontMatter.tags);
@@ -37,8 +37,10 @@ export default function PageMeta({showStatus = true, showTags = true, showLastMo
   const workspace = frontMatter.workspace ? String(frontMatter.workspace) : null;
   const notebook = frontMatter.notebook ? String(frontMatter.notebook) : null;
   const notebookUrl = frontMatter.notebook_url ? String(frontMatter.notebook_url) : null;
+  const source = frontMatter.source ? String(frontMatter.source) : null;
+  const sourceUrl = frontMatter.source_url ? String(frontMatter.source_url) : null;
 
-  if (!status.length && !tags.length && !lastModified && !workspace && !notebook) {
+  if (!status.length && !tags.length && !lastModified && !workspace && !notebook && !source) {
     return null;
   }
 
@@ -61,6 +63,18 @@ export default function PageMeta({showStatus = true, showTags = true, showLastMo
         <div className="page-meta__row page-meta__row--date">
           <span className="page-meta__label">Last modified:</span>
           <time dateTime={lastModified}>{lastModified}</time>
+        </div>
+      )}
+      {showSource && source && (
+        <div className="page-meta__row page-meta__row--path">
+          <span className="page-meta__label">Source:</span>
+          {sourceUrl ? (
+            <a href={sourceUrl} target="_blank" rel="noreferrer">
+              <code>{source}</code>
+            </a>
+          ) : (
+            <code>{source}</code>
+          )}
         </div>
       )}
       {showWorkspace && workspace && (

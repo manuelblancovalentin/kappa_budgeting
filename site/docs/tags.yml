@@ -147,3 +147,13 @@ template:
   label: Template
   permalink: /template
   description: Template pages.
+
+architecture:
+  label: Architecture
+  permalink: /architecture
+  description: Pages tagged Architecture.
+
+training:
+  label: Training
+  permalink: /training
+  description: Pages tagged Training.
