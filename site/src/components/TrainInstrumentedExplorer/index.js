@@ -1,21 +1,27 @@
 import React, {useMemo, useState} from 'react';
 import clsx from 'clsx';
+import katex from 'katex';
+
+const text = (value) => ({type: 'text', value});
+const kw = (value) => ({type: 'kw', value});
+const code = (value) => ({type: 'code', value});
+const math = (value) => ({type: 'math', value});
 
 const topAlgorithm = [
-  {level: 0, kind: 'kw', text: 'input', rest: 'X, Y, learning rate eta, controller settings, precision map P'},
-  {level: 0, text: 'P <- ensure_precision_dict(precision_dict)'},
-  {level: 0, text: 'validate_model(P, model)'},
-  {level: 0, text: 'D <- batched Dataset(X, Y)'},
-  {level: 0, kind: 'kw', text: 'for', rest: 'each epoch and batch do'},
-  {level: 1, text: 'theta_t <- flatten(trainable variables)'},
-  {level: 1, text: 'y_hat, L_t, G_t <- ForwardGradientBlock(batch, P)'},
-  {level: 1, text: 'C_t, S_t <- CurvatureProxyBlock(theta_t, G_t)'},
-  {level: 1, text: 'alpha_t, eta_eff <- ControllerBlock(C_t, S_t, chi, eta)'},
-  {level: 1, text: 'theta_{t+1} <- UpdateStorageBlock(theta_t, G_t, eta_eff, P)'},
-  {level: 1, text: 'log MetricsBlock(...)'},
-  {level: 1, text: 'theta_{t-1}, G_{t-1} <- theta_t, G_t'},
-  {level: 0, kind: 'kw', text: 'end for'},
-  {level: 0, kind: 'kw', text: 'return', rest: 'FitHistory(H)'},
+  {level: 0, parts: [kw('input'), text(' data '), math('X,Y'), text(', learning rate '), math('\\eta'), text(', controller settings, precision map '), math('P')]},
+  {level: 0, parts: [math('P \\leftarrow \\operatorname{ensure\\_precision\\_dict}(\\texttt{precision\\_dict})')]},
+  {level: 0, parts: [math('\\operatorname{validate\\_model}(P,\\operatorname{model})')]},
+  {level: 0, parts: [math('D \\leftarrow \\operatorname{batch}(\\operatorname{Dataset}(X,Y))')]},
+  {level: 0, parts: [kw('for'), text(' each epoch and batch '), kw('do')]},
+  {level: 1, parts: [math('\\theta_t \\leftarrow \\operatorname{flatten}(\\operatorname{trainable\\ variables})')]},
+  {level: 1, parts: [math('\\hat{y}_t,L_t,G_t \\leftarrow \\operatorname{ForwardGradientBlock}(\\operatorname{batch},P)')]},
+  {level: 1, parts: [math('C_t,S_t \\leftarrow \\operatorname{CurvatureProxyBlock}(\\theta_t,G_t)')]},
+  {level: 1, parts: [math('\\alpha_t,\\eta^{\\mathrm{eff}}_t \\leftarrow \\operatorname{ControllerBlock}(C_t,S_t,\\chi,\\eta)')]},
+  {level: 1, parts: [math('\\theta_{t+1} \\leftarrow \\operatorname{UpdateStorageBlock}(\\theta_t,G_t,\\eta^{\\mathrm{eff}}_t,P)')]},
+  {level: 1, parts: [math('\\operatorname{MetricsBlock}(\\ldots)')]},
+  {level: 1, parts: [math('\\theta_{t-1},G_{t-1} \\leftarrow \\theta_t,G_t')]},
+  {level: 0, parts: [kw('end for')]},
+  {level: 0, parts: [kw('return'), text(' '), math('\\operatorname{FitHistory}(H)')]},
 ];
 
 const blocks = {
@@ -24,19 +30,19 @@ const blocks = {
     subtitle: 'precision, loss, dataset',
     algorithmTitle: 'Setup: train_instrumented(...)',
     algorithm: [
-      {level: 0, text: 'P <- ensure_precision_dict(precision_dict)'},
-      {level: 0, text: 'validate_model(P, self.model)'},
-      {level: 0, text: 'X, Y <- float32(X), float32(Y)'},
-      {level: 0, text: 'loss_fn <- select_loss(loss_mode)'},
-      {level: 0, text: 'D <- batch(Dataset(X, Y), batch_size)'},
-      {level: 0, text: 'H <- empty history dictionary'},
+      {level: 0, parts: [math('P \\leftarrow \\operatorname{ensure\\_precision\\_dict}(\\texttt{precision\\_dict})')]},
+      {level: 0, parts: [math('\\operatorname{validate\\_model}(P,\\operatorname{self.model})')]},
+      {level: 0, parts: [math('X,Y \\leftarrow \\operatorname{float32}(X),\\operatorname{float32}(Y)')]},
+      {level: 0, parts: [math('\\ell \\leftarrow \\operatorname{select\\_loss}(\\texttt{loss\\_mode})')]},
+      {level: 0, parts: [math('D \\leftarrow \\operatorname{batch}(\\operatorname{Dataset}(X,Y),\\texttt{batch\\_size})')]},
+      {level: 0, parts: [math('H \\leftarrow \\{\\}'), text(' history dictionary')]},
     ],
     notes: 'precision_dict=None preserves the floating-point EXP-000A path.',
     nodes: [
-      ['Precision map', 'P'],
-      ['Validate names', 'model layers'],
-      ['Data tensors', 'X, Y'],
-      ['History store', 'H'],
+      {label: 'Precision map', detail: 'P'},
+      {label: 'Validate names', detail: 'model layers'},
+      {label: 'Data tensors', detail: 'X, Y'},
+      {label: 'History store', detail: 'H'},
     ],
   },
   step: {
@@ -44,20 +50,20 @@ const blocks = {
     subtitle: 'loss and gradients',
     algorithmTitle: 'Step Block: Forward And Gradient',
     algorithm: [
-      {level: 0, text: 'theta_t <- flatten(model.trainable_variables)'},
-      {level: 0, kind: 'kw', text: 'with', rest: 'GradientTape do'},
-      {level: 1, text: 'y_hat <- forward(x_b, P)'},
-      {level: 1, text: 'L_t <- loss_fn(y_b, y_hat)'},
-      {level: 0, kind: 'kw', text: 'end with'},
-      {level: 0, text: '{G_l}_l <- grad(L_t, {theta_l}_l)'},
-      {level: 0, text: 'G_t <- flatten({G_l}_l)'},
+      {level: 0, parts: [math('\\theta_t \\leftarrow \\operatorname{flatten}(\\texttt{model.trainable\\_variables})')]},
+      {level: 0, parts: [kw('with'), text(' '), code('GradientTape'), text(' '), kw('do')]},
+      {level: 1, parts: [math('\\hat{y}_b \\leftarrow \\operatorname{forward}(x_b,P)')]},
+      {level: 1, parts: [math('L_t \\leftarrow \\ell(y_b,\\hat{y}_b)')]},
+      {level: 0, parts: [kw('end with')]},
+      {level: 0, parts: [math('\\{G_l\\}_l \\leftarrow \\nabla_{\\{\\theta_l\\}_l} L_t')]},
+      {level: 0, parts: [math('G_t \\leftarrow \\operatorname{flatten}(\\{G_l\\}_l)')]},
     ],
     notes: 'When P is present, the forward path uses fake-quantized weights, activations, accumulators, and gradients.',
     nodes: [
-      ['theta_t', 'flatten variables'],
-      ['GradientTape', 'record forward'],
-      ['Loss', 'L_t'],
-      ['Gradients', 'G_t'],
+      {label: 'Flatten variables', detail: 'theta_t'},
+      {label: 'GradientTape', detail: 'record forward'},
+      {label: 'Loss', detail: 'L_t'},
+      {label: 'Gradients', detail: 'G_t'},
     ],
   },
   curvature: {
@@ -65,18 +71,18 @@ const blocks = {
     subtitle: 'C_t and EMA',
     algorithmTitle: 'Diagnostic: CurvatureProxy',
     algorithm: [
-      {level: 0, text: 'dG_t <- G_t - G_{t-1}'},
-      {level: 0, text: 'dtheta_t <- theta_t - theta_{t-1}'},
-      {level: 0, text: 'C_t <- ||dG_t||_2 / (||dtheta_t||_2 + eps)'},
-      {level: 0, text: 'S_t <- (1-rho) S_{t-1} + rho C_t'},
-      {level: 0, text: 'C_ctrl <- max(C_t, S_t)'},
+      {level: 0, parts: [math('\\Delta G_t \\leftarrow G_t-G_{t-1}')]},
+      {level: 0, parts: [math('\\Delta\\theta_t \\leftarrow \\theta_t-\\theta_{t-1}')]},
+      {level: 0, parts: [math('C_t \\leftarrow \\dfrac{\\lVert\\Delta G_t\\rVert_2}{\\lVert\\Delta\\theta_t\\rVert_2+\\varepsilon}')]},
+      {level: 0, parts: [math('S_t \\leftarrow (1-\\rho)S_{t-1}+\\rho C_t')]},
+      {level: 0, parts: [math('C^{\\mathrm{ctrl}}_t \\leftarrow \\max(C_t,S_t)')]},
     ],
     notes: 'This estimates local update-field sensitivity without computing the full Hessian.',
     nodes: [
-      ['Delta gradient', 'dG_t'],
-      ['Delta theta', 'dtheta_t'],
-      ['Proxy', 'C_t'],
-      ['EMA', 'S_t'],
+      {label: 'Delta gradient', detail: 'dG_t'},
+      {label: 'Delta theta', detail: 'dtheta_t'},
+      {label: 'Proxy', detail: 'C_t'},
+      {label: 'EMA', detail: 'S_t'},
     ],
   },
   controller: {
@@ -84,20 +90,20 @@ const blocks = {
     subtitle: 'alpha and eta_eff',
     algorithmTitle: 'Controller: GlobalThrottle',
     algorithm: [
-      {level: 0, text: 'alpha_would <- min(1, chi / (eta (C_ctrl + eps)))'},
-      {level: 0, kind: 'kw', text: 'if', rest: 'use_controller then'},
-      {level: 1, text: 'alpha_t <- alpha_would'},
-      {level: 0, kind: 'kw', text: 'else'},
-      {level: 1, text: 'alpha_t <- 1'},
-      {level: 0, kind: 'kw', text: 'end if'},
-      {level: 0, text: 'eta_eff <- alpha_t eta'},
+      {level: 0, parts: [math('\\alpha^{\\mathrm{would}}_t \\leftarrow \\min\\left(1,\\dfrac{\\chi}{\\eta(C^{\\mathrm{ctrl}}_t+\\varepsilon)}\\right)')]},
+      {level: 0, parts: [kw('if'), text(' '), code('use_controller'), text(' '), kw('then')]},
+      {level: 1, parts: [math('\\alpha_t \\leftarrow \\alpha^{\\mathrm{would}}_t')]},
+      {level: 0, parts: [kw('else')]},
+      {level: 1, parts: [math('\\alpha_t \\leftarrow 1')]},
+      {level: 0, parts: [kw('end if')]},
+      {level: 0, parts: [math('\\eta^{\\mathrm{eff}}_t \\leftarrow \\alpha_t\\eta')]},
     ],
     notes: 'Baseline runs still log alpha_would so intervention can be inspected offline.',
     nodes: [
-      ['Curvature input', 'C_ctrl'],
-      ['Would throttle', 'alpha_would'],
-      ['Switch', 'use_controller?'],
-      ['Effective LR', 'eta_eff'],
+      {label: 'Curvature input', detail: 'C_ctrl'},
+      {label: 'Would throttle', detail: 'alpha_would'},
+      {label: 'Controller switch', detail: 'use_controller?'},
+      {label: 'Effective LR', detail: 'eta_eff'},
     ],
   },
   update: {
@@ -105,23 +111,23 @@ const blocks = {
     subtitle: 'apply update',
     algorithmTitle: 'Update: FloatOrQuantizedStorage',
     algorithm: [
-      {level: 0, kind: 'kw', text: 'for', rest: 'each variable theta_l and gradient G_l do'},
-      {level: 1, text: 'Delta_l <- - eta_eff G_l'},
-      {level: 1, kind: 'kw', text: 'if', rest: 'update precision exists then'},
-      {level: 2, text: 'Delta_l <- Q_update,l(Delta_l)'},
-      {level: 1, kind: 'kw', text: 'end if'},
-      {level: 1, text: 'theta_l <- theta_l + Delta_l'},
-      {level: 1, kind: 'kw', text: 'if', rest: 'storage precision exists then'},
-      {level: 2, text: 'theta_l <- Q_storage,l(theta_l)'},
-      {level: 1, kind: 'kw', text: 'end if'},
-      {level: 0, kind: 'kw', text: 'end for'},
+      {level: 0, parts: [kw('for'), text(' each variable '), math('\\theta_l'), text(' and gradient '), math('G_l'), text(' '), kw('do')]},
+      {level: 1, parts: [math('\\Delta_l \\leftarrow -\\eta^{\\mathrm{eff}}_t G_l')]},
+      {level: 1, parts: [kw('if'), text(' update precision exists '), kw('then')]},
+      {level: 2, parts: [math('\\Delta_l \\leftarrow Q_{\\mathrm{update},l}(\\Delta_l)')]},
+      {level: 1, parts: [kw('end if')]},
+      {level: 1, parts: [math('\\theta_l \\leftarrow \\theta_l+\\Delta_l')]},
+      {level: 1, parts: [kw('if'), text(' storage precision exists '), kw('then')]},
+      {level: 2, parts: [math('\\theta_l \\leftarrow Q_{\\mathrm{storage},l}(\\theta_l)')]},
+      {level: 1, parts: [kw('end if')]},
+      {level: 0, parts: [kw('end for')]},
     ],
     notes: 'This is where update quantization and stored-weight quantization are enforced.',
     nodes: [
-      ['Raw delta', 'Delta_l'],
-      ['Update dtype?', 'Q_update'],
-      ['Assign', 'theta_l + Delta_l'],
-      ['Storage dtype?', 'Q_storage'],
+      {label: 'Raw delta', detail: 'Delta_l'},
+      {label: 'Update dtype?', detail: 'Q_update'},
+      {label: 'Assign', detail: 'theta_l + Delta_l'},
+      {label: 'Storage dtype?', detail: 'Q_storage'},
     ],
   },
   metrics: {
@@ -129,34 +135,58 @@ const blocks = {
     subtitle: 'logs and diagnostics',
     algorithmTitle: 'Metrics: LogStep',
     algorithm: [
-      {level: 0, text: 'log loss, rmse, theta_norm, grad_norm'},
-      {level: 0, text: 'log raw_update_norm and actual_update_norm'},
-      {level: 0, text: 'log curvature_proxy, curvature_ema, alpha, eta_eff'},
-      {level: 0, kind: 'kw', text: 'if', rest: 'Hessian metrics are available then'},
-      {level: 1, text: 'log lambda_max, margins, spectral radii'},
-      {level: 0, kind: 'kw', text: 'end if'},
-      {level: 0, kind: 'kw', text: 'if', rest: 'precision map is enabled then'},
-      {level: 1, text: 'log rail pressure and underflow statistics'},
-      {level: 0, kind: 'kw', text: 'end if'},
+      {level: 0, parts: [math('\\operatorname{log}(L_t,\\operatorname{rmse},\\lVert\\theta_t\\rVert_2,\\lVert G_t\\rVert_2)')]},
+      {level: 0, parts: [math('\\operatorname{log}(\\lVert\\Delta\\theta_{\\mathrm{raw}}\\rVert_2,\\lVert\\Delta\\theta_{\\mathrm{actual}}\\rVert_2)')]},
+      {level: 0, parts: [math('\\operatorname{log}(C_t,S_t,\\alpha_t,\\eta^{\\mathrm{eff}}_t)')]},
+      {level: 0, parts: [kw('if'), text(' Hessian metrics are available '), kw('then')]},
+      {level: 1, parts: [math('\\operatorname{log}(\\lambda_{\\max},\\operatorname{margins},\\rho(I-\\eta H))')]},
+      {level: 0, parts: [kw('end if')]},
+      {level: 0, parts: [kw('if'), text(' precision map is enabled '), kw('then')]},
+      {level: 1, parts: [math('\\operatorname{log}(\\operatorname{rail\\ pressure},\\operatorname{underflow})')]},
+      {level: 0, parts: [kw('end if')]},
     ],
     notes: 'The metrics table below defines the exact logged fields and interpretation.',
     nodes: [
-      ['Core logs', 'loss, norms'],
-      ['Controller logs', 'alpha, eta_eff'],
-      ['Stability logs', 'lambda, rho'],
-      ['Rail logs', 'saturation'],
+      {label: 'Core logs', detail: 'loss, norms'},
+      {label: 'Controller logs', detail: 'alpha, eta_eff'},
+      {label: 'Stability logs', detail: 'lambda, rho'},
+      {label: 'Rail logs', detail: 'saturation'},
     ],
   },
 };
 
-const topFlow = ['setup', 'step', 'curvature', 'controller', 'update', 'metrics'];
+const topFlow = ['step', 'curvature', 'controller', 'update', 'metrics'];
 
-function AlgorithmLine({line, index}) {
+function MathInline({latex}) {
+  const html = katex.renderToString(latex, {
+    displayMode: false,
+    throwOnError: false,
+    strict: false,
+  });
+
+  return <span className="pseudo-math" dangerouslySetInnerHTML={{__html: html}} />;
+}
+
+function AlgorithmPart({part}) {
+  if (part.type === 'kw') {
+    return <span className="pseudo-kw">{part.value}</span>;
+  }
+  if (part.type === 'code') {
+    return <code>{part.value}</code>;
+  }
+  if (part.type === 'math') {
+    return <MathInline latex={part.value} />;
+  }
+  return <>{part.value}</>;
+}
+
+function AlgorithmLine({line}) {
   return (
     <li>
       <span className={clsx(line.level > 0 && `pseudo-indent-${line.level}`)}>
-        {line.kind === 'kw' ? <span className="pseudo-kw">{line.text}</span> : line.text}
-        {line.rest ? ` ${line.rest}` : ''}
+        {line.parts.map((part, index) => (
+          <AlgorithmPart key={`${part.type}-${index}-${part.value}`} part={part} />
+        ))}
       </span>
     </li>
   );
@@ -169,7 +199,7 @@ function Algorithm({title, lines, caption}) {
       <div className="pseudo-code">
         <ol>
           {lines.map((line, index) => (
-            <AlgorithmLine key={`${title}-${index}`} line={line} index={index} />
+            <AlgorithmLine key={`${title}-${index}`} line={line} />
           ))}
         </ol>
       </div>
@@ -178,11 +208,12 @@ function Algorithm({title, lines, caption}) {
   );
 }
 
-function NodeButton({block, active, onClick}) {
+function FlowNode({block, top, active, onClick}) {
   return (
     <button
       type="button"
       className={clsx('train-flow__node', active && 'train-flow__node--active')}
+      style={{top}}
       onClick={onClick}
     >
       <strong>{block.label}</strong>
@@ -191,51 +222,82 @@ function NodeButton({block, active, onClick}) {
   );
 }
 
+function StaticNode({node, top}) {
+  return (
+    <div className={clsx('train-flow__node', 'train-flow__node--static')} style={{top}}>
+      <strong>{node.label}</strong>
+      <span>{node.detail}</span>
+    </div>
+  );
+}
+
 function TopDiagram({selected, setSelected}) {
   return (
     <div className="train-flow train-flow--top" aria-label="train_instrumented top-level flow">
-      <div className="train-flow__terminal">Start</div>
-      <div className="train-flow__arrow">↓</div>
-      <NodeButton block={blocks.setup} active={selected === 'setup'} onClick={() => setSelected('setup')} />
-      <div className="train-flow__arrow">↓</div>
-      <div className="train-flow__diamond">
+      <svg className="train-flow__edges" viewBox="0 0 420 980" aria-hidden="true">
+        <defs>
+          <marker id="train-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" />
+          </marker>
+        </defs>
+        <path d="M210 68 L210 110" />
+        <path d="M210 178 L210 218" />
+        <path d="M210 350 L210 394" />
+        <path d="M210 462 L210 506" />
+        <path d="M210 574 L210 618" />
+        <path d="M210 686 L210 730" />
+        <path d="M210 798 L210 842" />
+        <path d="M210 910 L210 938" />
+        <path className="train-flow__edge--true" d="M210 318 L210 350" />
+        <path className="train-flow__edge--false" d="M130 268 L58 268 L58 944 L116 944" />
+        <path className="train-flow__edge--loop" d="M304 868 L370 868 L370 268 L294 268" />
+      </svg>
+
+      <div className="train-flow__terminal" style={{top: 20}}>Start</div>
+      <FlowNode block={blocks.setup} top={118} active={selected === 'setup'} onClick={() => setSelected('setup')} />
+      <div className="train-flow__diamond" style={{top: 218}}>
         <strong>More batches?</strong>
         <span>epoch / batch loop</span>
       </div>
-      <div className="train-flow__branch train-flow__branch--true">true</div>
-      <div className="train-flow__pipeline">
-        {topFlow.slice(1).map((key, index) => (
-          <React.Fragment key={key}>
-            <NodeButton block={blocks[key]} active={selected === key} onClick={() => setSelected(key)} />
-            {index < topFlow.length - 2 && <div className="train-flow__arrow train-flow__arrow--inline">→</div>}
-          </React.Fragment>
-        ))}
-      </div>
-      <div className="train-flow__loop">loop back to next batch</div>
-      <div className="train-flow__branch train-flow__branch--false">false</div>
-      <div className="train-flow__terminal">Return FitHistory</div>
+      <div className="train-flow__branch train-flow__branch--true" style={{top: 324}}>true</div>
+      <div className="train-flow__branch train-flow__branch--false" style={{top: 246, left: 32}}>false</div>
+      {topFlow.map((key, index) => (
+        <FlowNode
+          key={key}
+          block={blocks[key]}
+          top={350 + index * 112}
+          active={selected === key}
+          onClick={() => setSelected(key)}
+        />
+      ))}
+      <div className="train-flow__branch train-flow__branch--loop" style={{top: 834}}>next batch</div>
+      <div className="train-flow__terminal" style={{top: 936}}>Return FitHistory</div>
     </div>
   );
 }
 
 function DetailDiagram({block}) {
+  const height = 210 + block.nodes.length * 112;
   return (
-    <div className="train-flow train-flow--detail">
-      <div className="train-flow__terminal">Enter {block.label}</div>
-      <div className="train-flow__arrow">↓</div>
-      <div className="train-flow__pipeline train-flow__pipeline--detail">
-        {block.nodes.map(([label, detail], index) => (
-          <React.Fragment key={`${label}-${detail}`}>
-            <div className="train-flow__node train-flow__node--static">
-              <strong>{label}</strong>
-              <span>{detail}</span>
-            </div>
-            {index < block.nodes.length - 1 && <div className="train-flow__arrow train-flow__arrow--inline">→</div>}
-          </React.Fragment>
+    <div className="train-flow train-flow--detail" style={{height}}>
+      <svg className="train-flow__edges" viewBox={`0 0 420 ${height}`} aria-hidden="true">
+        <defs>
+          <marker id="train-arrow-detail" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" />
+          </marker>
+        </defs>
+        <path d="M210 68 L210 110" />
+        {block.nodes.map((_, index) => (
+          <path key={`edge-${index}`} d={`M210 ${178 + index * 112} L210 ${222 + index * 112}`} />
         ))}
+      </svg>
+      <div className="train-flow__terminal" style={{top: 20}}>Enter {block.label}</div>
+      {block.nodes.map((node, index) => (
+        <StaticNode key={`${node.label}-${node.detail}`} node={node} top={118 + index * 112} />
+      ))}
+      <div className="train-flow__terminal" style={{top: 118 + block.nodes.length * 112}}>
+        Exit {block.label}
       </div>
-      <div className="train-flow__arrow">↓</div>
-      <div className="train-flow__terminal">Exit {block.label}</div>
     </div>
   );
 }
