@@ -234,7 +234,7 @@ function StaticNode({node, top}) {
 function TopDiagram({selected, setSelected}) {
   return (
     <div className="train-flow train-flow--top" aria-label="train_instrumented top-level flow">
-      <svg className="train-flow__edges" viewBox="0 0 420 1190" aria-hidden="true">
+      <svg className="train-flow__edges" viewBox="0 0 420 1190" preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <marker id="train-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
             <path d="M 0 0 L 6 3 L 0 6 z" />
@@ -279,15 +279,15 @@ function DetailDiagram({block}) {
   const height = 210 + block.nodes.length * 112;
   return (
     <div className="train-flow train-flow--detail" style={{height}}>
-      <svg className="train-flow__edges" viewBox={`0 0 420 ${height}`} aria-hidden="true">
+      <svg className="train-flow__edges" viewBox={`0 0 420 ${height}`} preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <marker id="train-arrow-detail" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
             <path d="M 0 0 L 6 3 L 0 6 z" />
           </marker>
         </defs>
-        <path d="M210 68 L210 110" />
+        <path d="M210 90 L210 110" />
         {block.nodes.map((_, index) => (
-          <path key={`edge-${index}`} d={`M210 ${178 + index * 112} L210 ${222 + index * 112}`} />
+          <path key={`edge-${index}`} d={`M210 ${190 + index * 112} L210 ${222 + index * 112}`} />
         ))}
       </svg>
       <div className="train-flow__terminal" style={{top: 20}}>Enter {block.label}</div>

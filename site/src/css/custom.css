@@ -983,7 +983,8 @@
   align-items: center;
   justify-content: center;
   width: 13rem;
-  min-height: 4.1rem;
+  height: 4.1rem;
+  box-sizing: border-box;
   padding: 0.45rem 0.65rem;
   border: 2px solid var(--ifm-color-emphasis-400);
   background: var(--ifm-background-color);
@@ -995,7 +996,9 @@
 
 .train-flow__terminal {
   border-radius: 999px;
+  font-size: 0.98rem;
   font-weight: 800;
+  line-height: 1.18;
 }
 
 .train-flow__node {
