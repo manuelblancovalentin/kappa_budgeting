@@ -929,12 +929,25 @@
   position: relative;
   width: 420px;
   min-width: 420px;
-  height: 1260px;
+}
+
+.train-flow--top {
+  height: auto;
+  padding: 0 4.2rem;
+  overflow: hidden;
 }
 
 .train-flow--detail {
   height: auto;
   min-height: 650px;
+}
+
+.train-flow__stack {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .train-flow__edges {
@@ -977,9 +990,6 @@
 .train-flow__terminal,
 .train-flow__node,
 .train-flow__diamond {
-  position: absolute;
-  left: 50%;
-  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -992,6 +1002,13 @@
   color: var(--ifm-font-color-base);
   text-align: center;
   box-shadow: 0 3px 8px rgba(15, 23, 42, 0.12);
+}
+
+.train-flow--detail .train-flow__terminal,
+.train-flow--detail .train-flow__node,
+.train-flow--detail .train-flow__diamond {
+  position: absolute;
+  left: 50%;
   transform: translateX(-50%);
 }
 
@@ -1031,12 +1048,23 @@
   font-weight: 650;
 }
 
+.train-flow__diamond-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 10.8rem;
+  height: 10.8rem;
+}
+
 .train-flow__diamond {
   width: 8.8rem;
   height: 8.8rem;
-  min-height: 8.8rem;
   flex-direction: column;
   background: #fff7ed;
+  transform: rotate(45deg);
+}
+
+.train-flow--detail .train-flow__diamond {
   transform: translateX(-50%) rotate(45deg);
 }
 
@@ -1045,9 +1073,35 @@
   transform: rotate(-45deg);
 }
 
-.train-flow__branch {
+.train-flow__connector {
+  position: relative;
+  width: 2.2px;
+  height: 2.1rem;
+  background: var(--ifm-color-emphasis-600);
+}
+
+.train-flow__connector::after {
   position: absolute;
-  z-index: 2;
+  left: 50%;
+  bottom: -0.42rem;
+  width: 0;
+  height: 0;
+  border-left: 0.4rem solid transparent;
+  border-right: 0.4rem solid transparent;
+  border-top: 0.64rem solid var(--ifm-color-emphasis-700);
+  content: '';
+  transform: translateX(-50%);
+}
+
+.train-flow__connector--true {
+  background: #15803d;
+}
+
+.train-flow__connector--true::after {
+  border-top-color: #15803d;
+}
+
+.train-flow__branch {
   color: var(--ifm-color-emphasis-800);
   font-size: 0.8rem;
   font-weight: 850;
@@ -1055,17 +1109,85 @@
 }
 
 .train-flow__branch--true {
-  left: calc(50% + 1.1rem);
+  margin-top: -0.4rem;
+  margin-bottom: 0.25rem;
+  transform: translateX(2.4rem);
   color: #15803d;
 }
 
-.train-flow__branch--false {
+.train-flow__side-rail {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.train-flow__side-rail span {
+  position: absolute;
+  font-size: 0.8rem;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.train-flow__side-rail--false {
+  left: 1.1rem;
+  top: 15.7rem;
+  width: 5.1rem;
+  height: 41rem;
+  border-left: 2.2px solid #b91c1c;
+  border-top: 2.2px solid #b91c1c;
+  border-bottom: 2.2px solid #b91c1c;
+}
+
+.train-flow__side-rail--false::after {
+  position: absolute;
+  right: -0.55rem;
+  bottom: -0.42rem;
+  width: 0;
+  height: 0;
+  border-top: 0.4rem solid transparent;
+  border-bottom: 0.4rem solid transparent;
+  border-left: 0.65rem solid #b91c1c;
+  content: '';
+}
+
+.train-flow__side-rail--false span {
+  left: -0.2rem;
+  top: -1.35rem;
   color: #b91c1c;
 }
 
-.train-flow__branch--loop {
-  right: 0.35rem;
+.train-flow__side-rail--loop {
+  right: 1.1rem;
+  top: 15.7rem;
+  width: 5.1rem;
+  height: 34.9rem;
+  border-right: 2.2px solid var(--ifm-color-primary);
+  border-top: 2.2px solid var(--ifm-color-primary);
+  border-bottom: 2.2px solid var(--ifm-color-primary);
+}
+
+.train-flow__side-rail--loop::before {
+  position: absolute;
+  left: -0.55rem;
+  top: -0.42rem;
+  width: 0;
+  height: 0;
+  border-top: 0.4rem solid transparent;
+  border-bottom: 0.4rem solid transparent;
+  border-right: 0.65rem solid var(--ifm-color-primary);
+  content: '';
+}
+
+.train-flow__side-rail--loop span {
+  right: -0.4rem;
+  bottom: -1.55rem;
   color: var(--ifm-color-primary);
+}
+
+.train-flow__loop-spacer {
+  height: 2.4rem;
 }
 
 .pseudo-math .katex {
