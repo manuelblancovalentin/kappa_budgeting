@@ -75,7 +75,7 @@ That means global throttling preserves the direction of learning. It only change
 
 This is the key contrast:
 ```math
-\text{row/column κ projection}
+\text{row/column $\kappa$ projection}
 \Rightarrow
 \text{may rotate the update}
 ```

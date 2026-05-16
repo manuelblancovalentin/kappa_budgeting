@@ -26,7 +26,7 @@ This page explains the project to someone joining it for the first time.
 
 Build a small, reproducible ablation harness that separates two ideas:
 
-- static κ-budgeting as a representational gain rail,
+- static $\kappa$-budgeting as a representational gain rail,
 - dynamic global throttling as a closed-loop learning-stability controller.
 
 The goal is to understand when each mechanism helps, when it disrupts learning, and how to document the resulting methodology clearly enough for another collaborator to continue the work.

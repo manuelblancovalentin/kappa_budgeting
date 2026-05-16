@@ -14,7 +14,7 @@ import rehypeKatex from 'rehype-katex';
 const config = {
   title: 'Project Logbook',
   tagline: 'A living record of project status, experiments, decisions, and handoff notes.',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon-emoji.svg',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
