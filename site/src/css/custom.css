@@ -21,7 +21,9 @@
 
 
 .pseudo {
+  max-width: 100%;
   margin: 1.5rem 0;
+  overflow: hidden;
   border-top: 2px solid var(--ifm-color-emphasis-700);
   border-bottom: 2px solid var(--ifm-color-emphasis-700);
 }
@@ -34,6 +36,8 @@
 }
 
 .pseudo-code {
+  max-width: 100%;
+  overflow-x: auto;
   border-top: 1px solid var(--ifm-color-emphasis-300);
   border-bottom: 1px solid var(--ifm-color-emphasis-300);
   padding: 0.35rem 0;
@@ -41,6 +45,8 @@
 }
 
 .pseudo-code ol {
+  width: max-content;
+  min-width: calc(100% - 3.5rem);
   margin: 0;
   padding-left: 3.5rem;
 }
@@ -1145,7 +1151,7 @@
   left: 1.2rem;
   top: 18.7rem;
   width: 6.55rem;
-  height: 42.35rem;
+  height: 46.55rem;
   border-left: 2.2px solid #b91c1c;
   border-top: 2.2px solid #b91c1c;
   border-bottom: 2.2px solid #b91c1c;
@@ -1173,7 +1179,7 @@
   right: 1.2rem;
   top: 18.7rem;
   width: 6.55rem;
-  height: 34.45rem;
+  height: 36.75rem;
   border-right: 2.2px solid var(--ifm-color-primary);
   border-top: 2.2px solid var(--ifm-color-primary);
   border-bottom: 2.2px solid var(--ifm-color-primary);
@@ -1193,12 +1199,12 @@
 
 .train-flow__side-rail--loop span {
   right: -0.15rem;
-  bottom: -1.5rem;
+  bottom: -1.35rem;
   color: var(--ifm-color-primary);
 }
 
 .train-flow__loop-spacer {
-  height: 2.4rem;
+  height: 3.8rem;
 }
 
 .pseudo-math .katex {
