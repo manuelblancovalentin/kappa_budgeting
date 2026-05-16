@@ -856,3 +856,214 @@
 [data-theme='dark'] .project-timeline__task span {
   background: rgba(15, 23, 42, 0.42);
 }
+
+
+.train-explorer {
+  margin: 1.5rem 0;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 10px;
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.train-explorer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.train-explorer__header div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.train-explorer__header strong {
+  color: var(--ifm-heading-color);
+  font-size: 1rem;
+}
+
+.train-explorer__header span {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.86rem;
+}
+
+.train-explorer__back {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-color-emphasis-800);
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.train-explorer__back:hover {
+  background: var(--ifm-color-emphasis-200);
+}
+
+.train-explorer__body {
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.9fr) minmax(22rem, 1.1fr);
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.train-explorer__diagram {
+  min-width: 0;
+}
+
+.train-explorer__algorithm {
+  margin: 0;
+}
+
+.train-flow {
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.train-flow__terminal,
+.train-flow__node,
+.train-flow__diamond {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 8rem;
+  min-height: 3rem;
+  padding: 0.45rem 0.65rem;
+  border: 2px solid var(--ifm-color-emphasis-400);
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  text-align: center;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.12);
+}
+
+.train-flow__terminal {
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.train-flow__node {
+  flex-direction: column;
+  gap: 0.15rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.train-flow__node--static {
+  cursor: default;
+}
+
+.train-flow__node--active,
+.train-flow__node:hover {
+  border-color: var(--ifm-color-primary);
+  background: color-mix(in srgb, var(--ifm-color-primary-lightest) 18%, var(--ifm-background-color));
+}
+
+.train-flow__node strong,
+.train-flow__diamond strong {
+  font-size: 0.9rem;
+}
+
+.train-flow__node span,
+.train-flow__diamond span {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.train-flow__diamond {
+  width: 7.5rem;
+  height: 7.5rem;
+  min-width: 7.5rem;
+  min-height: 7.5rem;
+  flex-direction: column;
+  transform: rotate(45deg);
+  background: #fff7ed;
+}
+
+.train-flow__diamond > * {
+  transform: rotate(-45deg);
+}
+
+.train-flow__arrow {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.train-flow__arrow--inline {
+  display: flex;
+  align-items: center;
+  padding: 0 0.1rem;
+}
+
+.train-flow__pipeline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  max-width: 100%;
+}
+
+.train-flow__pipeline--detail {
+  gap: 0.5rem;
+}
+
+.train-flow__branch {
+  font-size: 0.8rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.train-flow__branch--true {
+  color: #15803d;
+}
+
+.train-flow__branch--false {
+  color: #b91c1c;
+}
+
+.train-flow__loop {
+  width: 70%;
+  border-top: 2px solid var(--ifm-color-emphasis-400);
+  border-right: 2px solid var(--ifm-color-emphasis-400);
+  border-radius: 0 12px 0 0;
+  padding-top: 0.35rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-align: right;
+}
+
+@media (max-width: 980px) {
+  .train-explorer__body {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .train-explorer {
+    overflow-x: auto;
+  }
+
+  .train-explorer__body,
+  .train-explorer__header {
+    min-width: 46rem;
+  }
+}
+
+[data-theme='dark'] .train-explorer {
+  box-shadow: none;
+}
+
+[data-theme='dark'] .train-flow__diamond {
+  background: rgba(251, 146, 60, 0.14);
+}

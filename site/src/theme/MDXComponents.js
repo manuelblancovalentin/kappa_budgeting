@@ -6,8 +6,7 @@ import TBox from '@site/src/components/TBox';
 import BrandName from '@site/src/components/BrandName';
 import Terminal from '@site/src/components/Terminal';
 import ProjectTimeline from '@site/src/components/ProjectTimeline';
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+import TrainInstrumentedExplorer from '@site/src/components/TrainInstrumentedExplorer';
 
 export default {
   ...MDXComponents,
@@ -21,6 +20,5 @@ export default {
   enabol: BrandName,
   Terminal,
   ProjectTimeline,
-  Tabs,
-  TabItem,
+  TrainInstrumentedExplorer,
 };
