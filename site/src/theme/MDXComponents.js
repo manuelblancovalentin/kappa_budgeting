@@ -7,6 +7,7 @@ import BrandName from '@site/src/components/BrandName';
 import Terminal from '@site/src/components/Terminal';
 import ProjectTimeline from '@site/src/components/ProjectTimeline';
 import TrainInstrumentedExplorer from '@site/src/components/TrainInstrumentedExplorer';
+import Figure from '@site/src/components/Figure';
 
 export default {
   ...MDXComponents,
@@ -21,4 +22,5 @@ export default {
   Terminal,
   ProjectTimeline,
   TrainInstrumentedExplorer,
+  Figure,
 };
