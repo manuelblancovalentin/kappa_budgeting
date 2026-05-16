@@ -220,7 +220,22 @@ This is the main ablation loop.
 | `reference_A` | Teacher matrix for one-layer weight error. |
 | `precision_dict` | Optional `PrecisionDict`; `None` means full floating point. |
 
-##### Setup Block
+##### Training Loop Structure
+
+The instrumented loop is easier to read as five connected blocks. The diagram is the reference flow; the tabbed algorithms underneath expand each block without forcing every pseudo-code listing to be visible at once.
+
+```mermaid
+flowchart LR
+    SETUP["Setup\nprecision, loss, dataset"] --> STEP["Forward + Gradient\nloss and G_t"]
+    STEP --> CURV["Curvature Proxy\nC_t and EMA"]
+    CURV --> CTRL["Controller\nalpha_t and eta_eff"]
+    CTRL --> UPDATE["Update + Storage\napply delta theta"]
+    UPDATE --> METRICS["Metrics\nlogs and diagnostics"]
+    METRICS --> STEP
+```
+
+<Tabs groupId="train-instrumented-blocks">
+<TabItem value="setup" label="Setup" default>
 
 <div className="pseudo">
   <div className="pseudo-title">Setup: `train_instrumented(...)`</div>
@@ -245,7 +260,8 @@ precision_dict=None
 
 must preserve the original EXP-000A behavior.
 
-##### Main Step Block
+</TabItem>
+<TabItem value="step" label="Forward + Gradient">
 
 <div className="pseudo">
   <div className="pseudo-title">Step Block: Forward And Gradient</div>
@@ -263,7 +279,8 @@ must preserve the original EXP-000A behavior.
   <div className="pseudo-caption">If a `PrecisionDict` is present, the forward path uses `_forward_with_precision(...)` and gradients later pass through `_quantize_gradients(...)`.</div>
 </div>
 
-##### Curvature Proxy Block
+</TabItem>
+<TabItem value="curvature" label="Curvature">
 
 <div className="pseudo">
   <div className="pseudo-title">Diagnostic: CurvatureProxy</div>
@@ -279,7 +296,8 @@ must preserve the original EXP-000A behavior.
   <div className="pseudo-caption">The controller uses the larger of the instantaneous proxy and the EMA-smoothed proxy.</div>
 </div>
 
-##### Controller Block
+</TabItem>
+<TabItem value="controller" label="Controller">
 
 <div className="pseudo">
   <div className="pseudo-title">Controller: GlobalThrottle</div>
@@ -297,7 +315,8 @@ must preserve the original EXP-000A behavior.
   <div className="pseudo-caption">Baseline runs still log $\alpha^{\mathrm{would}}_t$ so we can see whether the controller would have intervened.</div>
 </div>
 
-##### Update Block
+</TabItem>
+<TabItem value="update" label="Update + Storage">
 
 <div className="pseudo">
   <div className="pseudo-title">Update: FloatOrQuantizedStorage</div>
@@ -318,45 +337,48 @@ must preserve the original EXP-000A behavior.
   <div className="pseudo-caption">This is where update quantization and stored-weight quantization happen.</div>
 </div>
 
+</TabItem>
+</Tabs>
+
 ##### Metric Block
 
-The loop logs:
+The loop returns a `FitHistory` whose keys are grouped by what they diagnose. The exact set of populated metrics depends on whether `reference_A`, analytic Hessian logging, and `precision_dict` are enabled.
 
-```text
-loss
-rmse
-theta_norm
-grad_norm
-raw_update_norm
-actual_update_norm
-update_cosine
-update_angle_rad
-update_radius_ratio
-curvature_proxy
-curvature_ema
-alpha
-alpha_would
-eta_eff
-forward_gain_spectral
-hessian_lambda_max
-stability_margin_lambda_raw
-stability_margin_lambda_ctrl
-spectral_radius_raw
-spectral_radius_ctrl
-weight_error_fro
-finite/divergence flags
-```
+| Metric | Symbol / expression | What it measures | Notes |
+|---|---|---|---|
+| `loss` | $L_t$ | Current batch loss. | Usually `half_mse` in clean Hessian experiments. |
+| `rmse` | $\sqrt{\operatorname{MSE}}$ | Output error scale. | Easier to read than raw loss. |
+| `theta_norm` | $\lVert \theta_t \rVert_2$ | Global parameter magnitude. | Detects growth or collapse. |
+| `grad_norm` | $\lVert G_t \rVert_2$ | Global gradient magnitude. | Detects exploding or vanishing gradients. |
+| `raw_update_norm` | $\lVert \Delta\theta_{\mathrm{raw}} \rVert_2$ | Intended update magnitude before storage effects. | Uses the throttled raw update direction. |
+| `actual_update_norm` | $\lVert \theta_{t+1}-\theta_t \rVert_2$ | Applied update magnitude after quantization/storage. | Detects silent update underflow. |
+| `update_cosine` | $\cos(\Delta\theta_{\mathrm{actual}},\Delta\theta_{\mathrm{raw}})$ | Direction preservation. | Near `1` means little update rotation. |
+| `update_angle_rad` | $\beta_t=\arccos(\cos_t)$ | Angular distortion in radians. | Used by phase-style plots. |
+| `update_radius_ratio` | $r_t=\lVert\Delta\theta_{\mathrm{actual}}\rVert_2/(\lVert\Delta\theta_{\mathrm{raw}}\rVert_2+\varepsilon)$ | Applied-vs-intended update radius. | Values near `0` indicate update death. |
+| `curvature_proxy` | $C_t=\lVert G_t-G_{t-1}\rVert/(\lVert\theta_t-\theta_{t-1}\rVert+\varepsilon)$ | Online curvature/update-field sensitivity proxy. | Controller input candidate. |
+| `curvature_ema` | $S_t$ | Smoothed curvature proxy. | Reduces step-to-step noise. |
+| `alpha` | $\alpha_t$ | Applied global throttle. | `1` in baseline mode. |
+| `alpha_would` | $\alpha^{\mathrm{would}}_t$ | Controller value that would be applied. | Logged even when controller is disabled. |
+| `eta_eff` | $\eta^{\mathrm{eff}}_t=\alpha_t\eta$ | Effective learning rate. | Compare against stability bounds. |
+| `forward_gain_spectral` | approximate $\prod_l \lVert W_l\rVert_2$ | Forward gain proxy. | Static gain diagnostic, not the closed-loop condition. |
+| `hessian_lambda_max` | $\lambda_{\max}(H_t)$ | True local curvature when available. | Exact only for supported toy cases. |
+| `stability_margin_lambda_raw` | $\eta\lambda_{\max}(H_t)$ | Raw SGD stability margin. | Quadratic stability boundary is near `2`. |
+| `stability_margin_lambda_ctrl` | $\alpha_t\eta\lambda_{\max}(H_t)$ | Throttled stability margin. | Should stay below the boundary in stable controller runs. |
+| `spectral_radius_raw` | $\rho(I-\eta H_t)$ | Raw local update-map spectral radius. | Stable if below `1` in the quadratic local model. |
+| `spectral_radius_ctrl` | $\rho(I-\alpha_t\eta H_t)$ | Throttled local update-map spectral radius. | Controller should reduce this when curvature rises. |
+| `weight_error_fro` | $\lVert W_t-A\rVert_F$ | Teacher-weight error. | Only meaningful when `reference_A` is supplied. |
+| finite/divergence flags | boolean indicators | Numerical run health. | Used to stop or label unstable trajectories. |
 
-With quantization enabled, it also logs:
+With quantization enabled, the loop also logs rail-pressure maxima:
 
-```text
-weight_saturation_fraction_max
-weight_near_rail_fraction_max
-gradient_saturation_fraction_max
-gradient_near_rail_fraction_max
-update_saturation_fraction_max
-update_underflow_fraction_max
-```
+| Metric | What it measures | Interpretation |
+|---|---|---|
+| `weight_saturation_fraction_max` | Max fraction of weights at fixed-point rails. | High values mean storage rails are active. |
+| `weight_near_rail_fraction_max` | Max fraction of weights near rails. | Early warning before saturation. |
+| `gradient_saturation_fraction_max` | Max fraction of gradients at rails. | Indicates gradient clipping by dtype. |
+| `gradient_near_rail_fraction_max` | Max fraction of gradients near rails. | Early warning for gradient rail pressure. |
+| `update_saturation_fraction_max` | Max fraction of updates at rails. | Indicates update dtype is too tight or learning rate too high. |
+| `update_underflow_fraction_max` | Max fraction of nonzero updates below half a quantum. | Indicates learning may silently die. |
 
 ##### Update Geometry Diagnostics
 
