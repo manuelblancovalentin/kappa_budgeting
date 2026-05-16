@@ -62,15 +62,15 @@ At each online step:
   <div className="pseudo-title">Algorithm 1: DynamicGlobalThrottle</div>
   <div className="pseudo-code">
 
-1. **input** current parameters $\theta(t)$, gradient $G(t)$, learning rate $\eta$
-2. **input** previous parameters $\theta(t-1)$, previous gradient $G(t-1)$
+1. <span className="pseudo-kw">input</span> current parameters $\theta(t)$, gradient $G(t)$, learning rate $\eta$
+2. <span className="pseudo-kw">input</span> previous parameters $\theta(t-1)$, previous gradient $G(t-1)$
 3. $\Delta_{\mathrm{raw}}(t) \leftarrow -\eta G(t)$
 4. $C(t) \leftarrow \dfrac{\lVert G(t) - G(t-1) \rVert}{\lVert \theta(t) - \theta(t-1) \rVert + \varepsilon}$ <span className="comment">curvature proxy</span>
 5. $S(t) \leftarrow \operatorname{EMA}(C(t))$
 6. $\alpha(t) \leftarrow \operatorname{clamp}\left(\dfrac{1}{1 + \beta S(t)}, \alpha_{\min}, 1\right)$
 7. $\Delta_{\mathrm{actual}}(t) \leftarrow \alpha(t)\Delta_{\mathrm{raw}}(t)$
 8. $\theta(t+1) \leftarrow \theta(t) + \Delta_{\mathrm{actual}}(t)$
-9. **return** $\theta(t+1)$, $\alpha(t)$, $C(t)$
+9. <span className="pseudo-kw">return</span> $\theta(t+1)$, $\alpha(t)$, $C(t)$
 
   </div>
   <div className="pseudo-caption">The scalar $\alpha(t)$ is shared globally across all layers.</div>

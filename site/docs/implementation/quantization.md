@@ -196,23 +196,27 @@ def _quantize_tensor_value(x: tf.Tensor, dtype: HLSDataType) -> tf.Tensor:
 
 Converts a TensorFlow tensor into the scaled integer domain, rounds it, applies overflow behavior, and scales it back.
 
-For fixed-point types:
+<div className="pseudo">
+  <div className="pseudo-title">Algorithm: TensorFixedPointQuantize</div>
+  <div className="pseudo-code">
 
-```math
-x_{scaled} = x \cdot 2^F,
-```
+1. <span className="pseudo-kw">if</span> dtype is fixed-point <span className="pseudo-kw">then</span>
+2. <span className="pseudo-indent-1">$s \leftarrow 2^{WL-IWL}$</span>
+3. <span className="pseudo-kw">else</span>
+4. <span className="pseudo-indent-1">$s \leftarrow 1$</span>
+5. <span className="pseudo-kw">end if</span>
+6. $x_s \leftarrow x \cdot s$
+7. $z \leftarrow \operatorname{round}_{QMODE}(x_s)$
+8. <span className="pseudo-kw">if</span> `OMODE == AP_WRAP` <span className="pseudo-kw">then</span>
+9. <span className="pseudo-indent-1">$z_q \leftarrow \operatorname{wrap}(z, WL)$</span>
+10. <span className="pseudo-kw">else if</span> `OMODE` is saturation-like <span className="pseudo-kw">then</span>
+11. <span className="pseudo-indent-1">$z_q \leftarrow \operatorname{clip}(z, WL)$</span>
+12. <span className="pseudo-kw">end if</span>
+13. <span className="pseudo-kw">return</span> $z_q / s$
 
-where:
-
-```math
-F = WL - IWL.
-```
-
-Then:
-
-```math
-q = \frac{\operatorname{overflow}(\operatorname{round}(x_{scaled}))}{2^F}.
-```
+  </div>
+  <div className="pseudo-caption">This mirrors the NumPy dtype path but operates on TensorFlow tensors inside the training loop.</div>
+</div>
 
 Supported dtype families:
 
@@ -326,8 +330,15 @@ precision = PrecisionDict({
 
 When adding a new dtype behavior, keep these three paths synchronized:
 
-1. NumPy dtype behavior in [`dtypes.py`](./dtypes.md),
-2. TensorFlow fake-quantization behavior in this module,
-3. documentation and tests that compare both implementations on the same values.
+<div className="pseudo">
+  <div className="pseudo-title">Checklist: AddQuantizationBehavior</div>
+  <div className="pseudo-code">
 
-If those paths diverge, the software ablations can stop representing the intended hardware arithmetic.
+1. Update NumPy dtype behavior in [`dtypes.py`](./dtypes.md)
+2. Update TensorFlow fake-quantization behavior in `quantization.py`
+3. Add tests comparing both implementations on the same input values
+4. Update the implementation documentation and any affected experiment notes
+
+  </div>
+  <div className="pseudo-caption">If these paths diverge, software ablations can stop representing the intended hardware arithmetic.</div>
+</div>

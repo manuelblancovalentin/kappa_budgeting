@@ -222,14 +222,20 @@ This is the main ablation loop.
 
 ##### Setup Block
 
-The method:
+<div className="pseudo">
+  <div className="pseudo-title">Setup: `train_instrumented(...)`</div>
+  <div className="pseudo-code">
 
-1. Converts `precision_dict` using `ensure_precision_dict`.
-2. Validates precision names against the Keras model.
-3. Converts `X` and `Y` to `np.float32`.
-4. Selects the loss function.
-5. Creates a batched `tf.data.Dataset`.
-6. Allocates the `history` dictionary.
+1. $P \leftarrow \operatorname{ensure\_precision\_dict}(\texttt{precision\_dict})$
+2. $\operatorname{validate\_model}(P, \texttt{self.model})$
+3. $X, Y \leftarrow \operatorname{float32}(X), \operatorname{float32}(Y)$
+4. $\ell \leftarrow \operatorname{select\_loss}(\texttt{loss\_mode})$
+5. $D \leftarrow \operatorname{batch}(\operatorname{Dataset}(X, Y), \texttt{batch\_size})$
+6. $H \leftarrow \{\}$ <span className="comment">history dictionary</span>
+
+  </div>
+  <div className="pseudo-caption">When `precision_dict=None`, this setup must preserve the original floating-point EXP-000A behavior.</div>
+</div>
 
 Backward compatibility rule:
 
@@ -241,71 +247,76 @@ must preserve the original EXP-000A behavior.
 
 ##### Main Step Block
 
-At each batch:
+<div className="pseudo">
+  <div className="pseudo-title">Step Block: Forward And Gradient</div>
+  <div className="pseudo-code">
 
-```text
-theta_before = flatten(model.trainable_variables)
+1. $\theta_t \leftarrow \operatorname{flatten}(\texttt{model.trainable\_variables})$
+2. <span className="pseudo-kw">with</span> `GradientTape` <span className="pseudo-kw">do</span>
+3. <span className="pseudo-indent-1">$\hat{y}_b \leftarrow \operatorname{forward}(x_b, P)$</span>
+4. <span className="pseudo-indent-1">$L_t \leftarrow \ell(y_b, \hat{y}_b)$</span>
+5. <span className="pseudo-kw">end with</span>
+6. $\{G_l\}_l \leftarrow \nabla_{\{\theta_l\}_l} L_t$
+7. $G_t \leftarrow \operatorname{flatten}(\{G_l\}_l)$
 
-with GradientTape:
-    y_pred = forward(...)
-    loss = loss_fn(y_batch, y_pred)
-
-grads = tape.gradient(loss, trainable_vars)
-grad_flat = flatten(grads)
-```
-
-If `precision_dict` is present, the forward path uses `_forward_with_precision()` and gradients are passed through `_quantize_gradients()`.
+  </div>
+  <div className="pseudo-caption">If a `PrecisionDict` is present, the forward path uses `_forward_with_precision(...)` and gradients later pass through `_quantize_gradients(...)`.</div>
+</div>
 
 ##### Curvature Proxy Block
 
-```python
-dG = grad_flat - prev_grad
-dtheta = theta_before - prev_theta
-C = ||dG|| / (||dtheta|| + eps)
-```
+<div className="pseudo">
+  <div className="pseudo-title">Diagnostic: CurvatureProxy</div>
+  <div className="pseudo-code">
 
-This estimates directional update-field sensitivity.
+1. $\Delta G_t \leftarrow G_t - G_{t-1}$
+2. $\Delta \theta_t \leftarrow \theta_t - \theta_{t-1}$
+3. $C_t \leftarrow \dfrac{\lVert \Delta G_t \rVert_2}{\lVert \Delta \theta_t \rVert_2 + \varepsilon}$ <span className="comment">directional update-field sensitivity</span>
+4. $S_t \leftarrow (1-\rho)S_{t-1}+\rho C_t$
+5. $C^{\mathrm{ctrl}}_t \leftarrow \max(C_t, S_t)$
 
-EMA:
-
-```python
-curvature_ema = (1-rho) * curvature_ema + rho * curvature_proxy
-```
-
-Control signal:
-
-```python
-curvature_for_control = max(curvature_proxy, curvature_ema)
-```
+  </div>
+  <div className="pseudo-caption">The controller uses the larger of the instantaneous proxy and the EMA-smoothed proxy.</div>
+</div>
 
 ##### Controller Block
 
-```python
-alpha_would = min(1.0, chi / (eta * (curvature_for_control + eps)))
-alpha = alpha_would if use_controller else 1.0
-eta_eff = alpha * eta
-```
+<div className="pseudo">
+  <div className="pseudo-title">Controller: GlobalThrottle</div>
+  <div className="pseudo-code">
 
-If `use_controller=False`, the loop still logs `alpha_would` so we can see whether the controller would have intervened.
+1. $\alpha^{\mathrm{would}}_t \leftarrow \min\left(1, \dfrac{\chi}{\eta(C^{\mathrm{ctrl}}_t+\varepsilon)}\right)$
+2. <span className="pseudo-kw">if</span> `use_controller` <span className="pseudo-kw">then</span>
+3. <span className="pseudo-indent-1">$\alpha_t \leftarrow \alpha^{\mathrm{would}}_t$</span>
+4. <span className="pseudo-kw">else</span>
+5. <span className="pseudo-indent-1">$\alpha_t \leftarrow 1$</span>
+6. <span className="pseudo-kw">end if</span>
+7. $\eta^{\mathrm{eff}}_t \leftarrow \alpha_t\eta$
+
+  </div>
+  <div className="pseudo-caption">Baseline runs still log $\alpha^{\mathrm{would}}_t$ so we can see whether the controller would have intervened.</div>
+</div>
 
 ##### Update Block
 
-Floating-point path:
+<div className="pseudo">
+  <div className="pseudo-title">Update: FloatOrQuantizedStorage</div>
+  <div className="pseudo-code">
 
-```python
-var.assign_sub(eta_eff * grad)
-```
+1. <span className="pseudo-kw">for</span> each trainable variable $\theta_l$ and gradient $G_l$ <span className="pseudo-kw">do</span>
+2. <span className="pseudo-indent-1">$\Delta_l \leftarrow -\eta^{\mathrm{eff}}_t G_l$</span>
+3. <span className="pseudo-indent-1"><span className="pseudo-kw">if</span> update precision exists <span className="pseudo-kw">then</span></span>
+4. <span className="pseudo-indent-2">$\Delta_l \leftarrow Q_{\mathrm{update},l}(\Delta_l)$</span>
+5. <span className="pseudo-indent-1"><span className="pseudo-kw">end if</span></span>
+6. <span className="pseudo-indent-1">$\theta_l \leftarrow \theta_l + \Delta_l$</span>
+7. <span className="pseudo-indent-1"><span className="pseudo-kw">if</span> storage precision exists <span className="pseudo-kw">then</span></span>
+8. <span className="pseudo-indent-2">$\theta_l \leftarrow Q_{\mathrm{storage},l}(\theta_l)$</span>
+9. <span className="pseudo-indent-1"><span className="pseudo-kw">end if</span></span>
+10. <span className="pseudo-kw">end for</span>
 
-Quantized path:
-
-```python
-delta = -eta_eff * grad
-delta = quantize_tensor(delta, update_dtype, ste=False)
-var.assign_add(delta)
-self._quantize_variable_storage(var, precision)
-```
-
-This is where update quantization and stored-weight quantization happen.
+  </div>
+  <div className="pseudo-caption">This is where update quantization and stored-weight quantization happen.</div>
+</div>
 
 ##### Metric Block
 

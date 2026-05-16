@@ -28,7 +28,9 @@
 
 .pseudo-title {
   padding: 0.45rem 0.75rem;
-  font-weight: 600;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.02rem;
+  font-weight: 800;
 }
 
 .pseudo-code {
@@ -49,7 +51,8 @@
 
 .pseudo-code li {
   position: relative;
-  margin: 0.2rem 0;
+  min-height: 1.65rem;
+  margin: 0.12rem 0;
   padding-left: 0.25rem;
   list-style: none;
 }
@@ -68,6 +71,38 @@
   counter-increment: pseudo-line;
   font-variant-numeric: tabular-nums;
   text-align: right;
+}
+
+
+.pseudo-kw {
+  font-weight: 800;
+}
+
+.pseudo-indent-1,
+.pseudo-indent-2 {
+  display: inline-block;
+  position: relative;
+  min-height: 1.45rem;
+  padding-left: 0.85rem;
+}
+
+.pseudo-indent-1 {
+  margin-left: 1.55rem;
+}
+
+.pseudo-indent-2 {
+  margin-left: 3.1rem;
+}
+
+.pseudo-indent-1::before,
+.pseudo-indent-2::before {
+  position: absolute;
+  top: -0.45rem;
+  bottom: -0.45rem;
+  left: 0;
+  width: 1px;
+  background: var(--ifm-color-emphasis-400);
+  content: "";
 }
 
 .pseudo-code .comment {

@@ -161,13 +161,25 @@ def _quantize_np(
     ...
 ```
 
-Shared NumPy quantization backend. Steps:
+Shared NumPy quantization backend.
 
-1. Convert input to float NumPy array.
-2. Scale by `2^F`.
-3. Round according to `QMODE`.
-4. Overflow according to `OMODE`.
-5. Return either raw integer storage or dequantized real values.
+<div className="pseudo">
+  <div className="pseudo-title">Algorithm: NumPyFixedPointQuantize</div>
+  <div className="pseudo-code">
+
+1. $x \leftarrow \operatorname{asarray}(\texttt{value}, \texttt{float})$
+2. $F \leftarrow WL - IWL$
+3. $x_s \leftarrow x \cdot 2^F$
+4. $z \leftarrow \operatorname{round}_{QMODE}(x_s)$
+5. $z_q \leftarrow \operatorname{overflow}_{OMODE}(z, WL, \texttt{signed})$
+6. <span className="pseudo-kw">if</span> `return_int` <span className="pseudo-kw">then</span>
+7. <span className="pseudo-indent-1"><span className="pseudo-kw">return</span> $z_q$</span>
+8. <span className="pseudo-kw">end if</span>
+9. <span className="pseudo-kw">return</span> $z_q / 2^F$
+
+  </div>
+  <div className="pseudo-caption">This is the NumPy reference path used by dtype objects such as `ap_fixed(...)`.</div>
+</div>
 
 Usage through a dtype object:
 
