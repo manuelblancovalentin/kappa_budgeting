@@ -5,6 +5,7 @@ import Todo from '@site/src/components/Todo';
 import TBox from '@site/src/components/TBox';
 import BrandName from '@site/src/components/BrandName';
 import Terminal from '@site/src/components/Terminal';
+import ProjectTimeline from '@site/src/components/ProjectTimeline';
 
 export default {
   ...MDXComponents,
@@ -17,4 +18,5 @@ export default {
   ENABOL: BrandName,
   enabol: BrandName,
   Terminal,
+  ProjectTimeline,
 };

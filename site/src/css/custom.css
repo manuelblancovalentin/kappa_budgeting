@@ -568,3 +568,256 @@
   border-bottom-color: #2f3742;
   background: linear-gradient(#f7f7f7, #dfe3e7);
 }
+
+
+.project-timeline {
+  margin: 1.5rem 0;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 10px;
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.project-timeline__summary {
+  display: block;
+  padding: 1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.project-timeline__summary::-webkit-details-marker {
+  display: none;
+}
+
+.project-timeline__summary-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+}
+
+.project-timeline__title {
+  color: var(--ifm-heading-color);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.project-timeline__percent {
+  color: var(--ifm-color-emphasis-700);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.project-timeline__bar {
+  display: flex;
+  min-height: 2.8rem;
+  overflow: hidden;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.project-timeline__segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5rem;
+  padding: 0.45rem 0.55rem;
+  border-right: 1px solid rgba(15, 23, 42, 0.16);
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.project-timeline__segment:last-child {
+  border-right: 0;
+}
+
+.project-timeline__segment--done,
+.project-timeline__segment--complete,
+.project-timeline__segment--completed,
+.project-timeline__segment--valid {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.project-timeline__segment--active,
+.project-timeline__segment--running,
+.project-timeline__segment--inprogress,
+.project-timeline__segment--in-progress {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.project-timeline__segment--blocked,
+.project-timeline__segment--failing {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.project-timeline__segment--planned {
+  background: repeating-linear-gradient(
+    135deg,
+    #f1f5f9,
+    #f1f5f9 8px,
+    #e2e8f0 8px,
+    #e2e8f0 16px
+  );
+  color: #475569;
+}
+
+.project-timeline__expanded {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.project-timeline__months,
+.project-timeline__row {
+  display: grid;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.project-timeline__months {
+  position: sticky;
+  top: var(--ifm-navbar-height);
+  z-index: 1;
+  padding: 0.8rem 0 0.45rem;
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.project-timeline__months span:not(:first-child) {
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  text-align: center;
+}
+
+.project-timeline__rows {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.project-timeline__row {
+  min-height: 4.2rem;
+}
+
+.project-timeline__row-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  color: var(--ifm-heading-color);
+  font-weight: 800;
+}
+
+.project-timeline__row-label small {
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.project-timeline__task {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  min-height: 3.3rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 8px;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.project-timeline__task span {
+  display: inline-flex;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.project-timeline__task--done,
+.project-timeline__task--complete,
+.project-timeline__task--completed,
+.project-timeline__task--valid {
+  border-color: #86efac;
+  background: #dcfce7;
+}
+
+.project-timeline__task--active,
+.project-timeline__task--running,
+.project-timeline__task--inprogress,
+.project-timeline__task--in-progress {
+  border-color: #93c5fd;
+  background: #dbeafe;
+}
+
+.project-timeline__task--blocked,
+.project-timeline__task--failing {
+  border-color: #fca5a5;
+  background: #fee2e2;
+}
+
+@media (max-width: 760px) {
+  .project-timeline {
+    overflow-x: auto;
+  }
+
+  .project-timeline__summary,
+  .project-timeline__expanded {
+    min-width: 44rem;
+  }
+}
+
+[data-theme='dark'] .project-timeline {
+  box-shadow: none;
+}
+
+[data-theme='dark'] .project-timeline__segment--done,
+[data-theme='dark'] .project-timeline__segment--complete,
+[data-theme='dark'] .project-timeline__segment--completed,
+[data-theme='dark'] .project-timeline__segment--valid,
+[data-theme='dark'] .project-timeline__task--done,
+[data-theme='dark'] .project-timeline__task--complete,
+[data-theme='dark'] .project-timeline__task--completed,
+[data-theme='dark'] .project-timeline__task--valid {
+  background: rgba(34, 197, 94, 0.16);
+  color: #bbf7d0;
+}
+
+[data-theme='dark'] .project-timeline__segment--active,
+[data-theme='dark'] .project-timeline__segment--running,
+[data-theme='dark'] .project-timeline__segment--inprogress,
+[data-theme='dark'] .project-timeline__segment--in-progress,
+[data-theme='dark'] .project-timeline__task--active,
+[data-theme='dark'] .project-timeline__task--running,
+[data-theme='dark'] .project-timeline__task--inprogress,
+[data-theme='dark'] .project-timeline__task--in-progress {
+  background: rgba(59, 130, 246, 0.18);
+  color: #bfdbfe;
+}
+
+[data-theme='dark'] .project-timeline__segment--planned {
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(148, 163, 184, 0.16),
+    rgba(148, 163, 184, 0.16) 8px,
+    rgba(148, 163, 184, 0.24) 8px,
+    rgba(148, 163, 184, 0.24) 16px
+  );
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .project-timeline__task span {
+  background: rgba(15, 23, 42, 0.42);
+}
