@@ -929,7 +929,7 @@
   position: relative;
   width: min(100%, 30rem);
   min-width: 25rem;
-  height: 1080px;
+  height: 1190px;
 }
 
 .train-flow--detail {
@@ -948,7 +948,7 @@
 .train-flow__edges path {
   fill: none;
   stroke: var(--ifm-color-emphasis-600);
-  stroke-width: 3;
+  stroke-width: 2.2;
   marker-end: url(#train-arrow);
 }
 

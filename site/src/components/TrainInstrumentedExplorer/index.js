@@ -234,23 +234,22 @@ function StaticNode({node, top}) {
 function TopDiagram({selected, setSelected}) {
   return (
     <div className="train-flow train-flow--top" aria-label="train_instrumented top-level flow">
-      <svg className="train-flow__edges" viewBox="0 0 420 1080" aria-hidden="true">
+      <svg className="train-flow__edges" viewBox="0 0 420 1190" aria-hidden="true">
         <defs>
-          <marker id="train-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-            <path d="M 0 0 L 10 5 L 0 10 z" />
+          <marker id="train-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M 0 0 L 6 3 L 0 6 z" />
           </marker>
         </defs>
-        <path d="M210 86 L210 112" />
-        <path d="M210 186 L210 190" />
-        <path d="M210 498 L210 532" />
-        <path d="M210 600 L210 634" />
-        <path d="M210 702 L210 736" />
-        <path d="M210 804 L210 838" />
-        <path d="M210 906 L210 940" />
-        <path d="M210 1008 L210 1030" />
-        <path className="train-flow__edge--true" d="M210 390 L210 430" />
-        <path className="train-flow__edge--false" d="M111 290 L58 290 L58 1048 L116 1048" />
-        <path className="train-flow__edge--loop" d="M304 956 L370 956 L370 290 L309 290" />
+        <path d="M210 86 L210 108" />
+        <path d="M210 186 L210 202" />
+        <path d="M210 498 L210 524" />
+        <path d="M210 600 L210 626" />
+        <path d="M210 702 L210 728" />
+        <path d="M210 804 L210 830" />
+        <path d="M210 906 L210 932" />
+        <path className="train-flow__edge--true" d="M210 392 L210 422" />
+        <path className="train-flow__edge--false" d="M115 290 L58 290 L58 1132 L108 1132" />
+        <path className="train-flow__edge--loop" d="M296 956 L370 956 L370 290 L316 290" />
       </svg>
 
       <div className="train-flow__terminal" style={{top: 20}}>Start</div>
@@ -265,13 +264,13 @@ function TopDiagram({selected, setSelected}) {
         <FlowNode
           key={key}
           block={blocks[key]}
-          top={430 + index * 102}
+          top={438 + index * 112}
           active={selected === key}
           onClick={() => setSelected(key)}
         />
       ))}
-      <div className="train-flow__branch train-flow__branch--loop" style={{top: 930}}>next batch</div>
-      <div className="train-flow__terminal" style={{top: 1030}}>Return FitHistory</div>
+      <div className="train-flow__branch train-flow__branch--loop" style={{top: 1010}}>next batch</div>
+      <div className="train-flow__terminal" style={{top: 1098}}>Return FitHistory</div>
     </div>
   );
 }
@@ -282,8 +281,8 @@ function DetailDiagram({block}) {
     <div className="train-flow train-flow--detail" style={{height}}>
       <svg className="train-flow__edges" viewBox={`0 0 420 ${height}`} aria-hidden="true">
         <defs>
-          <marker id="train-arrow-detail" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-            <path d="M 0 0 L 10 5 L 0 10 z" />
+          <marker id="train-arrow-detail" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M 0 0 L 6 3 L 0 6 z" />
           </marker>
         </defs>
         <path d="M210 68 L210 110" />
