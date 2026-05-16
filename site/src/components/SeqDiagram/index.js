@@ -2,11 +2,18 @@ import React from 'react';
 import clsx from 'clsx';
 import katex from 'katex';
 
-function normalizeMaxWidth(maxWidth) {
-  if (typeof maxWidth === 'number') {
-    return `${maxWidth}px`;
+function normalizeCssLength(value, fallback) {
+  if (typeof value === 'number') {
+    return `${value}px`;
   }
-  return maxWidth || '100%';
+  return value || fallback;
+}
+
+function normalizeScale(scale) {
+  if (typeof scale === 'number') {
+    return String(scale);
+  }
+  return scale || '1.08';
 }
 
 function renderLatex(value) {
@@ -64,6 +71,9 @@ export default function SeqDiagram({
   items = [],
   arrows = [],
   maxWidth = '100%',
+  gap = '5.4em',
+  arrowPadding = '0.7em',
+  scale = 1.08,
   className,
 }) {
   const arrowAt = (index) => arrows[index] || {};
@@ -71,7 +81,12 @@ export default function SeqDiagram({
   return (
     <div
       className={clsx('seq-diagram', className)}
-      style={{'--seq-diagram-max-width': normalizeMaxWidth(maxWidth)}}
+      style={{
+        '--seq-diagram-max-width': normalizeCssLength(maxWidth, '100%'),
+        '--seq-diagram-gap': normalizeCssLength(gap, '5.4em'),
+        '--seq-diagram-arrow-padding': normalizeCssLength(arrowPadding, '0.7em'),
+        '--seq-diagram-scale': normalizeScale(scale),
+      }}
     >
       <div className="seq-diagram__inner">
         {items.map((item, index) => (

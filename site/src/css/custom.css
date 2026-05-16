@@ -875,7 +875,8 @@
   justify-content: center;
   gap: 0;
   min-width: max-content;
-  padding: 0.5rem 0.25rem;
+  padding: 0.5em 0.25em;
+  font-size: calc(1rem * var(--seq-diagram-scale, 1.08));
 }
 
 .seq-diagram__node {
@@ -883,9 +884,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 6.5rem;
-  min-height: 3.2rem;
-  padding: 0.6rem 0.85rem;
+  min-width: 6.5em;
+  min-height: 3.2em;
+  padding: 0.6em 0.85em;
   text-align: center;
 }
 
@@ -899,8 +900,8 @@
 }
 
 .seq-diagram__node--plain {
-  min-width: 3rem;
-  padding-inline: 0.25rem;
+  min-width: 3em;
+  padding-inline: 0.25em;
 }
 
 .seq-diagram__node--ghost {
@@ -922,9 +923,9 @@
 }
 
 .seq-diagram__sublabel {
-  margin-top: 0.25rem;
+  margin-top: 0.25em;
   color: var(--ifm-color-emphasis-700);
-  font-size: 0.82rem;
+  font-size: 0.82em;
   line-height: 1.25;
 }
 
@@ -933,14 +934,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 4.6rem;
-  min-width: 4.6rem;
-  height: 3.2rem;
+  width: var(--seq-diagram-gap, 5.4em);
+  min-width: var(--seq-diagram-gap, 5.4em);
+  height: 3.2em;
 }
 
 .seq-diagram__arrow-line {
   position: relative;
-  width: 100%;
+  width: calc(100% - var(--seq-diagram-arrow-padding, 0.7em) - var(--seq-diagram-arrow-padding, 0.7em));
   height: 2px;
   background: var(--ifm-color-emphasis-700);
 }
@@ -951,22 +952,22 @@
   top: 50%;
   width: 0;
   height: 0;
-  border-top: 0.34rem solid transparent;
-  border-bottom: 0.34rem solid transparent;
-  border-left: 0.56rem solid var(--ifm-color-emphasis-700);
+  border-top: 0.34em solid transparent;
+  border-bottom: 0.34em solid transparent;
+  border-left: 0.56em solid var(--ifm-color-emphasis-700);
   content: '';
   transform: translateY(-50%);
 }
 
 .seq-diagram__arrow-label {
   position: absolute;
-  top: -0.15rem;
+  top: -0.15em;
   left: 50%;
   z-index: 1;
-  padding: 0 0.18rem;
+  padding: 0 0.18em;
   background: var(--ifm-background-color);
   color: var(--ifm-color-emphasis-700);
-  font-size: 0.82rem;
+  font-size: 0.82em;
   line-height: 1;
   transform: translate(-50%, -50%);
   white-space: nowrap;
