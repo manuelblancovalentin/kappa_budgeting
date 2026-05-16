@@ -927,12 +927,13 @@
 
 .train-flow {
   position: relative;
-  width: min(100%, 30rem);
-  min-width: 25rem;
-  height: 1190px;
+  width: 420px;
+  min-width: 420px;
+  height: 1260px;
 }
 
 .train-flow--detail {
+  height: auto;
   min-height: 650px;
 }
 
@@ -1063,7 +1064,7 @@
 }
 
 .train-flow__branch--loop {
-  right: 0.85rem;
+  right: 0.35rem;
   color: var(--ifm-color-primary);
 }
 
