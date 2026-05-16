@@ -8,6 +8,7 @@ import Terminal from '@site/src/components/Terminal';
 import ProjectTimeline from '@site/src/components/ProjectTimeline';
 import TrainInstrumentedExplorer from '@site/src/components/TrainInstrumentedExplorer';
 import Figure from '@site/src/components/Figure';
+import SeqDiagram from '@site/src/components/SeqDiagram';
 
 export default {
   ...MDXComponents,
@@ -23,4 +24,5 @@ export default {
   ProjectTimeline,
   TrainInstrumentedExplorer,
   Figure,
+  SeqDiagram,
 };
