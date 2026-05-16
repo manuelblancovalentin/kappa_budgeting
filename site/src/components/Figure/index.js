@@ -1,5 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 
 function normalizeMaxWidth(maxWidth) {
   if (typeof maxWidth === 'number') {
@@ -17,6 +18,7 @@ export default function Figure({
   children,
   className,
 }) {
+  const resolvedSrc = typeof src === 'string' ? useBaseUrl(src) : src;
   const hasCaption = Boolean(children || caption || label);
 
   return (
@@ -24,7 +26,7 @@ export default function Figure({
       className={clsx('doc-figure', className)}
       style={{'--doc-figure-max-width': normalizeMaxWidth(maxWidth)}}
     >
-      <img className="doc-figure__image" src={src} alt={alt} />
+      <img className="doc-figure__image" src={resolvedSrc} alt={alt} />
       {hasCaption && (
         <figcaption className="doc-figure__caption">
           {children || (

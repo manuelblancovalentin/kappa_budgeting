@@ -8,7 +8,6 @@ tags:
 last_modified: 2026-05-15
 ---
 
-import LossLandscape3D from './imgs/3D.png';
 
 # 🔎 Background
 <PageMeta />
@@ -20,9 +19,9 @@ This project studies how to make fixed-point online learning stable when a deplo
 
 
 <Figure
-  src={LossLandscape3D}
+  src="/img/formulation/3D.png"
   alt="3D loss landscape arbitrary"
-  maxWidth="80%"
+  maxWidth="70%"
   label="Figure 1"
   caption="Illustrative loss landscape for the closed-loop training stability discussion."
 />
