@@ -859,9 +859,8 @@
 
 
 .train-explorer {
-  width: min(92vw, 86rem);
-  margin: 1.5rem 50%;
-  transform: translateX(-50%);
+  width: 100%;
+  margin: 1.5rem 0;
   border: 1px solid var(--ifm-color-emphasis-200);
   border-radius: 10px;
   background: var(--ifm-background-surface-color);
@@ -909,7 +908,7 @@
 
 .train-explorer__body {
   display: grid;
-  grid-template-columns: minmax(31rem, 0.95fr) minmax(34rem, 1.25fr);
+  grid-template-columns: minmax(31rem, 0.9fr) minmax(32rem, 1.1fr);
   gap: 1.1rem;
   padding: 1rem;
 }
@@ -1077,15 +1076,25 @@
 
 .train-flow__connector {
   position: relative;
+  width: 0.9rem;
+  height: 2.35rem;
+}
+
+.train-flow__connector::before {
+  position: absolute;
+  top: 0;
+  bottom: 0.66rem;
+  left: 50%;
   width: 2.2px;
-  height: 2.1rem;
   background: var(--ifm-color-emphasis-600);
+  content: '';
+  transform: translateX(-50%);
 }
 
 .train-flow__connector::after {
   position: absolute;
   left: 50%;
-  bottom: -0.42rem;
+  top: calc(100% - 0.72rem);
   width: 0;
   height: 0;
   border-left: 0.4rem solid transparent;
@@ -1095,7 +1104,7 @@
   transform: translateX(-50%);
 }
 
-.train-flow__connector--true {
+.train-flow__connector--true::before {
   background: #15803d;
 }
 
@@ -1134,9 +1143,9 @@
 
 .train-flow__side-rail--false {
   left: 1.2rem;
-  top: 16.65rem;
+  top: 18.7rem;
   width: 6.55rem;
-  height: 42.8rem;
+  height: 42.35rem;
   border-left: 2.2px solid #b91c1c;
   border-top: 2.2px solid #b91c1c;
   border-bottom: 2.2px solid #b91c1c;
@@ -1145,7 +1154,7 @@
 .train-flow__side-rail--false::after {
   position: absolute;
   right: -0.55rem;
-  bottom: -0.42rem;
+  bottom: -0.41rem;
   width: 0;
   height: 0;
   border-top: 0.4rem solid transparent;
@@ -1162,9 +1171,9 @@
 
 .train-flow__side-rail--loop {
   right: 1.2rem;
-  top: 16.65rem;
+  top: 18.7rem;
   width: 6.55rem;
-  height: 36.65rem;
+  height: 34.45rem;
   border-right: 2.2px solid var(--ifm-color-primary);
   border-top: 2.2px solid var(--ifm-color-primary);
   border-bottom: 2.2px solid var(--ifm-color-primary);
@@ -1173,7 +1182,7 @@
 .train-flow__side-rail--loop::before {
   position: absolute;
   left: -0.55rem;
-  top: -0.42rem;
+  top: -0.41rem;
   width: 0;
   height: 0;
   border-top: 0.4rem solid transparent;
@@ -1184,7 +1193,7 @@
 
 .train-flow__side-rail--loop span {
   right: -0.15rem;
-  bottom: -1.55rem;
+  bottom: -1.5rem;
   color: var(--ifm-color-primary);
 }
 
