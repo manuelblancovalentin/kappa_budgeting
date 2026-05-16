@@ -1,4 +1,5 @@
 ---
+sidebar_label: "📦 nn.py"
 status:
   - valid
   - inprogress

@@ -1,4 +1,5 @@
 ---
+sidebar_label: "🧮 precision.py"
 status:
   - valid
   - inprogress
@@ -95,7 +96,24 @@ precisions = PrecisionDict({
         "value": "ap_fixed<24,12,AP_RND,AP_SAT>",
     },
 })
+
+print(precisions)
 ```
+
+should print:
+<Terminal
+  title="precision map"
+  content={`PrecisionDict(
+    input:
+        value: ap_fixed<12,4,AP_RND,AP_SAT>
+    dense0:
+        weight: ap_fixed<12,4,AP_RND,AP_SAT>
+        gradient: ap_fixed<16,6,AP_RND,AP_SAT>
+        update: ap_fixed<16,4,AP_RND,AP_SAT>
+    loss:
+        value: ap_fixed<24,12,AP_RND,AP_SAT>
+)`}
+/>
 
 Strings and dtype objects can be mixed. `None` means explicitly float/no quantization.
 

@@ -1,4 +1,5 @@
 ---
+sidebar_label: "🗺️ Code map"
 status:
   - preliminary
 tags:
