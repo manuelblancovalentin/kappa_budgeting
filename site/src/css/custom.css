@@ -973,6 +973,12 @@
   white-space: nowrap;
 }
 
+.doc-anchor {
+  display: block;
+  height: 0;
+  scroll-margin-top: calc(var(--ifm-navbar-height, 3.75rem) + 1rem);
+}
+
 .doc-figure {
   max-width: var(--doc-figure-max-width, 80%);
   margin: 1.5rem auto;

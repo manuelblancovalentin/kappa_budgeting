@@ -17,15 +17,18 @@ export default function Figure({
   label,
   children,
   className,
+  id,
 }) {
   const resolvedSrc = typeof src === 'string' ? useBaseUrl(src) : src;
   const hasCaption = Boolean(children || caption || label);
 
   return (
-    <figure
-      className={clsx('doc-figure', className)}
-      style={{'--doc-figure-max-width': normalizeMaxWidth(maxWidth)}}
-    >
+    <>
+      {id && <span id={id} className="doc-anchor" aria-hidden="true" />}
+      <figure
+        className={clsx('doc-figure', className)}
+        style={{'--doc-figure-max-width': normalizeMaxWidth(maxWidth)}}
+      >
       <img className="doc-figure__image" src={resolvedSrc} alt={alt} />
       {hasCaption && (
         <figcaption className="doc-figure__caption">
@@ -38,6 +41,7 @@ export default function Figure({
           )}
         </figcaption>
       )}
-    </figure>
+      </figure>
+    </>
   );
 }

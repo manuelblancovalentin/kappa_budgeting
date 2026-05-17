@@ -75,27 +75,31 @@ export default function SeqDiagram({
   arrowPadding = '0.7em',
   scale = 1.08,
   className,
+  id,
 }) {
   const arrowAt = (index) => arrows[index] || {};
 
   return (
-    <div
-      className={clsx('seq-diagram', className)}
-      style={{
-        '--seq-diagram-max-width': normalizeCssLength(maxWidth, '100%'),
-        '--seq-diagram-gap': normalizeCssLength(gap, '5.4em'),
-        '--seq-diagram-arrow-padding': normalizeCssLength(arrowPadding, '0.7em'),
-        '--seq-diagram-scale': normalizeScale(scale),
-      }}
-    >
-      <div className="seq-diagram__inner">
-        {items.map((item, index) => (
-          <React.Fragment key={item.id || `${item.label}-${index}`}>
-            <SeqNode item={item} />
-            {index < items.length - 1 && <SeqArrow arrow={arrowAt(index)} />}
-          </React.Fragment>
-        ))}
+    <>
+      {id && <span id={id} className="doc-anchor" aria-hidden="true" />}
+      <div
+        className={clsx('seq-diagram', className)}
+        style={{
+          '--seq-diagram-max-width': normalizeCssLength(maxWidth, '100%'),
+          '--seq-diagram-gap': normalizeCssLength(gap, '5.4em'),
+          '--seq-diagram-arrow-padding': normalizeCssLength(arrowPadding, '0.7em'),
+          '--seq-diagram-scale': normalizeScale(scale),
+        }}
+      >
+        <div className="seq-diagram__inner">
+          {items.map((item, index) => (
+            <React.Fragment key={item.id || `${item.label}-${index}`}>
+              <SeqNode item={item} />
+              {index < items.length - 1 && <SeqArrow arrow={arrowAt(index)} />}
+            </React.Fragment>
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

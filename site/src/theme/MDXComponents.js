@@ -9,6 +9,7 @@ import ProjectTimeline from '@site/src/components/ProjectTimeline';
 import TrainInstrumentedExplorer from '@site/src/components/TrainInstrumentedExplorer';
 import Figure from '@site/src/components/Figure';
 import SeqDiagram from '@site/src/components/SeqDiagram';
+import DocRef from '@site/src/components/DocRef';
 
 export default {
   ...MDXComponents,
@@ -25,4 +26,7 @@ export default {
   TrainInstrumentedExplorer,
   Figure,
   SeqDiagram,
+  DocRef,
+  FigureRef: DocRef,
+  DiagramRef: DocRef,
 };
