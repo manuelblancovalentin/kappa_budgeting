@@ -9,7 +9,11 @@ import ProjectTimeline from '@site/src/components/ProjectTimeline';
 import TrainInstrumentedExplorer from '@site/src/components/TrainInstrumentedExplorer';
 import Figure from '@site/src/components/Figure';
 import SeqDiagram from '@site/src/components/SeqDiagram';
+import FeedbackLoopDiagram from '@site/src/components/FeedbackLoopDiagram';
 import DocRef from '@site/src/components/DocRef';
+import Algorithm from '@site/src/components/Algorithm';
+import Person from '@site/src/components/Person';
+import PeopleTable from '@site/src/components/PeopleTable';
 
 export default {
   ...MDXComponents,
@@ -24,8 +28,13 @@ export default {
   Terminal,
   ProjectTimeline,
   TrainInstrumentedExplorer,
+  Algorithm,
+  Person,
+  Mention: Person,
+  PeopleTable,
   Figure,
   SeqDiagram,
+  FeedbackLoopDiagram,
   DocRef,
   FigureRef: DocRef,
   DiagramRef: DocRef,

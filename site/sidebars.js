@@ -18,6 +18,7 @@ const sidebars = {
   tutorialSidebar: [
     'intro',
     'current-status',
+    'people',
     {
       type: 'category',
       label: '🚀 Onboarding',
@@ -32,8 +33,8 @@ const sidebars = {
       label: '⟦♾️⟧ Formulation',
       items: [
         'formulation/overview',
-        'formulation/kappa-budgeting',
         'formulation/lipschitzness-stability',
+        'formulation/kappa-budgeting',
         'formulation/global-throttle',
         'formulation/how-this-fits',
         'formulation/quantization',

@@ -1,6 +1,7 @@
 import React from 'react';
 import {useDoc} from '@docusaurus/plugin-content-docs/client';
 import StatusBadges, {Badge} from '@site/src/components/StatusBadges';
+import Person from '@site/src/components/Person';
 
 function asList(value) {
   if (!value) {
@@ -29,10 +30,11 @@ function formatDate(value) {
   return String(value);
 }
 
-export default function PageMeta({showStatus = true, showTags = true, showLastModified = true, showWorkspace = true, showNotebook = true, showSource = true}) {
+export default function PageMeta({showStatus = true, showTags = true, showAuthors = true, showLastModified = true, showWorkspace = true, showNotebook = true, showSource = true}) {
   const {frontMatter} = useDoc();
   const status = asList(frontMatter.status);
   const tags = asList(frontMatter.tags);
+  const authors = asList(frontMatter.authors ?? frontMatter.author);
   const lastModified = formatDate(frontMatter.last_modified ?? frontMatter.lastModified);
   const workspace = frontMatter.workspace ? String(frontMatter.workspace) : null;
   const notebook = frontMatter.notebook ? String(frontMatter.notebook) : null;
@@ -40,7 +42,7 @@ export default function PageMeta({showStatus = true, showTags = true, showLastMo
   const source = frontMatter.source ? String(frontMatter.source) : null;
   const sourceUrl = frontMatter.source_url ? String(frontMatter.source_url) : null;
 
-  if (!status.length && !tags.length && !lastModified && !workspace && !notebook && !source) {
+  if (!status.length && !tags.length && !authors.length && !lastModified && !workspace && !notebook && !source) {
     return null;
   }
 
@@ -55,6 +57,16 @@ export default function PageMeta({showStatus = true, showTags = true, showLastMo
           <span className="page-meta__badges">
             {tags.map((tag) => (
               <Badge key={tag} status={tag} />
+            ))}
+          </span>
+        </div>
+      )}
+      {showAuthors && authors.length > 0 && (
+        <div className="page-meta__row">
+          <span className="page-meta__label">Author{authors.length > 1 ? 's' : ''}:</span>
+          <span className="page-meta__people">
+            {authors.map((author) => (
+              <Person key={author} id={author} />
             ))}
           </span>
         </div>

@@ -1388,3 +1388,207 @@
 [data-theme='dark'] .train-flow__diamond {
   background: rgba(251, 146, 60, 0.14);
 }
+
+.feedback-loop {
+  max-width: var(--feedback-loop-max-width, 920px);
+  margin: 1.5rem auto;
+  transform: scale(var(--feedback-loop-scale, 1));
+  transform-origin: top center;
+}
+
+.feedback-loop__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.feedback-loop__node {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.18rem;
+  border: 2px solid var(--ifm-color-emphasis-400);
+  border-radius: 8px;
+  background: var(--ifm-background-color);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+  color: var(--ifm-font-color-base);
+  text-align: center;
+}
+
+.feedback-loop__node--loss {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ifm-color-primary-lightest) 35%, var(--ifm-background-color));
+}
+
+.feedback-loop__node--grad {
+  background: color-mix(in srgb, #ef4b9a 18%, var(--ifm-background-color));
+}
+
+.feedback-loop__label {
+  font-size: 1.65rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.feedback-loop__sublabel {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.88rem;
+  line-height: 1;
+}
+
+.feedback-loop__edge {
+  fill: none;
+  stroke: var(--ifm-color-emphasis-900);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  marker-end: url(#feedback-loop-arrow);
+}
+
+.feedback-loop__edge--red {
+  stroke: #c72626;
+  stroke-width: 3.4;
+  marker-end: url(#feedback-loop-arrow-red);
+}
+
+.feedback-loop__edge--soft {
+  opacity: 0.82;
+}
+
+.feedback-loop__arrow-head {
+  fill: var(--ifm-color-emphasis-900);
+}
+
+.feedback-loop__arrow-head-red {
+  fill: #c72626;
+}
+
+.feedback-loop__edge-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 125px;
+  padding: 0.06rem 0.24rem;
+  border-radius: 4px;
+  background: var(--ifm-background-color);
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.9rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.feedback-loop__edge-label--red {
+  color: #b51f1f;
+  font-weight: 700;
+}
+
+.algorithm-code-block li {
+  font-family: var(--ifm-font-family-monospace);
+  line-height: 1.55;
+  white-space: pre;
+}
+
+.algorithm-line {
+  display: inline-block;
+  min-height: 1.45rem;
+  white-space: pre;
+}
+
+.algorithm-code {
+  white-space: pre;
+}
+
+.algorithm-comment {
+  margin-left: 0.9rem;
+  color: var(--ifm-color-emphasis-600);
+  font-style: italic;
+  white-space: pre;
+}
+
+.algorithm-code-block li.algorithm-line-empty {
+  min-height: 0.7rem;
+}
+
+.algorithm-code-block li.algorithm-line-empty::before {
+  content: "";
+  counter-increment: none;
+}
+
+
+.person-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.08rem;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.08rem 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--ifm-color-primary) 45%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ifm-color-primary-lightest) 20%, var(--ifm-background-color));
+  color: var(--ifm-color-primary-darkest);
+  font-size: 0.86em;
+  font-weight: 700;
+  line-height: 1.35;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .person-chip {
+  background: color-mix(in srgb, var(--ifm-color-primary) 18%, var(--ifm-background-color));
+  color: var(--ifm-color-primary-lightest);
+}
+
+.person-chip__handle {
+  color: var(--ifm-color-emphasis-600);
+  font-weight: 800;
+}
+
+.person-chip__role {
+  margin-left: 0.25rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.82em;
+  font-weight: 600;
+}
+
+.page-meta__people {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+
+.person-chip--link {
+  text-decoration: none;
+}
+
+.person-chip--link:hover {
+  text-decoration: none;
+  filter: brightness(0.96);
+}
+
+.people-roster {
+  margin: 1.25rem 0;
+}
+
+.people-roster__lab {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.people-roster__label {
+  color: var(--ifm-color-emphasis-700);
+  font-weight: 800;
+}
+
+.people-roster__muted {
+  color: var(--ifm-color-emphasis-600);
+}

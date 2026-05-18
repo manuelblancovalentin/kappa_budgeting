@@ -167,3 +167,13 @@ utils:
   label: Utils
   permalink: /utils
   description: Pages tagged Utils.
+
+project:
+  label: Project
+  permalink: /project
+  description: Pages tagged Project.
+
+people:
+  label: People
+  permalink: /people
+  description: Pages tagged People.
