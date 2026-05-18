@@ -5,6 +5,7 @@ tags:
   - experiment
   - template
 last_modified: 2026-05-15
+author: mbvalentin
 ---
 # Experiment Template
 

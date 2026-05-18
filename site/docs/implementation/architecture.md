@@ -7,6 +7,7 @@ tags:
   - architecture
   - global-throttle
 last_modified: 2026-05-15
+author: mbvalentin
 ---
 # Closed-Loop Ablation Architecture
 <PageMeta />

@@ -6,6 +6,7 @@ tags:
   - formulation
   - overview
 last_modified: 2026-05-15
+author: mbvalentin
 ---
 
 
@@ -111,12 +112,42 @@ But what about the maximum $\eta$ value that we mentioned earlier? To find this,
 }
 ```
 
-**Slow down. Where did this condition come from?** Let's derive it step by step and very carefully. We will use another basic tool for this: Taylor expansion. First, for any given point $\theta$, we can approximate the loss function around that point using a second-order Taylor expansion:
+**Slow down. Where did this condition come from?** Let's derive it step by step and very carefully. We will use another basic tool for this: Taylor expansion. First, recall the formula for Taylor series:
 ```math
-\mathcal{L}(\theta + \delta) \approx \mathcal{L}(\theta) + G(\theta)^\top \delta + \frac{1}{2} \delta^\top H(\theta) \delta,
+f(x) = \sum_{n=0}^\infty \frac{f^{(n)}(a)}{n!}(x-a)^n \quad \leadsto \quad f(x) \approx f(a) + f'(a)(x-a) + \frac{1}{2}f''(a)(x-a)^2 + \ldots
+```
+where $f^{(n)}(a)$ is the $n$-th derivative of $f$ evaluated at $a$. Now, for any given point $\theta$, let's approximate this loss function around $a$ up to second order:
+```math
+\mathcal{L}(\theta) 
+\approx 
+\underbrace{\mathcal{L}(a)}_{\text{0th order}} + 
+\underbrace{\nabla_\theta \mathcal{L}(a)^\top (\theta - a)}_{\text{1st order}} + 
+\underbrace{\frac{1}{2}(\theta - a)^\top \nabla^2_\theta \mathcal{L}(a) (\theta - a)}_{\text{2nd order}} + \ldots
 ```
 
-where $\delta$ is a small perturbation around $\theta$. Now, if we apply the gradient descent update rule, we have:
+But now, let's note something important:
+* $\nabla_\theta \mathcal{L}$ is precisely the gradient $G(\theta)$ introduced before, and
+* $\nabla^2_\theta \mathcal{L}$ is precisely the Hessian $H(\theta)$, and
+
+So we can rewrite the Taylor expansion as:
+```math
+\mathcal{L}(\theta)
+\approx
+\mathcal{L}(a) +
+G(a)^\top (\theta - a) +
+\frac{1}{2}(\theta - a)^\top H(a) (\theta - a) + \ldots
+```
+
+Now, let's analyze the stability of this system around some small perturbation $\delta$ around a local minimum $\theta^\ast$. This means that we will set $a = \theta^\ast$ and $\theta = \theta^\ast + \delta$. Substituting this into the Taylor expansion, we get:
+```math
+\mathcal{L}(\theta^\ast + \delta)
+\approx
+\mathcal{L}(\theta^\ast) +
+G(\theta^\ast)^\top \delta +
+\frac{1}{2}\delta^\top H(\theta^\ast) \delta + \ldots
+```
+
+Now, if we apply the gradient descent update rule, we have:
 ```math
 \theta_{t+1} = \theta_t - \eta G(\theta_t).
 ```
@@ -159,13 +190,15 @@ Since $\lambda_{\max}$ is the largest eigenvalue, we need to ensure that $\eta \
 ```
 
 ## Why stop at the Hessian?
-When analyzing stability we introduced an approximation around some point, via taylor expansion, but we stopped at second order (Hessian). But why not go further? We could, in principle. The reason why we don't is indeed boring: *the hessian is already too computationally expensive for us to compute, let alone higher-order derivatives*.
+When analyzing stability we introduced an approximation around some point, via taylor expansion, but we stopped at second order (Hessian). But why not go further? **We could, in principle**. The reason why we don't is ... boring: *the hessian is already too computationally expensive for us to compute, let alone higher-order derivatives*.
 
 In fact, we never even use Hessians in practice for our neural networks. Even modest-sized neural networks have millions of parameters, which means that computing the full Hessian matrix would require storing and manipulating a matrix with trillions of entries, which is completely infeasible. Instead, we often use approximations to the Hessian, such as the diagonal approximation used in algorithms like Adam, or we use techniques like stochastic estimation of the curvature.
 
 ## The issue of online learning
 Training a neural network on chip has many issues, but in this case we are going to focus on two:
-1. Quantization and fixed-point representation turns our problem into a non-trivial control problem;
+1. Quantization and fixed-point representation turns our problem into a non-trivial control problem because quantization introduces errors in the loss-landscape;
 2. The data distribution can change over time, which means that the loss landscape itself can change as we train.
+
+Both of these problems, as you can see, are issues that, in the end, affect in the same way: they can change the training process in a way that can make the system unstable. The task of <ENABOL /> is to design a controller that can keep the training process stable under these conditions.
 
 

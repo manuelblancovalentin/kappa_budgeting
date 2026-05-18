@@ -11,6 +11,7 @@ tags:
   - linear
   - lin1
 last_modified: 2026-05-15
+author: mbvalentin
 ---
 # MDL-DENSE1-LINEAR-NOBIAS-000: One Dense Linear Student
 

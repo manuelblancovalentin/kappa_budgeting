@@ -7,6 +7,7 @@ tags:
   - formulation
   - global-throttle
 last_modified: 2026-05-15
+author: mbvalentin
 ---
 # 🎚️ The global throttle mechanism
 <PageMeta />

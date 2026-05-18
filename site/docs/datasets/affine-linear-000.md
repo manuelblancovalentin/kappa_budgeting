@@ -10,6 +10,7 @@ tags:
   - affine
   - linear
 last_modified: 2026-05-15
+author: mbvalentin
 ---
 # DS-AFFINE-LINEAR-000: One-Layer Linear Teacher
 

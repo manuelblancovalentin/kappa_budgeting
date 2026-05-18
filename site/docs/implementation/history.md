@@ -7,6 +7,7 @@ tags:
   - implementation
   - history
 last_modified: 2026-05-16
+author: mbvalentin
 source: "enabol/history.py"
 source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master/enabol/history.py"
 ---

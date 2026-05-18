@@ -6,6 +6,7 @@ tags:
   - revise
   - formulation
 last_modified: 2026-05-15
+author: mbvalentin
 ---
 # 🗂️ How this fits into κ-budgeting
 <PageMeta />

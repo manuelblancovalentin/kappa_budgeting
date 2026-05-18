@@ -7,6 +7,7 @@ tags:
   - formulation
   - quantization
 last_modified: 2026-05-15
+author: mbvalentin
 ---
 # 🧮 Fixed-point quantization
 <PageMeta />

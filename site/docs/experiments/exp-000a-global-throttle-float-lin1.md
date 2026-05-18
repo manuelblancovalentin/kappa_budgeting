@@ -11,6 +11,7 @@ tags:
   - float
   - lin1
 last_modified: 2026-05-15
+author: mbvalentin
 workspace: "workspace/ablations/exp_000_global_throttle_sanity/"
 notebook: "${WORKSPACE}/notebooks/exp_000a_global_throttle_float_lin1.ipynb"
 notebook_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master/workspace/ablations/exp_000_global_throttle_sanity/notebooks/exp_000a_global_throttle_float_lin1.ipynb"

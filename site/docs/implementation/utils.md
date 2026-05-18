@@ -8,6 +8,7 @@ tags:
   - utils
   - stability
 last_modified: 2026-05-16
+author: mbvalentin
 source: "enabol/utils.py"
 source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master/enabol/utils.py"
 ---

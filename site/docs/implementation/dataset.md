@@ -7,6 +7,7 @@ tags:
   - implementation
   - dataset
 last_modified: 2026-05-15
+author: mbvalentin
 source: "enabol/dataset.py"
 source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master/enabol/dataset.py"
 ---

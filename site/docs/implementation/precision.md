@@ -8,6 +8,7 @@ tags:
   - precision
   - quantization
 last_modified: 2026-05-15
+author: mbvalentin
 source: "enabol/precision.py"
 source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master/enabol/precision.py"
 ---
