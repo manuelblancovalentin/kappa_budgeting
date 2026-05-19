@@ -13,27 +13,24 @@ author: mbvalentin
 <PageMeta />
 ---
 
-Instead of projecting each row/column independently, we introduce a single global scalar:
+## Motivation
+Instead of projecting each row/column independently (which as we saw in the [kappa-budgeting section](./kappa-budgeting.md) introduces rotation in the $\theta$ plane), we introduce a single global scalar:
 
 ```math
 0<\alpha_t\leq 1.
 ```
 
-The update becomes:
+Then the SGD update becomes:
 
 ```math
 \boxed{
 \theta_{t+1}
 =
 \theta_t-\alpha_t\eta G_t
-}
-```
-
-where:
-
-```math
+} \qquad \text{with} \quad 
 G_t=\nabla_\theta\mathcal{L}(\theta_t).
 ```
+
 This is important because the update remains parallel to the original gradient update.
 
 Raw update:
@@ -60,21 +57,46 @@ Therefore:
 \alpha_t\Delta\theta_t^{\text{raw}}.
 ```
 
-So:
+Now, to verify whether direction is preserved or not, we can use the cosine similarity:
 
 ```math
 \cos
-\left(
-\Delta\theta_t^{\text{ctrl}},
+\left(\Delta\theta_t^{\text{ctrl}},
 \Delta\theta_t^{\text{raw}}
 \right)
+=
+\frac{\Delta\theta_t^{\text{ctrl}}\,\Delta\theta_t^{\text{raw}}}{
+\|\Delta\theta_t^{\text{ctrl}}\|
+\|\Delta\theta_t^{\text{raw}}\|
+}.
+```
+
+
+As mentioned before, we want this to be $1$, which means the scaling used to ensure stability (on every layer) do not change the direction of the update. Now, if we replace the definition for our global throttle, we get:
+
+```math
+\cos
+\left(\Delta\theta_t^{\text{ctrl}},
+\Delta\theta_t^{\text{raw}}
+\right)
+=
+\frac{\alpha_t\Delta\theta_t^{\text{raw}}\,\Delta\theta_t^{\text{raw}}}{
+\|\alpha_t\Delta\theta_t^{\text{raw}}\|
+\|\Delta\theta_t^{\text{raw}}\|
+}
+=
+\frac{\alpha_t\|\Delta\theta_t^{\text{raw}}\|^2}{
+\alpha_t\|\Delta\theta_t^{\text{raw}}\|
+\|\Delta\theta_t^{\text{raw}}\|
+}
 =
 1.
 ```
 
+<TBox type="summary" title="Key insight">
+
 That means global throttling preserves the direction of learning. It only changes the speed.
 
-This is the key contrast:
 ```math
 \text{row/column $\kappa$ projection}
 \Rightarrow
@@ -85,28 +107,28 @@ This is the key contrast:
 \Rightarrow
 \text{preserves the update direction}
 ```
-
+</TBox>
 
 ## Estimation of local curvature/sensitivity
-Finding the actual hessian is computationally expensive and sometimes even not feasible. Thus, the controller chooses $\alpha_t$ using an online curvature estimate.
 
-The gradient is:
-
-```math
-G(\theta)=\nabla_\theta\mathcal{L}(\theta).
-```
-
-The Hessian is the derivative of the gradient:
+In [section overview](./overview.md#lyapunov-stability-analysis-on-sgd) we showed that convergence of SGD is guaranteed if the learning rate $\eta$ satisfies:
 
 ```math
-H(\theta)
-=
-\frac{\partial G}{\partial\theta}
-=
-\nabla_\theta^2\mathcal{L}(\theta).
+\eta<\frac{2}{\lambda_{\max}(H)},
 ```
 
-For a small change:
+where $H$ is the Hessian of the loss. Therefore, to adapt $\alpha_t$ to ensure stability, we need an estimate of $\lambda_{\max}(H)$. However, as also introduced in [the overview section](./overview.md#why-stop-at-the-hessian), finding the actual hessian is computationally expensive and sometimes even not feasible. Therefore, we need a cheap online estimate of the local curvature/sensitivity of the loss landscape.
+
+Let's recall the formulas for the gradient and the Hessian. 
+
+```math
+\begin{aligned}
+G(\theta) &= \nabla_\theta\mathcal{L}(\theta) \\ 
+H(\theta) &= \nabla_\theta G(\theta) &= \nabla_\theta^2\mathcal{L}(\theta)
+\end{aligned}
+```
+
+Now, we can approximate the hessian using Taylor expansion around some operating point. For a small change in $\theta$, we have:
 
 ```math
 \Delta\theta_t
@@ -157,7 +179,7 @@ Then:
 }.
 ```
 
-This is an observed directional curvature estimate.
+This is an observed directional curvature estimate. In other words, this is a first-order approximation of the curvature along the direction the optimizer just moved. 
 
 So we define:
 
@@ -173,67 +195,55 @@ So we define:
 }
 ```
 
-This does not always equal:
+### How does this relate to $\lambda_{\max}(H_t)$?
+
+For a quadratic loss, we have:
+
 ```math
-\lambda_{\max}(H_t).
-```
-More precisely, it estimates the curvature along the direction the optimizer just moved.
-
-
-## Smoothing and control
-
-To avoid reacting to noise, we can smooth the curvature estimate with an exponential moving average:
-```math
-S_t
+\mathcal{L}(\theta)
 =
-(1-\rho)S_{t-1}
-+
-\rho \widehat{C}_t.
+\frac{1}{2}\theta^\top H \theta,
 ```
-And use:
-
+then:
 ```math
-C_t^{\text{ctrl}}
+G(\theta)
 =
-\max(\widehat{C}_t,S_t).
+H\theta,
+```
+and:
+```math
+\Delta G_t
+=
+H\Delta\theta_t.
 ```
 
-Finally:
 
+Then:
 ```math
-\boxed{
-\alpha_t
-=
-\min
-\left(
-1,
-\frac{\chi}{\eta(C_t^{\text{ctrl}}+\epsilon)}
-\right)
+\frac{\|\Delta G_t\|
+}{\|\Delta\theta_t\|
 }
-```
-
-where:
-
-* $\chi$ is the desired stability margin,
-* $\eta$ is the base learning rate,
-* $C_t^{\text{ctrl}}$ is the curvature/sensitivity estimate,
-* $\epsilon$ avoids division by zero.
-
-The controller attempts to enforce:
-
-```math
-\boxed{
-\alpha_t\eta C_t^{\text{ctrl}}
+=
+\frac{\|H\Delta\theta_t\|
+}{\|\Delta\theta_t\|
+}
 \leq
-\chi.
-}
+\|H\|_2
+=
+\lambda_{\max}(H).
 ```
-
-## Caveat and summary
-The previous estimate is not perfect. It is very good for convex problems and things like a single-dense layer architecture, but it can be inaccurate for non-convex problems and more complex architectures. However, it is a simple and computationally cheap way to get a sense of the local curvature/sensitivity, which is what we need to adapt the learning rate and prevent divergence.
 
 <TBox type="summary" title="Key insight">
-The global throttle mechanism preserves the geometry of the original gradient update, but it adaptively reduces the learning rate when the gradient field becomes stiff/sharp. This allows the model to keep learning without diverging, even under distribution shift.
+  So as we can see, for a quadratic loss, this estimator is an upper bound on the true Hessian spectral norm. For general losses, it is a local directional curvature estimate that can be used as a proxy for the local Lipschitzness of the gradient field.
+
+  > **If we ensure that our estimated curvature $\widehat{C}_t$ is below some threshold, we can be SURE that the $\lambda_{\max}(H_t)$ is also below that threshold, which in turn ensures stability of the update.**
+</TBox>
+
+
+<TBox type="warning" title="A caveat">
+  The previous estimate is not perfect. It is very good for convex problems and things like a single-dense layer architecture, but it can (**and will**) be inaccurate for non-convex problems and more complex architectures. However, it is a simple and computationally cheap way to get a sense of the local curvature/sensitivity, which is what we need to adapt the learning rate and prevent divergence.
+
+  The global throttle mechanism preserves the geometry of the original gradient update, but it adaptively reduces the learning rate when the gradient field becomes stiff/sharp. This allows the model to keep learning without diverging, even under distribution shift.
 </TBox>
 
 
@@ -286,17 +296,7 @@ However:
 * mini-batch gradients include sampling noise,
 * quantization introduces non-smooth perturbations.
 
-Therefore, for general networks we should not claim:
-```math
-\widehat{C}_t=\lambda_{\max}(H_t)
-```
-exactly.
-
-Instead, we claim:
-```math
-\widehat{C}_t
-```
-is an online estimate of local update-field sensitivity:
+Therefore, for general networks we should not claim $\widehat{C}_t=\lambda_{\max}(H_t)$ exactly. Instead, we claim: $\widehat{C}_t$ is an online estimate of local update-field sensitivity:
 ```math
 \widehat{C}_t
 \approx
@@ -306,21 +306,11 @@ is an online estimate of local update-field sensitivity:
 \|\Delta\theta_t\|
 }.
 ```
-This is a directional curvature estimate.
-
-For a general loss, we want to keep:
+Then, for a general loss, we want to keep:
 ```math
 \alpha_t\eta L_t<\chi,
 ```
-where $L_t$ is a local estimate of gradient-field Lipschitzness.
-
-The controller uses:
-
-```math
-L_t\approx C_t^{\text{ctrl}}.
-```
-
-So:
+where $L_t$ is a local estimate of gradient-field Lipschitzness and $chi$ is some stability margin (normally $\chi \leq 2$). Then, for instance, if the controller uses $L_t\approx C_t^{\text{ctrl}}$:
 
 ```math
 \boxed{
@@ -329,113 +319,53 @@ So:
 ```
 
 <TBox type="summary" title="Key insight">
-For the linear case, this matches the true Hessian stability condition. For general networks, it becomes a local adaptive control rule.
+Even for nonlinear, non-convex networks, this global throttle mechanism can still be used as a stabilizer by using the local curvature/sensitivity estimate to adapt the learning rate and prevent divergence.
 </TBox>
 
 
-## Implementation
+## Dynamical system controller design
+As we just saw, the task of our controller is to guarantee, at any time, that the effective learning rate $\alpha_t\eta$ is below the stability threshold $\chi/C_t^{\text{ctrl}}$. Because training is a stochastic noisy process, we want to ensure that the system can react quickly to sudden spikes in curvature/sensitivity. In other words: we want an adaptive controller. Thus, we have different options for this (depending on how fancy we want to get). In order of complexity:
 
-Implementation-wise, this throttle can be implemented layer by layer, but the final controller is global. For each layer $\ell$, we have parameters $\theta_{\ell,t}$ and gradients $G_{\ell,t}$.
+| Complexity Order | Controller type | Description | Equation |
+|---|---|---|---|
+| 0 | Proportional (P) | $\alpha$ response is proportional to the error | $\alpha_t = k_p e_t$ |
+| 1 | Proportional-Integral (PI) | $\alpha$ response is proportional to the error and its integral | $\alpha_t = k_p e_t + k_i \sum_{i=0}^t e_i$ |
+| 2 | Proportional-Integral-Derivative (PID) | $\alpha$ response is proportional to the error, its integral, and its derivative | $\alpha_t = k_p e_t + k_i \sum_{i=0}^t e_i + k_d (e_t - e_{t-1})$ |
 
-We can compute local contributions:
+Where $e_t$ is the error signal at time $t$, defined as:
 ```math
-A_{\ell,t}
+e_t
 =
-\|G_{\ell,t}-G_{\ell,t-1}\|_2^2,
-```
-```math
-B_{\ell,t}
-=
-\|\theta_{\ell,t}-\theta_{\ell,t-1}\|_2^2.
-```
-
-Then aggregate globally:
-```math
-A_t
-=
-\sum_{\ell=1}^L A_{\ell,t},
-```
-```math
-B_t
-=
-\sum_{\ell=1}^L B_{\ell,t}.
-```
-
-Then:
-
-```math
-\boxed{
-\widehat{C}_t
-=
-\sqrt{
-\frac{
-\sum_{\ell=1}^L
-\|G_{\ell,t}-G_{\ell,t-1}\|_2^2
-}{
-\sum_{\ell=1}^L
-\|\theta_{\ell,t}-\theta_{\ell,t-1}\|_2^2
-+\epsilon
-}
-}.
-}
-```
-
-This is equivalent to flattening all layers into one vector:
-
-```math
-\theta_t=
-\operatorname{vec}(\theta_{1,t},\dots,\theta_{L,t}),
-```
-```math
-G_t=
-\operatorname{vec}(G_{1,t},\dots,G_{L,t}),
-```
-and computing:
-```math
-\widehat{C}_t
-=
-\frac{
-\|G_t-G_{t-1}\|_2
-}{
-\|\theta_t-\theta_{t-1}\|_2+\epsilon
-}.
-```
-
-Hardware-wise, this can be implemented as streaming reductions:
-
-```math
-\text{accum\_dG2}
-\leftarrow
-\text{accum\_dG2}
-+
-(G_{\ell,t}-G_{\ell,t-1})^2,
-```
-```math
-\text{accum\_dtheta2}
-\leftarrow
-\text{accum\_dtheta2}
-+
-(\theta_{\ell,t}-\theta_{\ell,t-1})^2.
-```
-
-At the end, compute one global scalar: $\widehat{C}_t$. Then broadcast one global: $\alpha_t$
-
-So we do not multiply per-layer gains at the top level for this controller. The controller is based on the global sensitivity of the optimizer trajectory.
-
-Layerwise versions are possible later:
-```math
-\widehat{C}_{\ell,t}
-=
-\frac{
-\|G_{\ell,t}-G_{\ell,t-1}\|
-}{
-\|\theta_{\ell,t}-\theta_{\ell,t-1}\|+\epsilon
-}.
-```
-
-But the first version should be global because global scaling preserves update geometry.
-
+\alpha_t\eta C_t^{\text{ctrl}}-\chi
+``` 
 
 <TBox type="summary" title="Key insight">
-The estimator can be accumulated layer by layer, but the control action is a single global scalar. That lets us keep hardware implementation simple and avoids layerwise distortion of the descent direction.
+  The global throttle can be imagined as a dynamical controller that tries to keep the system effective learning rate at the stability threshold $\chi$. The actual dynamical response of the controller can be simple but fast (P), slower and more stable (PI), or even predictive (PID).
 </TBox>
+
+### Zero-th order Proportional controller 
+The simplest controller is a proportional controller, which sets $\alpha_t$ proportional to the error signal $e_t$. For instance:
+
+```math
+\alpha_t
+=
+\frac{\chi}{\eta C_t^{\text{ctrl}}}
+```
+
+The issue with this controller is that it can react too aggressively to spikes in curvature/sensitivity, which can lead to oscillations and instability. However, it is very simple and computationally cheap.
+
+### First-order Proportional-Integral controller
+A more stable controller is a proportional-integral controller, which sets $\alpha_t$ proportional to the error signal $e_t$ and its integral. For instance:
+```math
+\tau_\alpha\dot{\alpha}_t = \chi - \alpha_t\eta C_t^{\text{ctrl}}.
+```
+
+**But how to choose $\tau_\alpha$?**
+
+### Second-order PID controller
+An even more sophisticated controller is a proportional-integral-derivative controller, which sets $\alpha_t$ proportional to the error signal $e_t$, its integral, and its derivative. For instance:
+```math
+\ddot{\alpha}_t + k_d \dot{\alpha}_t + k_p (\alpha_t\eta C_t^{\text{ctrl}} - \chi) = 0.
+```
+
+**But how to choose $k_d$, and $k_p$?**
