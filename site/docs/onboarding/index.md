@@ -18,11 +18,6 @@ Follow these pages if you are joining the project, setting up the repository for
 
 </TBox>
 
-## Recommended Path
-
-1. [Setup](./setup.md): install the Python environment, editable package, notebook kernel, and optional documentation tooling.
-2. [Repo Map](./repo-map.md): understand the repository layout and where new work should go.
-3. [Common Tasks](./common-tasks.md): use the standard commands for building, testing, and working with the project.
 
 ## Who Needs This?
 

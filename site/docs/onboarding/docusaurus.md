@@ -11,7 +11,7 @@ last_modified: 2026-05-15
 <PageMeta />
 ---
 
-## [👥 People](./people.md)
+## [👥 People](../people.md)
 
 ### How to add a new person to the registry
 Just add a new entry to `src/data/people.js` with the following format:
@@ -122,7 +122,7 @@ In case you need multiple pages under the same section, it's better to create a 
 
 ---
 
-## [✅ Tasks](./status/tasks.md)
+## [✅ Tasks](../status/tasks.md)
 Tasks are a bit trickier, but don't be scared. This is because there are some react (js) components involved to make the tables and interactivity work. But it's not that bad once you understand the structure.
 
 ### How to add a new task
@@ -143,7 +143,7 @@ First, go to `site/src/data/tasks.js` and add a new entry to the `tasks` object 
 },
 ```
 
-Then, you can view this task in the [Tasks page](./status/tasks.md) and filter it by status, type, area, or owner. You can also update the status and other fields as the task progresses.
+Then, you can view this task in the [Tasks page](../status/tasks.md) and filter it by status, type, area, or owner. You can also update the status and other fields as the task progresses.
 
 Some generic notes on tasks so we keep this sane (please):
 * Each task should ideally be small and actionable, something that can be done in a few hours to a couple of days. If a task is too big, consider breaking it down into smaller subtasks.
