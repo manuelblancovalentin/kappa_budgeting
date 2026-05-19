@@ -19,6 +19,7 @@ author: mbvalentin
 <ENABOL /> ablation work has pivoted from hard row/column $\kappa$ projection toward a closed-loop stability controller. The current algorithm keeps static $\kappa$-style constraints as loose representational rails, but stabilizes online learning with one global throttle $\alpha_t$ that scales the full parameter update. This preserves the optimizer direction while reducing effective learning rate when curvature, saturation, or quantization pressure increases.
 </TBox>
 
+
 ## Current formulation
 
 At each online step, the raw update is:

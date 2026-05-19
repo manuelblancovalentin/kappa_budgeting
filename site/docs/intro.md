@@ -1,10 +1,8 @@
 ---
 sidebar_position: 1
 status:
-  - draft
+  - valid
 tags:
-  - todo
-  - placeholder
   - overview
 last_modified: 2026-05-15
 author: mbvalentin
@@ -18,21 +16,6 @@ This page explains the project to someone joining it for the first time.
 <TBox type="summary" title="Project snapshot">
 <ENABOL /> is currently focused on controlled ablation experiments for closed-loop online training stability. The immediate work is to move from one-layer floating-point sanity checks toward quantized and multi-layer tests while keeping the documentation and experiment registry handoff-ready.
 </TBox>
-
-## One-sentence summary
-
-<ENABOL /> is a hardware-aware online-training framework for studying how fixed-point neural networks can keep learning stable under drift, quantization, saturation, and limited on-edge precision.
-
-## Project goal
-
-Build a small, reproducible ablation harness that separates two ideas:
-
-- static $\kappa$-budgeting as a representational gain rail,
-- dynamic global throttling as a closed-loop learning-stability controller.
-
-The goal is to understand when each mechanism helps, when it disrupts learning, and how to document the resulting methodology clearly enough for another collaborator to continue the work.
-
-## Project roadmap
 
 <ProjectTimeline
   title="ENABOL Ablation Roadmap"
@@ -82,6 +65,7 @@ The goal is to understand when each mechanism helps, when it disrupts learning, 
     },
   ]}
 />
+
 
 ## How to read the docs
 * [🔎 Project Overview](./intro.md) (this page) is the global entry point to understand this project.

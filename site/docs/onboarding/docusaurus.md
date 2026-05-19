@@ -1,11 +1,11 @@
 ---
 title: "🦖 Docusaurus contribution guide"
 status:
-  - draft
+  - valid
 tags:
-  - todo
-  - placeholder
+  - tutorials
   - onboarding
+  - contribute
 last_modified: 2026-05-15
 ---
 <PageMeta />

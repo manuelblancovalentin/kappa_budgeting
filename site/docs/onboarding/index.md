@@ -2,7 +2,7 @@
 title: "Onboarding"
 sidebar_label: "Index"
 status:
-  - preliminary
+  - valid
 tags:
   - onboarding
 last_modified: 2026-05-18
