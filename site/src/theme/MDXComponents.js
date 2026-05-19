@@ -14,6 +14,7 @@ import DocRef from '@site/src/components/DocRef';
 import Algorithm from '@site/src/components/Algorithm';
 import Person from '@site/src/components/Person';
 import PeopleTable from '@site/src/components/PeopleTable';
+import TaskBoard from '@site/src/components/TaskBoard';
 
 export default {
   ...MDXComponents,
@@ -32,6 +33,7 @@ export default {
   Person,
   Mention: Person,
   PeopleTable,
+  TaskBoard,
   Figure,
   SeqDiagram,
   FeedbackLoopDiagram,

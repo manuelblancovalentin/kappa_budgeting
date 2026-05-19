@@ -16,10 +16,13 @@ const STATUS_LABELS = {
   'priority-low': 'Low',
   'not-run': 'Not run yet',
   draft: 'Draft',
-  todo: 'TODO',
+  todo: 'Unassigned',
   placeholder: 'Placeholder',
   revise: 'Needs revision',
   inprogress: 'In progress',
+  completed: 'Completed',
+  blocked: 'Blocked',
+  dropped: 'Dropped',
 };
 
 function normalizeStatus(status) {
