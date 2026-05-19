@@ -5,7 +5,7 @@ tags:
   - revise
   - formulation
   - kappa-budgeting
-last_modified: 2026-05-15
+last_modified: 2026-05-18
 author: mbvalentin
 ---
 

@@ -177,3 +177,93 @@ people:
   label: People
   permalink: /people
   description: Pages tagged People.
+
+ablation-registry:
+  label: Ablation registry
+  permalink: /ablation-registry
+  description: Pages tagged Ablation registry.
+
+ablation-test:
+  label: Ablation test
+  permalink: /ablation-test
+  description: Pages tagged Ablation test.
+
+sanity:
+  label: Sanity
+  permalink: /sanity
+  description: Pages tagged Sanity.
+
+distribution-shift:
+  label: Distribution shift
+  permalink: /distribution-shift
+  description: Pages tagged Distribution shift.
+
+transient:
+  label: Transient
+  permalink: /transient
+  description: Pages tagged Transient.
+
+corruption:
+  label: Corruption
+  permalink: /corruption
+  description: Pages tagged Corruption.
+
+fixed-point:
+  label: Fixed point
+  permalink: /fixed-point
+  description: Pages tagged Fixed point.
+
+saturation:
+  label: Saturation
+  permalink: /saturation
+  description: Pages tagged Saturation.
+
+underflow:
+  label: Underflow
+  permalink: /underflow
+  description: Pages tagged Underflow.
+
+optimizer:
+  label: Optimizer
+  permalink: /optimizer
+  description: Pages tagged Optimizer.
+
+adam:
+  label: Adam
+  permalink: /adam
+  description: Pages tagged Adam.
+
+baselines:
+  label: Baselines
+  permalink: /baselines
+  description: Pages tagged Baselines.
+
+clipping:
+  label: Clipping
+  permalink: /clipping
+  description: Pages tagged Clipping.
+
+legacy:
+  label: Legacy
+  permalink: /legacy
+  description: Pages tagged Legacy.
+
+controller-registry:
+  label: Controller registry
+  permalink: /controller-registry
+  description: Pages tagged Controller registry.
+
+controller:
+  label: Controller
+  permalink: /controller
+  description: Pages tagged Controller.
+
+baseline:
+  label: Baseline
+  permalink: /baseline
+  description: Pages tagged Baseline.
+
+task-log:
+  label: Task log
+  permalink: /task-log
+  description: Pages tagged Task log.

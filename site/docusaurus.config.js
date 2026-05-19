@@ -102,12 +102,79 @@ const config = {
         },
         items: [
           {
-            type: 'docSidebar',
-            sidebarId: 'tutorialSidebar',
+            type: 'doc',
+            docId: 'intro',
             position: 'left',
-            label: 'Docs',
+            label: '🔎 Overview',
           },
-          {to: '/blog', label: 'Lab Log', position: 'left'},
+          {
+            type: 'dropdown',
+            position: 'left',
+            label: '📝 Status',
+            to: '/docs/current-status',
+            items: [
+              {type: 'doc', docId: 'current-status', label: 'Current Snapshot'},
+              {type: 'doc', docId: 'status/tasks', label: 'Tasks'},
+            ],
+          },
+          {
+            type: 'doc',
+            docId: 'people',
+            position: 'left',
+            label: '👥 People',
+          },
+          {
+            type: 'dropdown',
+            position: 'left',
+            label: '🚀 Onboarding',
+            to: '/docs/onboarding/',
+            items: [
+              {type: 'doc', docId: 'onboarding/setup', label: 'Setup'},
+              {type: 'doc', docId: 'onboarding/repo-map', label: 'Repo Map'},
+              {type: 'doc', docId: 'onboarding/common-tasks', label: 'Common Tasks'},
+            ],
+          },
+          {
+            type: 'dropdown',
+            position: 'left',
+            label: '🏷️ Docs',
+            to: '/docs/',
+            items: [
+              {type: 'doc', docId: 'formulation/overview', label: 'Formulation'},
+              {type: 'doc', docId: 'implementation/code-map', label: 'Implementation'},
+              {type: 'doc', docId: 'datasets/datasets-index', label: 'Datasets'},
+              {type: 'doc', docId: 'models/models-index', label: 'Models'},
+              {type: 'doc', docId: 'ablations/index', label: 'Ablation Tests'},
+              {type: 'doc', docId: 'controllers/index', label: 'Controllers'},
+              {type: 'doc', docId: 'experiments/index', label: 'Experiments'},
+            ],
+          },
+          {
+            type: 'dropdown',
+            position: 'left',
+            label: '💡 Decisions',
+            to: '/docs/decisions/',
+            items: [
+              {type: 'doc', docId: 'decisions/adr-template', label: 'ADR Template'},
+            ],
+          },
+          {
+            type: 'doc',
+            docId: 'meetings/index',
+            position: 'left',
+            label: '📅 Meetings',
+          },
+          {
+            type: 'dropdown',
+            position: 'left',
+            label: '🚚 Handoff',
+            to: '/docs/handoff/',
+            items: [
+              {type: 'doc', docId: 'handoff/handoff-checklist', label: 'Checklist'},
+              {type: 'doc', docId: 'handoff/known-issues', label: 'Known Issues'},
+            ],
+          },
+          {to: '/blog', label: '💬 Lab Log', position: 'left'},
           {
             href: 'https://github.com/manuelblancovalentin/kappa_budgeting',
             label: 'GitHub',
@@ -119,16 +186,48 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Docs',
+            title: 'Project',
+            items: [
+              {label: 'Overview', to: '/docs/intro'},
+              {label: 'Current Status', to: '/docs/current-status'},
+              {label: 'People', to: '/docs/people'},
+              {label: 'Lab Log', to: '/blog'},
+            ],
+          },
+          {
+            title: 'Work',
+            items: [
+              {label: 'Experiments', to: '/docs/experiments/'},
+              {label: 'Ablation Tests', to: '/docs/ablations/'},
+              {label: 'Controllers', to: '/docs/controllers/'},
+              {label: 'Datasets', to: '/docs/datasets/'},
+            ],
+          },
+          {
+            title: 'Coordination',
+            items: [
+              {label: 'Decisions', to: '/docs/decisions/'},
+              {label: 'Meetings', to: '/docs/meetings/'},
+              {label: 'Handoff', to: '/docs/handoff/'},
+              {label: 'Onboarding', to: '/docs/onboarding/'},
+            ],
+          },
+          {
+            title: 'Links',
             items: [
               {
-                label: 'Tutorial',
-                to: '/docs/intro',
+                label: 'GitHub Repository',
+                href: 'https://github.com/manuelblancovalentin/kappa_budgeting',
+              },
+              {
+                label: 'Memik Lab',
+                href: 'https://github.com/orgs/Memik-Lab',
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} ENABOL Inc. Built with Docusaurus.`,
+        copyright:
+          `Copyright © ${new Date().getFullYear()} <span class="brand-name">🚂ENABOL</span>. Built with Docusaurus.`,
       },
       prism: {
         theme: prismThemes.github,

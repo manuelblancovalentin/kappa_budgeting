@@ -83,32 +83,36 @@ The goal is to understand when each mechanism helps, when it disrupts learning, 
   ]}
 />
 
-
-## Why this matters
-
-Online training on edge hardware is not only a forward-pass quantization problem. Once learning is enabled, the weights become part of a closed-loop dynamical system. This project studies how to keep that loop stable while preserving the descent direction enough for learning to continue.
-
-## Current owner
-
-| Role | Person |
-|---|---|
-| Primary owner | NAME |
-| Faculty advisor | NAME |
-| Active contributors | NAME, NAME |
-| Former contributors | NAME, NAME |
+## How to read the docs
+* [🔎 Project Overview](./intro.md) (this page) is the global entry point to understand this project.
+* [📝 Current Status](./current-status.md) summarizes the current state of the project and next steps.
+* [👥 People](./people.md) describes the current and past contributors to the project.
+* [🚀 Onboarding](./onboarding/setup.md) is a step-by-step guide to set up the code and run the first experiments.
+* [🏷️ Docs ](./index.md) contains the technical documentation of the formulation, algorithms, and hardware implementation details.
+* [💡 Decisions ](./decisions/index.md) is the decision log of important design choices and their rationale.
+* [📅 Meetings ](./meetings/index.md) contains notes and recordings of project meetings.
+* [🚚 Handoff ](./handoff/index.md) contains the documentation and materials to hand off the project to another collaborator.
+* [💬 Lab log ](/blog) is the public-facing log of experiments, results, and insights.
 
 ## Where to start
 
-1. Read the [current status](./current-status.md).
-2. Follow the [setup guide](./onboarding/setup.md).
-3. Check the latest [lab log](/blog).
-4. Review [known issues](./handoff/known-issues.md).
-5. Pick an item from [next steps](./handoff/next-steps.md).
+I, <Person id="mbvalentin" />, personally recommend starting with:
+
+1. Read the [📝 Current Status](./current-status.md).
+2. Follow the [🚀 Onboarding](./onboarding/setup.md) guide.
+3. Read the documentation in [🏷️ Docs ](./index.md) as needed to understand the experiments and algorithms.
+4. Check the latest [💬 Lab log ](/blog) entry.
+5. Pick an item from [active tasks](./status/tasks.md).
+
+## How to contribute to the docs
+The documentation page is based on [🦖 Docusaurus](https://docusaurus.io/), a React-based static site generator. The docs are written in Markdown with some custom components for styling and interactivity. 
+
+<TBox type="todo" title="TODO">
+- [ ] I, <Person id="mbvalentin" />, intend to do a tutorial walkthrough on how to modify the docs and add new stuff. In the meantime I suggest you use Codex with care, or simply log stuff in the blog or in a google docs/plain markdown text locally and I will add entries to the docs as we go.
+</TBox>
 
 ## Repository links
 
-- GitHub repository:
-- Main branch:
-- Important experimental branches:
-- Related papers / proposals:
-- Shared drive / data location:
+- 👾 GitHub repository (for now): [github.com/manuelblancovalentin/kappa-budgeting](https://github.com/manuelblancovalentin/kappa-budgeting)
+- Main branch: `main`
+- Shared drive / data location: `kona`

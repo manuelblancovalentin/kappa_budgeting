@@ -5,7 +5,7 @@ tags:
   - revise
   - formulation
   - stability
-last_modified: 2026-05-15
+last_modified: 2026-05-18
 author: mbvalentin
 ---
 # 🌀 1-Lipschitz and stability

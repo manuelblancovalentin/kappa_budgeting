@@ -16,18 +16,6 @@
  */
 const sidebars = {
   tutorialSidebar: [
-    'intro',
-    'current-status',
-    'people',
-    {
-      type: 'category',
-      label: '🚀 Onboarding',
-      items: [
-        'onboarding/setup',
-        'onboarding/repo-map',
-        'onboarding/common-tasks',
-      ],
-    },
     {
       type: 'category',
       label: '⟦♾️⟧ Formulation',
@@ -74,36 +62,39 @@ const sidebars = {
     },
     {
       type: 'category',
+      label: '🥊 Ablation Tests',
+      items: [
+        'ablations/index',
+        'ablations/st-000-high-learning-rate-sanity',
+        'ablations/st-001-distribution-shift',
+        'ablations/st-002-transient-spike',
+        'ablations/st-003-rail-saturation',
+        'ablations/st-004-update-dead-zone',
+        'ablations/st-005-optimizer-state-precision',
+        'ablations/st-006-naive-safety-mechanisms',
+        'ablations/st-007-kappa-projection-mismatch',
+      ],
+    },
+    {
+      type: 'category',
+      label: '🕹️ Controllers',
+      items: [
+        'controllers/index',
+        'controllers/ctrl-none',
+        'controllers/ctrl-gt-order-0',
+        'controllers/ctrl-gt-order-1',
+        'controllers/ctrl-gt-order-2',
+        'controllers/ctrl-gt-order-2-qa',
+      ],
+    },
+    {
+      type: 'category',
       label: '🔬 Experiments',
       items: [
         'experiments/index',
         'experiments/exp-000a-global-throttle-float-lin1',
         'experiments/exp-000b-global-throttle-qfx-lin1',
         // 'experiments/experiment-template',
-      ],
-    },
-    {
-      type: 'category',
-      label: '💡 Decisions',
-      items: [
-        'decisions/index',
-        'decisions/adr-template',
-      ],
-    },
-    {
-      type: 'category',
-      label: '📅 Meetings',
-      items: [
-        'meetings/index',
-      ],
-    },
-    {
-      type: 'category',
-      label: '🚚 Handoff',
-      items: [
-        'handoff/handoff-checklist',
-        'handoff/known-issues',
-        'handoff/next-steps',
       ],
     },
   ],

@@ -6,7 +6,7 @@ tags:
   - todo
   - formulation
   - global-throttle
-last_modified: 2026-05-15
+last_modified: 2026-05-18
 author: mbvalentin
 ---
 # 🎚️ The global throttle mechanism
@@ -235,8 +235,6 @@ Then:
 
 <TBox type="summary" title="Key insight">
   So as we can see, for a quadratic loss, this estimator is an upper bound on the true Hessian spectral norm. For general losses, it is a local directional curvature estimate that can be used as a proxy for the local Lipschitzness of the gradient field.
-
-  > **If we ensure that our estimated curvature $\widehat{C}_t$ is below some threshold, we can be SURE that the $\lambda_{\max}(H_t)$ is also below that threshold, which in turn ensures stability of the update.**
 </TBox>
 
 
@@ -323,49 +321,321 @@ Even for nonlinear, non-convex networks, this global throttle mechanism can stil
 </TBox>
 
 
+
 ## Dynamical system controller design
-As we just saw, the task of our controller is to guarantee, at any time, that the effective learning rate $\alpha_t\eta$ is below the stability threshold $\chi/C_t^{\text{ctrl}}$. Because training is a stochastic noisy process, we want to ensure that the system can react quickly to sudden spikes in curvature/sensitivity. In other words: we want an adaptive controller. Thus, we have different options for this (depending on how fancy we want to get). In order of complexity:
 
-| Complexity Order | Controller type | Description | Equation |
-|---|---|---|---|
-| 0 | Proportional (P) | $\alpha$ response is proportional to the error | $\alpha_t = k_p e_t$ |
-| 1 | Proportional-Integral (PI) | $\alpha$ response is proportional to the error and its integral | $\alpha_t = k_p e_t + k_i \sum_{i=0}^t e_i$ |
-| 2 | Proportional-Integral-Derivative (PID) | $\alpha$ response is proportional to the error, its integral, and its derivative | $\alpha_t = k_p e_t + k_i \sum_{i=0}^t e_i + k_d (e_t - e_{t-1})$ |
+The global throttle can be interpreted as a closed-loop controller on the effective learning rate. The controlled SGD update is
 
-Where $e_t$ is the error signal at time $t$, defined as:
+```math
+\theta_{t+1}
+=
+\theta_t-\alpha_t\eta G_t,
+```
+
+where $G_t=\nabla_\theta \mathcal{L}(\theta_t)$. The role of the controller is to keep the effective stability margin
+
+```math
+m_t
+=
+\eta\alpha_t C_t^{\mathrm{ctrl}}
+```
+
+near a chosen target $\chi<2$. We define the margin error
+
 ```math
 e_t
 =
-\alpha_t\eta C_t^{\text{ctrl}}-\chi
-``` 
+m_t-\chi
+=
+\eta\alpha_t C_t^{\mathrm{ctrl}}-\chi.
+```
 
-<TBox type="summary" title="Key insight">
-  The global throttle can be imagined as a dynamical controller that tries to keep the system effective learning rate at the stability threshold $\chi$. The actual dynamical response of the controller can be simple but fast (P), slower and more stable (PI), or even predictive (PID).
-</TBox>
+If $e_t>0$, the update is too aggressive and the controller should reduce $\alpha_t$. If $\alpha_t<0$, the update is conservative and the controller may increase $\alpha_t$.
 
-### Zero-th order Proportional controller 
-The simplest controller is a proportional controller, which sets $\alpha_t$ proportional to the error signal $e_t$. For instance:
+### Case 0: Algebraic safe-gain throttle
+
+The simplest controller directly sets $\alpha_t$ to the estimated safe value:
 
 ```math
 \alpha_t
 =
-\frac{\chi}{\eta C_t^{\text{ctrl}}}
+\min\left(
+1,
+\frac{\chi}
+{\eta(C_t^{\mathrm{ctrl}}+\epsilon)}
+\right).
 ```
 
-The issue with this controller is that it can react too aggressively to spikes in curvature/sensitivity, which can lead to oscillations and instability. However, it is very simple and computationally cheap.
+This is the controller used in the first global-throttle sanity experiment. It is the instantaneous solution of
 
-### First-order Proportional-Integral controller
-A more stable controller is a proportional-integral controller, which sets $\alpha_t$ proportional to the error signal $e_t$ and its integral. For instance:
 ```math
-\tau_\alpha\dot{\alpha}_t = \chi - \alpha_t\eta C_t^{\text{ctrl}}.
+\eta\alpha_t C_t^{\mathrm{ctrl}}=\chi.
 ```
 
-**But how to choose $\tau_\alpha$?**
+Therefore, it can be interpreted as the zero-time-constant limit of a dynamical controller.
 
-### Second-order PID controller
-An even more sophisticated controller is a proportional-integral-derivative controller, which sets $\alpha_t$ proportional to the error signal $e_t$, its integral, and its derivative. For instance:
+### Case 1: First-order gain controller
+
+Instead of setting $\alpha_t$ instantaneously, we can treat it as a state variable. In continuous time:
+
 ```math
-\ddot{\alpha}_t + k_d \dot{\alpha}_t + k_p (\alpha_t\eta C_t^{\text{ctrl}} - \chi) = 0.
+\dot{\alpha}
+=
+k_\alpha(\chi-\eta\alpha C^{\mathrm{ctrl}}).
 ```
 
-**But how to choose $k_d$, and $k_p$?**
+If $\eta\alpha C^{\mathrm{ctrl}}>\chi$, then $\dot{\alpha}<0$, so the controller brakes. If $\eta\alpha C^{\mathrm{ctrl}}<\chi$, then $\dot{\alpha}>0$, so the controller accelerates.
+
+For locally constant $C^{\mathrm{ctrl}}$, the equilibrium is
+
+```math
+\alpha^\star
+=
+\frac{\chi}
+{\eta C^{\mathrm{ctrl}}}.
+```
+
+A discrete-time implementation is
+
+```math
+\alpha_{t+1}
+=
+\alpha_t
++
+k_\alpha
+\left(
+\chi-\eta\alpha_t C_t^{\mathrm{ctrl}}
+\right).
+```
+
+To choose $k_\alpha$, assume $C_t^{\mathrm{ctrl}}=C$ is locally constant. Then the error $u_t=\alpha_t-\alpha^\star$ evolves as
+
+```math
+u_{t+1}
+=
+(1-k_\alpha\eta C)u_t.
+```
+
+Thus, stable $\alpha$-adaptation requires
+
+```math
+0<k_\alpha\eta C<2.
+```
+
+For non-oscillatory adaptation, choose
+
+```math
+0<k_\alpha\eta C<1.
+```
+
+Using an estimated maximum curvature $C_{\max}$, a conservative choice is
+
+```math
+k_\alpha
+=
+\frac{c_k}{\eta C_{\max}},
+\qquad
+0<c_k<1.
+``` 
+
+<TBox type="summary" title="Key insight">
+  A first-order controller can adapt the global throttle $\alpha_t$ over time to keep the effective learning rate near the stability margin. The adaptation speed can be tuned via $k_\alpha$. A first choice can be:
+  ```math
+  k_\alpha
+  =
+  \frac{0.5}{\eta C_{\max}} \quad \leadsto \quad \dot{\alpha}=k_\alpha(\chi-\eta\alpha C^{\mathrm{ctrl}}).
+  ```
+</TBox>
+
+### Case 2: Second-order damped gain controller
+
+A second-order controller gives $\alpha_t$ its own velocity:
+
+```math
+\ddot{\alpha}
++
+k_d\dot{\alpha}
++
+k_p
+\left(
+\eta\alpha C^{\mathrm{ctrl}}-\chi
+\right)
+=
+0.
+```
+
+For locally constant $C^{\mathrm{ctrl}}$, the equilibrium is again
+
+```math
+\alpha^\star
+=
+\frac{\chi}
+{\eta C^{\mathrm{ctrl}}}.
+```
+
+Let
+
+```math
+u=\alpha-\alpha^\star.
+```
+
+Then
+
+```math
+\eta\alpha C^{\mathrm{ctrl}}-\chi
+=
+\eta C^{\mathrm{ctrl}}u,
+```
+
+and the local controller dynamics become
+
+```math
+\ddot{u}
++
+k_d\dot{u}
++
+k_p\eta C^{\mathrm{ctrl}}u
+=
+0.
+```
+
+This is a damped second-order system with natural frequency
+
+```math
+\omega_n
+=
+\sqrt{k_p\eta C^{\mathrm{ctrl}}}
+```
+
+and damping ratio
+
+```math
+\zeta
+=
+\frac{k_d}
+{2\sqrt{k_p\eta C^{\mathrm{ctrl}}}}.
+```
+
+Critical damping occurs when
+
+```math
+k_d
+=
+2\sqrt{k_p\eta C^{\mathrm{ctrl}}}.
+```
+
+In practice, choose a reference curvature $C_{\mathrm{ref}}$, a desired gain-settling time $T_\alpha$, and set
+
+```math
+\omega_n=\frac{4}{T_\alpha},
+```
+
+```math
+k_p
+=
+\frac{\omega_n^2}
+{\eta C_{\mathrm{ref}}},
+```
+
+```math
+k_d=2\omega_n.
+```
+
+If one wants conservative non-ringing behavior over all expected curvatures $C\leq C_{\max}$, choose
+
+```math
+k_d
+\geq
+2\sqrt{k_p\eta C_{\max}}. 
+```
+
+A hardware-friendly discrete version is
+
+```math
+\begin{aligned}
+v_{\alpha,t+1}
+&=
+\beta v_{\alpha,t}
++
+k_\alpha
+\left(
+\chi-\eta\alpha_t C_t^{\mathrm{ctrl}}
+\right) \\[8pt]
+\alpha_{t+1}
+&=
+\alpha_t+v_{\alpha,t+1} 
+\end{aligned}
+```
+
+which is basically a momentum update on $\alpha$ with a proportional term on the margin error. 
+
+In fact, a good choice could be to make this system be critically-damped at the reference curvature $C_{\mathrm{ref}}$:
+
+```math
+k_\alpha
+=
+\frac{16}{T_\alpha^2\eta C_{\mathrm{ref}}}, \qquad
+\beta
+=
+2\sqrt{k_\alpha\eta C_{\mathrm{ref}}}-1.
+```
+
+<TBox type="warning" title="But what is the best choice for $C_{\mathrm{ref}}$?">
+  ???
+</TBox>
+
+### Case 3: Quantization-aware gain feasibility
+
+In fixed-point training, reducing $\alpha_t$ too much can make the update vanish after quantization. If $q_\Delta$ is the update quantum, a useful update requires approximately
+
+```math
+\eta\alpha_t\|G_t\|_2
+\gtrsim
+q_\Delta.
+```
+
+Therefore,
+
+```math
+\alpha_t
+\gtrsim
+\frac{q_\Delta}
+{\eta\|G_t\|_2+\epsilon}.
+```
+
+At the same time, stability requires
+
+```math
+\alpha_t
+\lesssim
+\frac{\chi}
+{\eta C_t^{\mathrm{ctrl}}+\epsilon}.
+```
+
+Define
+
+```math
+\alpha_{\min,t}
+=
+\frac{q_\Delta}
+{\eta\|G_t\|_2+\epsilon}
+```
+
+and
+
+```math
+\alpha_{\max,t}
+=
+\frac{\chi}
+{\eta C_t^{\mathrm{ctrl}}+\epsilon}.
+```
+
+Useful stable fixed-point learning requires
+
+```math
+\alpha_{\min,t}
+\leq
+\alpha_{\max,t}.
+```
+
+If this interval collapses, the current fixed-point format cannot simultaneously provide stable and useful updates.

@@ -1,6 +1,7 @@
+---
 slug: project-kickoff
 title: Project kickoff
-authors: [project-owner]
+authors: mbvalentin
 tags: [kickoff, planning]
 ---
 
