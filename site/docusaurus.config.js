@@ -131,7 +131,7 @@ const config = {
             items: [
               {type: 'doc', docId: 'onboarding/setup', label: 'Setup'},
               {type: 'doc', docId: 'onboarding/repo-map', label: 'Repo Map'},
-              {type: 'doc', docId: 'onboarding/common-tasks', label: 'Common Tasks'},
+              {type: 'doc', docId: 'onboarding/docusaurus', label: 'Docusaurus Guide'},
             ],
           },
           {

@@ -105,14 +105,8 @@ I, <Person id="mbvalentin" />, personally recommend starting with:
 5. Pick an item from [active tasks](./status/tasks.md).
 
 ## How to contribute to the docs
-The documentation page is based on [🦖 Docusaurus](https://docusaurus.io/), a React-based static site generator. The docs are written in Markdown with some custom components for styling and interactivity. 
+The documentation page is based on [🦖 Docusaurus](https://docusaurus.io/), a React-based static site generator. The docs are written in Markdown with some custom components for styling and interactivity. If you want to contribute, read carefully the [🦖 Docusaurus contribution guide](./onboarding/docusaurus.md) and familiarize yourself with the structure of the page. It's pretty easy.
 
 <TBox type="todo" title="TODO">
-- [ ] I, <Person id="mbvalentin" />, intend to do a tutorial walkthrough on how to modify the docs and add new stuff. In the meantime I suggest you use Codex with care, or simply log stuff in the blog or in a google docs/plain markdown text locally and I will add entries to the docs as we go.
+- [ ] I, <Person id="mbvalentin" />, intend to add more tutorials walkthrough on how to modify the docs and add new stuff. In the meantime I suggest you use Codex with care, or simply log stuff in the blog or in a google docs/plain markdown text locally and I will add entries to the docs as we go.
 </TBox>
-
-## Repository links
-
-- 👾 GitHub repository (for now): [github.com/manuelblancovalentin/kappa-budgeting](https://github.com/manuelblancovalentin/kappa-budgeting)
-- Main branch: `main`
-- Shared drive / data location: `kona`

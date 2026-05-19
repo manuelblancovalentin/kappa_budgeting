@@ -13,7 +13,7 @@ author: mbvalentin
 <PageMeta />
 ---
 
-This page is the project roster. Use the IDs below in page frontmatter and inline mentions.
+This page is the project roster. Use the IDs below in page frontmatter and inline mentions. To know how to contribute to the people registry, read the [Docusaurus contribution guide](./onboarding/docusaurus.md#-people).
 
 <PeopleTable />
 
@@ -37,19 +37,4 @@ For inline mentions:
 
 ```mdx
 <Person id="alan-guo" />
-```
-
-
-## Adding New People
-Just add a new entry to `src/data/people.js` with the following format:
-
-```javascript
-'entryname': {
-    id: 'unique-id',
-    handle: 'username',
-    name: 'Full Name',
-    shortName: 'Short Name',
-    role: 'Role in Project',
-    github: 'https://github.com/username',
-  },
 ```
