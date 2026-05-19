@@ -18,9 +18,11 @@ If you find this work useful, please consider citing it:
 ```
 @inproceedings{blanco-valentin2026enabol,
   title={ENABOL: Enabling Stable On-Chip Learning via Adaptive Lipschitz Budgeting in Edge-AI Systems},
-  author={Manuel Blanco-Valentin and others},
+  author={Blanco Valentin, Manuel and Forelli, Ryan and Gindlesperger, Ethan and Guo, Houxuan and Ogrenci, Seda},
   conference={ICCAD},
     year={2026}
 }
 ```
+
+
 
