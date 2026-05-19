@@ -2,7 +2,9 @@
 
 This repository contains the code and documentation for the actual mathematical implementation of the $\kappa$-Budgeting algorithm, as described in the paper "ENABOL: Enabling Stable On-Chip Learning via Adaptive Lipschitz Budgeting in Edge-AI Systems".
 
-For live updates, please refer to the Live Pages of this repo in [here](https://manuelblancovalentin.github.io/kappa_budgeting/).
+
+For further documentation [🚀 🖥️ Visit our live website](https://manuelblancovalentin.github.io/kappa_budgeting/)
+
 
 ## Paper
 
