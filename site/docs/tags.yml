@@ -267,3 +267,8 @@ task-log:
   label: Task log
   permalink: /task-log
   description: Pages tagged Task log.
+
+project-log:
+  label: Project log
+  permalink: /project-log
+  description: Pages tagged Project log.

@@ -15,6 +15,7 @@ import Algorithm from '@site/src/components/Algorithm';
 import Person from '@site/src/components/Person';
 import PeopleTable from '@site/src/components/PeopleTable';
 import TaskBoard from '@site/src/components/TaskBoard';
+import MeetingCalendar from '@site/src/components/MeetingCalendar';
 
 export default {
   ...MDXComponents,
@@ -34,6 +35,7 @@ export default {
   Mention: Person,
   PeopleTable,
   TaskBoard,
+  MeetingCalendar,
   Figure,
   SeqDiagram,
   FeedbackLoopDiagram,
