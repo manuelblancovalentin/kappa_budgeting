@@ -44,6 +44,6 @@ A meeting entry is intentionally small:
 
 <TBox type="todo" title="Future upgrade">
 
-If meeting notes become longer than a short summary, we can keep this calendar registry but point each entry to a dedicated markdown page under `site/docs/meetings/`. The calendar would remain the index, while each meeting page would hold agenda, decisions, action items, and raw notes.
+If meeting notes become longer than a short summary, we can keep this calendar registry but point each entry to a dedicated markdown page under `site/docs/meetings/`. The calendar would remain the index, while each meeting page would hold agenda, action items, and raw notes.
 
 </TBox>

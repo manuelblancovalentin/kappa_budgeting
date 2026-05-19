@@ -47,21 +47,6 @@ const cards = [
     link: '/docs/experiments',
     cta: 'View experiments',
   },
-
-  // {
-  //   title: 'Decisions',
-  //   description:
-  //     'Architecture and research decision records so people do not rediscover the same tradeoffs.',
-  //   link: '/docs/decisions',
-  //   cta: 'Read decisions',
-  // },
-  // {
-  //   title: 'Handoff',
-  //   description:
-  //     'Continuity notes: known issues, next steps, and things not to repeat.',
-  //   link: '/docs/handoff/handoff-checklist',
-  //   cta: 'Open handoff',
-  // },
 ];
 
 function Card({title, description, link, cta}) {
@@ -99,7 +84,7 @@ export default function Home() {
                 </Heading>
                 <p className={styles.heroSubtitle}>
                   A living memory system for this project: current status, lab logs,
-                  experiments, decisions, onboarding, and handoff notes.
+                  experiments, onboarding, and handoff notes.
                 </p>
                 <div className={styles.heroButtons}>
                   <Link className="button button--primary button--lg" to="/docs/current-status">

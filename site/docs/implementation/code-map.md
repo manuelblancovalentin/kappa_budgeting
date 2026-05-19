@@ -25,7 +25,7 @@ This repository is the new implementation and documentation home for the kappa-b
 |---|---|
 | `enabol/` | Python package for reusable kappa-budgeting simulation code. |
 | `workspace/ablations/` | Reproducible experiment workspaces, notebooks, configs, notes, and results. |
-| `site/docs/` | Docusaurus documentation for methodology, experiment logs, decisions, and handoff. |
+| `site/docs/` | Docusaurus documentation for methodology, experiment logs, and handoff. |
 | `site/blog/` | Short lab-log entries for chronological updates. |
 | `.github/workflows/deploy-docs.yml` | GitHub Pages deployment for the Docusaurus site. |
 

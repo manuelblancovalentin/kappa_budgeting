@@ -13,7 +13,7 @@ import rehypeKatex from 'rehype-katex';
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Project Logbook',
-  tagline: 'A living record of project status, experiments, decisions, and handoff notes.',
+  tagline: 'A living record of project status, experiments, and handoff notes.',
   favicon: 'img/favicon-emoji.svg',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -150,15 +150,6 @@ const config = {
             ],
           },
           {
-            type: 'dropdown',
-            position: 'left',
-            label: '💡 Decisions',
-            to: '/docs/decisions/',
-            items: [
-              {type: 'doc', docId: 'decisions/adr-template', label: 'ADR Template'},
-            ],
-          },
-          {
             type: 'doc',
             docId: 'meetings/index',
             position: 'left',
@@ -206,7 +197,6 @@ const config = {
           {
             title: 'Coordination',
             items: [
-              {label: 'Decisions', to: '/docs/decisions/'},
               {label: 'Meetings', to: '/docs/meetings/'},
               {label: 'Handoff', to: '/docs/handoff/'},
               {label: 'Onboarding', to: '/docs/onboarding/'},
