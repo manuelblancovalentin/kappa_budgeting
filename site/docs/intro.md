@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_label: "Ha"
 status:
   - valid
 tags:
@@ -69,11 +69,10 @@ This page explains the project to someone joining it for the first time.
 
 ## How to read the docs
 * [🔎 Project Overview](./intro.md) (this page) is the global entry point to understand this project.
-* [📝 Current Status](./current-status.md) summarizes the current state of the project and next steps.
+* [📝 Current Status](./status/current-status.md) summarizes the current state of the project and next steps.
 * [👥 People](./people.md) describes the current and past contributors to the project.
 * [🚀 Onboarding](./onboarding/setup.md) is a step-by-step guide to set up the code and run the first experiments.
-* [🏷️ Docs ](./index.md) contains the technical documentation of the formulation, algorithms, and hardware implementation details.
-* [💡 Decisions ](./decisions/index.md) is the decision log of important design choices and their rationale.
+* [🏷️ Docs ](./formulation/index.md) contains the technical documentation of the formulation, algorithms, and hardware implementation details.
 * [📅 Meetings ](./meetings/index.md) contains notes and recordings of project meetings.
 * [🚚 Handoff ](./handoff/index.md) contains the documentation and materials to hand off the project to another collaborator.
 * [💬 Lab log ](/blog) is the public-facing log of experiments, results, and insights.
@@ -82,9 +81,9 @@ This page explains the project to someone joining it for the first time.
 
 I, <Person id="mbvalentin" />, personally recommend starting with:
 
-1. Read the [📝 Current Status](./current-status.md).
+1. Read the [📝 Current Status](./status/current-status.md).
 2. Follow the [🚀 Onboarding](./onboarding/setup.md) guide.
-3. Read the documentation in [🏷️ Docs ](./index.md) as needed to understand the experiments and algorithms.
+3. Read the documentation in [🏷️ Docs ](./formulation/index.md) as needed to understand the experiments and algorithms.
 4. Check the latest [💬 Lab log ](/blog) entry.
 5. Pick an item from [active tasks](./status/tasks.md).
 

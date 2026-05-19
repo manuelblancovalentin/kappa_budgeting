@@ -8,7 +8,7 @@ Use it when starting a new project, prototype, paper-support repo, hardware expe
 
 1. Rename the project in `docusaurus.config.js`.
 2. Update `docs/intro.md`.
-3. Update `docs/current-status.md`.
+3. Update `docs/status/current-status.md`.
 4. Fill in `docs/onboarding/setup.md`.
 5. Add the first lab log entry in `blog/`.
 6. Enable GitHub Pages using GitHub Actions.
@@ -17,11 +17,10 @@ Use it when starting a new project, prototype, paper-support repo, hardware expe
 
 | Location | Purpose |
 |---|---|
-| `docs/current-status.md` | Canonical current state |
+| `docs/status/current-status.md` | Canonical current state |
 | `docs/onboarding/` | Setup and first-day instructions |
 | `docs/implementation/` | Stable implementation notes |
 | `docs/experiments/` | Summarized experiment results |
-| `docs/decisions/` | Architecture/research decision records |
 | `docs/handoff/` | Continuity notes |
 | `blog/` | Chronological progress logs |
 | GitHub Issues | Raw working memory |

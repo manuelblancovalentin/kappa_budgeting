@@ -111,9 +111,9 @@ const config = {
             type: 'dropdown',
             position: 'left',
             label: '📝 Status',
-            to: '/docs/current-status',
+            to: '/docs/status/current-status',
             items: [
-              {type: 'doc', docId: 'current-status', label: 'Current Snapshot'},
+              {type: 'doc', docId: 'status/current-status', label: 'Current Snapshot'},
               {type: 'doc', docId: 'status/tasks', label: 'Tasks'},
             ],
           },
@@ -138,7 +138,7 @@ const config = {
             type: 'dropdown',
             position: 'left',
             label: '🏷️ Docs',
-            to: '/docs/',
+            to: '/docs/formulation/',
             items: [
               {type: 'doc', docId: 'formulation/overview', label: 'Formulation'},
               {type: 'doc', docId: 'implementation/code-map', label: 'Implementation'},
@@ -166,11 +166,11 @@ const config = {
             ],
           },
           {to: '/blog', label: '💬 Lab Log', position: 'left'},
-          {
-            href: 'https://github.com/manuelblancovalentin/kappa_budgeting',
-            label: 'GitHub',
-            position: 'right',
-          },
+          // {
+          //   href: 'https://github.com/manuelblancovalentin/kappa_budgeting',
+          //   label: 'GitHub',
+          //   position: 'right',
+          // },
         ],
       },
       footer: {
@@ -180,7 +180,7 @@ const config = {
             title: 'Project',
             items: [
               {label: 'Overview', to: '/docs/intro'},
-              {label: 'Current Status', to: '/docs/current-status'},
+              {label: 'Current Status', to: '/docs/status/current-status'},
               {label: 'People', to: '/docs/people'},
               {label: 'Lab Log', to: '/blog'},
             ],

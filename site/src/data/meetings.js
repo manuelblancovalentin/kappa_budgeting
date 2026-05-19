@@ -9,7 +9,7 @@ const meetings = [
     summary: 'Organized the project docs around registries for datasets, models, ablation tests, controllers, experiments, tasks, and handoff material.',
     links: {
       docs: [
-        {label: 'Current Status', href: '/docs/current-status'},
+        {label: 'Current Status', href: '/docs/status/current-status'},
         {label: 'Tasks', href: '/docs/status/tasks'},
       ],
     },

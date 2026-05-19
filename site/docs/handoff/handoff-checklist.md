@@ -1,4 +1,5 @@
 ---
+sidebar_label: "☑ Handoff Checklist"
 status:
   - draft
 tags:
@@ -8,7 +9,7 @@ tags:
 last_modified: 2026-05-15
 author: mbvalentin
 ---
-# Handoff Checklist
+# ☑ Handoff Checklist
 
 <PageMeta />
 ---
@@ -17,7 +18,7 @@ Use this before someone leaves the project, pauses work, graduates, goes on inte
 
 ## Current project state is documented
 
-- [ ] `docs/current-status.md` is up to date.
+- [ ] `docs/status/current-status.md` is up to date.
 - [ ] Known issues are documented.
 - [ ] Next steps are documented.
 - [ ] Last known good commit is listed.
@@ -33,7 +34,6 @@ Use this before someone leaves the project, pauses work, graduates, goes on inte
 
 ## Knowledge transfer
 
-- [ ] Main design decisions are documented.
 - [ ] Failed approaches are documented.
 - [ ] Current blockers are documented.
 - [ ] Open questions are documented.

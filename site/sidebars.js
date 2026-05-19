@@ -16,6 +16,7 @@
  */
 const sidebars = {
   tutorialSidebar: [
+    'formulation/index',
     {
       type: 'category',
       label: '⟦♾️⟧ Formulation',
@@ -97,6 +98,21 @@ const sidebars = {
         // 'experiments/experiment-template',
       ],
     },
+  ],
+  statusSidebar: [
+    'status/current-status',
+    'status/tasks',
+  ],
+  onBoardingSidebar: [
+    'onboarding/index',
+    'onboarding/setup',
+    'onboarding/repo-map',
+    'onboarding/docusaurus',
+  ],
+  HandOffSidebar: [
+    'handoff/index',
+    'handoff/handoff-checklist',
+    'handoff/known-issues',
   ],
 };
 

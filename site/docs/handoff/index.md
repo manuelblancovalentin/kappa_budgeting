@@ -1,6 +1,6 @@
 ---
 title: "Handoff"
-sidebar_label: "Index"
+sidebar_label: "🚚 Handoff"
 status:
   - preliminary
 tags:
@@ -24,7 +24,6 @@ This section is for transferring project context to another person without relyi
 |---|---|
 | [Handoff Checklist](./handoff-checklist.md) | Checklist to complete before transferring ownership or pausing work. |
 | [Known Issues](./known-issues.md) | Current problems, caveats, and blockers. |
-| [Tasks](../status/tasks.md) | Concrete active work items and completed project tasks. |
 
 ## What Belongs Here?
 
@@ -33,4 +32,3 @@ This section is for transferring project context to another person without relyi
 - experiment status,
 - unstable assumptions,
 - files or notebooks that need attention,
-- decisions that have not yet been formalized.

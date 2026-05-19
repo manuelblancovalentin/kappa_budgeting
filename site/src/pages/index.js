@@ -9,7 +9,7 @@ const cards = [
     title: '📝 Current Status',
     description:
       'The canonical snapshot of what works, what is blocked, and what should happen next.',
-    link: '/docs/current-status',
+    link: '/docs/status/current-status',
     cta: 'Read status',
   },
   {
@@ -87,7 +87,7 @@ export default function Home() {
                   experiments, onboarding, and handoff notes.
                 </p>
                 <div className={styles.heroButtons}>
-                  <Link className="button button--primary button--lg" to="/docs/current-status">
+                  <Link className="button button--primary button--lg" to="/docs/status/current-status">
                     Current Status
                   </Link>
                   <Link className="button button--secondary button--lg" to="/blog">

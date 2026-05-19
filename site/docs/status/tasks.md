@@ -1,6 +1,6 @@
 ---
 title: "Tasks"
-sidebar_label: "Tasks"
+sidebar_label: "✅ Tasks"
 status:
   - preliminary
   - inprogress

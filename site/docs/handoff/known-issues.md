@@ -1,4 +1,5 @@
 ---
+sidebar_label: "🚧 Known Issues"
 status:
   - draft
 tags:

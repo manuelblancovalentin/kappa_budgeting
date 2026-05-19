@@ -1,4 +1,5 @@
 ---
+sidebar_label: "📸 Current Snapshot"
 sidebar_position: 2
 status:
   - preliminary
@@ -10,7 +11,7 @@ tags:
 last_modified: 2026-05-15
 author: mbvalentin
 ---
-# 📝 Current Status
+# 📸 Current Snapshot
 <PageMeta />
 
 ---
@@ -56,10 +57,10 @@ Then $\alpha_t$ is selected so the effective update is damped during high-curvat
 
 | Item | Current value |
 |---|---|
-| Dataset | [`DS-AFFINE-LINEAR-000`](./datasets/affine-linear-000.md) |
-| Model | [`MDL-DENSE1-LINEAR-NOBIAS-000`](./models/dense1-linear-nobias-000.md) |
-| Float experiment | [`EXP-000A`](./experiments/exp-000a-global-throttle-float-lin1.md) |
-| Quantized experiment | [`EXP-000B`](./experiments/exp-000b-global-throttle-qfx-lin1.md) |
+| Dataset | [`DS-AFFINE-LINEAR-000`](../datasets/affine-linear-000.md) |
+| Model | [`MDL-DENSE1-LINEAR-NOBIAS-000`](../models/dense1-linear-nobias-000.md) |
+| Float experiment | [`EXP-000A`](../experiments/exp-000a-global-throttle-float-lin1.md) |
+| Quantized experiment | [`EXP-000B`](../experiments/exp-000b-global-throttle-qfx-lin1.md) |
 | Workspace | `workspace/ablations/exp_000_global_throttle_sanity/` |
 
 ## What currently works

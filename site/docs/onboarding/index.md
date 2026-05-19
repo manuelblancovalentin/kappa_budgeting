@@ -1,6 +1,6 @@
 ---
 title: "Onboarding"
-sidebar_label: "Index"
+sidebar_label: "🚀 Onboarding"
 status:
   - valid
 tags:
@@ -28,4 +28,4 @@ Use onboarding if you are:
 - editing the documentation site,
 - taking over part of the project from someone else.
 
-If you only need to read the current results, start with [Current Status](../current-status.md) instead.
+If you only need to read the current results, start with [Current Status](../status/current-status) instead.

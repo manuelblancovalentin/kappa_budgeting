@@ -1,7 +1,7 @@
 ---
 id: index
 title: "Docs"
-sidebar_label: "Docs"
+sidebar_label: "🏷️ Docs"
 status:
   - valid
   - inprogress
@@ -24,13 +24,13 @@ Use this page as the technical documentation entry point. The sidebar is organiz
 
 | Section | Purpose |
 |---|---|
-| [Formulation](./formulation/overview.md) | Mathematical framing for fixed-point online learning and global throttling. |
-| [Implementation](./implementation/code-map.md) | Code-facing reference for the Python modules and training loop. |
-| [Datasets](./datasets/) | Stable dataset IDs used in experiment traces. |
-| [Models](./models/) | Stable model IDs used in experiment traces. |
-| [Ablation Tests](./ablations/) | Stress-test families used to make fixed-point training fail in controlled ways. |
-| [Controllers](./controllers/) | Stable controller IDs used to modify or throttle optimizer updates. |
-| [Experiments](./experiments/) | Actual experiment reports, plots, notebooks, and conclusions. |
+| [Formulation](overview.md) | Mathematical framing for fixed-point online learning and global throttling. |
+| [Implementation](../implementation/code-map.md) | Code-facing reference for the Python modules and training loop. |
+| [Datasets](../datasets/) | Stable dataset IDs used in experiment traces. |
+| [Models](../models/) | Stable model IDs used in experiment traces. |
+| [Ablation Tests](../ablations/) | Stress-test families used to make fixed-point training fail in controlled ways. |
+| [Controllers](../controllers/) | Stable controller IDs used to modify or throttle optimizer updates. |
+| [Experiments](../experiments/) | Actual experiment reports, plots, notebooks, and conclusions. |
 
 ## Experiment Trace Pattern
 
