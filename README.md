@@ -13,7 +13,7 @@ For live updates, please refer to the Live Pages of this repo in [here](https://
 </object>
 
 ## Cite:
-If you find this work useful, please consider citing it:
+If you find this work useful, please consider citing it with the following BibTeX entry:
 
 ```
 @inproceedings{blanco-valentin2026enabol,
@@ -23,6 +23,9 @@ If you find this work useful, please consider citing it:
     year={2026}
 }
 ```
+
+or in plain text:
+> Manuel Blanco Valentin, Ryan Forelli, Ethan Gindlesperger, Houxuan Guo, and Seda Ogrenci. "ENABOL: Enabling Stable On-Chip Learning via Adaptive Lipschitz Budgeting in Edge-AI Systems". In Proceedings of the 45th International Conference on Computer-Aided Design (ICCAD), 2026.
 
 
 
