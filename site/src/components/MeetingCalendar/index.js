@@ -1,4 +1,5 @@
 import React, {useMemo, useState} from 'react';
+import Link from '@docusaurus/Link';
 import meetings from '@site/src/data/meetings';
 import Person from '@site/src/components/Person';
 import {Badge} from '@site/src/components/StatusBadges';
@@ -77,12 +78,92 @@ function MeetingLinks({links}) {
     <span className="meeting-links">
       {groups.flatMap(([group, values]) =>
         values.map((link) => (
-          <a key={`${group}-${link.href}-${link.label}`} href={link.href}>
+          <Link key={`${group}-${link.href}-${link.label}`} to={link.href}>
             {link.label}
-          </a>
+          </Link>
         )),
       )}
     </span>
+  );
+}
+
+function leadingSpaces(value) {
+  return value.match(/^\s*/)?.[0].length || 0;
+}
+
+function normalizeNoteLines(notes) {
+  const rawLines = String(notes || '').replace(/\t/g, '  ').split('\n');
+  while (rawLines.length && !rawLines[0].trim()) rawLines.shift();
+  while (rawLines.length && !rawLines[rawLines.length - 1].trim()) rawLines.pop();
+
+  const heading = rawLines[0]?.trim().startsWith('## ')
+    ? rawLines.shift().trim().replace(/^##\s+/, '')
+    : 'Notes';
+  const bodyIndents = rawLines
+    .filter((line) => line.trim())
+    .map(leadingSpaces);
+  const baseIndent = bodyIndents.length ? Math.min(...bodyIndents) : 0;
+
+  return {
+    heading,
+    lines: rawLines.map((line) => line.slice(Math.min(baseIndent, leadingSpaces(line)))),
+  };
+}
+
+function parseNoteList(lines) {
+  const root = [];
+  const stack = [{indent: -1, items: root}];
+
+  for (const line of lines) {
+    if (!line.trim()) continue;
+
+    const bullet = line.match(/^(\s*)[-*+]\s+(.+)$/);
+    if (!bullet) {
+      const currentItems = stack[stack.length - 1].items;
+      const currentItem = currentItems[currentItems.length - 1];
+      if (currentItem) currentItem.text = `${currentItem.text} ${line.trim()}`;
+      continue;
+    }
+
+    const indent = bullet[1].length;
+    const item = {text: bullet[2].trim(), children: []};
+    while (stack.length > 1 && stack[stack.length - 1].indent >= indent) stack.pop();
+    stack[stack.length - 1].items.push(item);
+    stack.push({indent, items: item.children});
+  }
+
+  return root;
+}
+
+function renderNoteItems(items) {
+  if (!items.length) return null;
+
+  return (
+    <ul>
+      {items.map((item, index) => (
+        <li key={`${item.text}-${index}`}>
+          {item.text}
+          {renderNoteItems(item.children)}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function MeetingNotes({notes, notesDoc}) {
+  if (!notes && !notesDoc) return null;
+
+  const {heading, lines} = normalizeNoteLines(notes);
+  const items = parseNoteList(lines);
+
+  return (
+    <div className="meeting-card__notes">
+      <div className="meeting-card__notes-top">
+        <strong>{heading}</strong>
+        {notesDoc && <Link to={notesDoc.href}>{notesDoc.label || 'Full notes'}</Link>}
+      </div>
+      {renderNoteItems(items)}
+    </div>
   );
 }
 
@@ -111,6 +192,7 @@ function MeetingCard({meeting}) {
       </div>
       {meeting.summary && <p>{meeting.summary}</p>}
       <Attendees attendees={meeting.attendees} />
+      <MeetingNotes notes={meeting.notes} notesDoc={meeting.notesDoc} />
       <MeetingLinks links={meeting.links} />
     </article>
   );

@@ -6,7 +6,7 @@ status:
 tags:
   - meeting
   - project-log
-last_modified: 2026-05-18
+last_modified: 2026-05-20
 author: mbvalentin
 ---
 # 📅 Meetings
@@ -15,7 +15,7 @@ author: mbvalentin
 
 <TBox type="summary" title="Meeting registry">
 
-This page is the project meeting calendar. For now, meetings are stored in `site/src/data/meetings.js` and rendered here. Each entry can record a date, status, meeting type, attendees, links, and short notes. Attendees should use registered people IDs so the chips link back to the project roster.
+This page is the project meeting calendar. Meetings are stored in `site/src/data/meetings.js` and rendered here. Each entry can record a date, status, meeting type, attendees, links, a short markdown notes preview, and a pointer to a full markdown note page. Attendees should use registered people IDs so the chips link back to the project roster.
 
 </TBox>
 
@@ -35,6 +35,10 @@ A meeting entry is intentionally small:
   type: working-session | research-planning | project-update | handoff
   attendees: [mbvalentin, alan-guo]
   summary: one short paragraph
+  notes: markdown preview shown in the meeting card
+  notesDoc:
+    label: 'Click here for full meeting notes'
+    href: /docs/meetings/YYYY-MM-DD-meeting-slug
   links:
     docs:
       - label: Related page
@@ -42,8 +46,8 @@ A meeting entry is intentionally small:
 `}
 />
 
-<TBox type="todo" title="Future upgrade">
+<TBox type="note" title="Source of truth">
 
-If meeting notes become longer than a short summary, we can keep this calendar registry but point each entry to a dedicated markdown page under `site/docs/meetings/`. The calendar would remain the index, while each meeting page would hold agenda, action items, and raw notes.
+The calendar registry stays as the structured index. Longer notes should live as dedicated markdown pages under `site/docs/meetings/`, with the registry entry linking to them through `notesDoc`.
 
 </TBox>
