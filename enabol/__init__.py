@@ -5,7 +5,25 @@ __url__ = 'https://manuelblancovalentin.github.io/ENABOL/'
 from . import utils
 from . import dtypes
 from .dataset import AffineDataset
-from .nn import LinearBlockModel
+from .nn import (
+    BaseModel,
+    LinearBlockModel,
+    Controller,
+    BaseController,
+    NoController,
+    GlobalThrottleOrder0Controller,
+    GlobalThrottleOrder1Controller,
+    GlobalThrottleOrder2Controller,
+    QuantizationAwareOrder2Controller,
+    BaseUpdateRule,
+    SGDUpdateRule,
+    CurvatureSensor,
+    HistoryRecorder,
+    MetricsConfig,
+    InstrumentedTrainer,
+    InstrumentationConfig,
+    UpdateApplier,
+)
 from .precision import PrecisionDict
 
 

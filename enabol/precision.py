@@ -75,6 +75,26 @@ class PrecisionDict(dict[str, dict[str, HLSDataType | None]]):
                 lines.append(f"    {field}: {dtype}")
         lines.append(")")
         return "\n".join(lines)
+
+    def summary(self) -> str:
+        if not self:
+            return "PrecisionDict: disabled"
+
+        grouped: dict[str, list[str]] = {}
+        for layer_name, fields in self.items():
+            for field, dtype in fields.items():
+                label = "None" if dtype is None else str(dtype)
+                grouped.setdefault(label, []).append(f"{layer_name}.{field}")
+
+        lines = [
+            f"PrecisionDict: {len(self.layers())} layer entries | {len(grouped)} unique dtypes",
+        ]
+        for dtype_label, uses in grouped.items():
+            preview = ", ".join(uses[:4])
+            if len(uses) > 4:
+                preview += f", +{len(uses) - 4} more"
+            lines.append(f"  {dtype_label}: {preview}")
+        return "\n".join(lines)
     
     def __repr__(self) -> str:
         return self.describe()
