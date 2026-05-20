@@ -357,7 +357,7 @@ The reason is diagnostic control. We need to turn quantization on and off indepe
 The training loop should expose a layer-indexed `PrecisionDict`, not a flat config object. This keeps the experiment explicit now and scales to multilayer precision allocation later:
 
 ```python
-from enabol import dtypes, PrecisionDict
+from enabol import Controller, PrecisionDict, dtypes
 
 precisions = PrecisionDict({
     "input": {
@@ -384,7 +384,7 @@ h = model.train_instrumented(
     X,
     Y,
     learning_rate=0.5,
-    use_controller=True,
+    controller=Controller.from_str("gt-order-0"),
     precision_dict=precisions,
 )
 ```

@@ -1,32 +1,35 @@
 ---
-sidebar_label: "📦 nn.py"
+sidebar_label: "📦 nn"
 status:
   - valid
   - inprogress
 tags:
   - implementation
   - model
-last_modified: 2026-05-15
+last_modified: 2026-05-19
 author: mbvalentin
-source: "enabol/nn.py"
-source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master/enabol/nn.py"
+source: "enabol/nn/"
+source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/tree/master/enabol/nn"
 ---
 # 📦 Models / NN Module Reference
 <PageMeta />
 ---
 
 <TBox type="summary" title="What this page covers">
-This page is a coder-facing reference for `enabol/nn.py`: the shared `BaseModel`, the current dense-only `LinearBlockModel`, quantization hooks, and the custom instrumented training loop. It also tracks model families from `old_enabol/nn.py` that have not been ported yet.
+This page is a coder-facing reference for the `enabol.nn` package: the shared `BaseModel`, the current dense-only `LinearBlockModel`, quantization hooks, controllers, optimizer-style update rules, telemetry, and the custom instrumented training loop. It also tracks model families from `old_enabol/nn.py` that have not been ported yet.
 </TBox>
 
 ## Module Map
 
 | Group | Objects | Purpose |
 |---|---|---|
-| Base class | `BaseModel` | Owns dataset linkage, Keras model object, simple training, and the instrumented online loop. |
+| Model classes | `BaseModel`, `LinearBlockModel` | Own dataset linkage, Keras model construction, simple training, and the public instrumented-training entry point. |
 | BaseModel public methods | `summary`, `reinitialize_weights`, `train`, `train_instrumented` | User-facing model utilities and training entry points. |
 | BaseModel precision helpers | `_forward_with_precision`, `_quantize_gradients`, `_quantize_variable_storage`, rail helpers | Internal fake-quantization and diagnostic hooks. |
-| Implemented model | `LinearBlockModel` | Dense-only model family used by the current ablation experiments. |
+| Controllers | `BaseController`, `GlobalThrottleOrder*`, `QuantizationAwareOrder2Controller` | Own controller parameters, alpha computation, state, and controller-specific log fields. |
+| Update rules | `BaseUpdateRule`, `SGDUpdateRule` | Propose raw optimizer deltas before controller intervention. |
+| Telemetry | `CurvatureSensor`, `HistoryRecorder` | Collect tensor-native signals and materialize NumPy histories. |
+| Trainer/apply path | `InstrumentedTrainer`, `UpdateApplier` | Orchestrate the online loop and apply controller-approved updates. |
 
 ## Model Coverage
 
@@ -35,7 +38,7 @@ This table tracks active model classes and legacy model families that are still 
 | Model family | Class / source | Status | Priority | Notes / Documentation |
 |---|---|---|---|---|
 | Base model and training harness | `BaseModel` | <Badge status="valid" /> |  | Internal parent class documented below. |
-| Dense linear blocks | `LinearBlockModel` | <Badge status="valid" /> |  | [`MDL-DENSE1-LINEAR-NOBIAS-000`](../models/dense1-linear-nobias-000.md) |
+| Dense linear blocks | `LinearBlockModel` (`enabol.nn.models`) | <Badge status="valid" /> |  | [`MDL-DENSE1-LINEAR-NOBIAS-000`](../models/dense1-linear-nobias-000.md) |
 | Generic MLP | `MLPModel` | <Badge status="missing" /> | <Badge status="priority-high" /> | Needed for two-layer and deeper dense ablations. |
 | Bounded activation layers | `ClippedReLU`, `ClippedReLUAdaptive` | <Badge status="missing" /> | <Badge status="priority-medium" /> | Needed when activation rails become part of the controller study. |
 | Fusion CNN family | `FusionModel`, `TinyFusionModel`, `NanoFusionModel`, `NanoFusionModel16` | <Badge status="missing" /> | <Badge status="priority-medium" /> | Useful for TinyML image-like regression once dense ablations are stable. |
@@ -46,7 +49,7 @@ This table tracks active model classes and legacy model families that are still 
 <TBox type="todo" title="Model TODOs">
 
 - [ ] Port a minimal `MLPModel` or extend `LinearBlockModel` enough to support two-layer dense experiments.
-- [ ] Decide whether bounded activations belong in `nn.py` or a separate `activations.py`.
+- [ ] Decide whether bounded activations belong in `enabol.nn.models` or a separate `enabol.nn.activations` module.
 - [ ] Add model registry pages only when a model is used by an experiment.
 
 </TBox>
@@ -65,11 +68,13 @@ import tensorflow as tf
 Local dependencies:
 
 ```python
-from .dataset import BaseDataset
-from .history import FitHistory
-from .precision import PrecisionDict, ensure_precision_dict
-from .quantization import quantize_tensor, rail_stats
-from .utils import ...
+from ..dataset import BaseDataset
+from ..history import FitHistory
+from ..precision import PrecisionDict, ensure_precision_dict
+from ..quantization import quantize_tensor, rail_stats
+from ..utils import ...
+from .controller import BaseController, make_controller
+from .training import InstrumentationConfig, InstrumentedTrainer
 ```
 
 Important utilities:
@@ -195,12 +200,8 @@ def train_instrumented(
     learning_rate=0.05,
     shuffle=True,
     loss_mode="half_mse",
-    curvature_ema_rho=0.05,
-    chi=1.5,
-    eps=1e-12,
-    use_controller=False,
-    compute_analytic_hessian=True,
-    reference_A=None,
+    controller=None,
+    metrics=None,
     precision_dict=None,
 ) -> FitHistory:
     ...
@@ -215,10 +216,8 @@ This is the main ablation loop.
 | `X`, `Y` | NumPy training arrays. |
 | `learning_rate` | Base SGD learning rate `eta`. |
 | `loss_mode` | `"half_mse"` for Hessian-clean experiments or `"keras_mse"`. |
-| `curvature_ema_rho` | EMA smoothing factor for curvature proxy. |
-| `chi` | Target stability margin for the throttle. |
-| `use_controller` | If true, applies `alpha_t`. If false, only logs would-be `alpha_t`. |
-| `reference_A` | Teacher matrix for one-layer weight error. |
+| `controller` | Controller object or registry string. `None` uses `NoController`. Controller-specific fields such as `chi`, `eps`, and `curvature_ema_rho` live on the controller object. |
+| `metrics` | Optional `MetricsConfig`. `None` preserves the legacy full metric list; `MetricsConfig()` records the compact `core` profile. Metric-only settings such as `reference_A` and analytic Hessian logging live here. |
 | `precision_dict` | Optional `PrecisionDict`; `None` means full floating point. |
 
 ##### Training Loop Structure
@@ -229,7 +228,7 @@ The instrumented loop is easiest to understand as a top-level online training lo
 
 ##### Metric Block
 
-The loop returns a `FitHistory` whose keys are grouped by what they diagnose. The exact set of populated metrics depends on whether `reference_A`, analytic Hessian logging, and `precision_dict` are enabled.
+The loop returns a `FitHistory` whose keys are selected by `MetricsConfig`. The exact set of populated metrics depends on the enabled profiles, `reference_A`, analytic Hessian logging, and `precision_dict`.
 
 | Metric | Symbol / expression | What it measures | Notes |
 |---|---|---|---|

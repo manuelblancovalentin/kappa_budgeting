@@ -217,11 +217,11 @@ h = model.train_instrumented(
     batch_size=32, #dataset.num_samples,  # Full-batch for clean Hessian metrics
     learning_rate=0.05,
     loss_mode="half_mse",
-    curvature_ema_rho=0.05,
-    chi=1.5,
-    use_controller=False,
-    compute_analytic_hessian=True,
-    reference_A=dataset.reference_weight_matrix,
+    controller=enabol.Controller.from_str(None, curvature_ema_rho=0.05, chi=1.5),
+    metrics=enabol.MetricsConfig(
+        profiles=("core", "stability", "teacher"),
+        reference_A=dataset.reference_weight_matrix,
+    ),
 )
 print(h)
 h.plot_results(title="Training History")
@@ -260,9 +260,8 @@ h_nom = model.train_instrumented(
     epochs=20,
     batch_size=len(X),
     learning_rate=0.5,
-    # highlight-next-line
-    use_controller=False,
-    reference_A=dataset.A,
+    controller=enabol.Controller.from_str(None),
+    metrics=enabol.MetricsConfig(profiles=("core", "stability", "teacher"), reference_A=dataset.A),
 )
 h_nom.plot_results(title="Warmup History")
 ```
@@ -286,8 +285,8 @@ h_drift = model.train_instrumented(
     epochs=100,
     batch_size=len(Xd),
     learning_rate=0.5,
-    use_controller=False,
-    reference_A=dataset.A / gamma,
+    controller=enabol.Controller.from_str(None),
+    metrics=enabol.MetricsConfig(profiles=("core", "stability", "teacher"), reference_A=dataset.A / gamma),
 )
 
 h_drift.plot_results(title="Drift History")
@@ -311,8 +310,8 @@ h_nom = model.train_instrumented(
     epochs=20,
     batch_size=len(X),
     learning_rate=0.5,
-    use_controller=False,
-    reference_A=dataset.A,
+    controller=enabol.Controller.from_str(None),
+    metrics=enabol.MetricsConfig(profiles=("core", "stability", "teacher"), reference_A=dataset.A),
 )
 
 # Phase 2: sensor gain drift
@@ -323,8 +322,8 @@ h_drift = model.train_instrumented(
     batch_size=len(Xd),
     learning_rate=0.5,
     # highlight-next-line
-    use_controller=True,
-    reference_A=dataset.A / gamma,
+    controller=enabol.Controller.from_str("gt-order-0"),
+    metrics=enabol.MetricsConfig(profiles=("core", "stability", "teacher"), reference_A=dataset.A / gamma),
 )
 
 h_nom.plot_results(title="Warmup History")

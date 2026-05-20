@@ -144,7 +144,7 @@ def reference_weight_matrix(self) -> np.ndarray:
     pass
 ```
 
-Subclasses should return the teacher matrix used to generate targets. This is used by experiment plots and `train_instrumented(..., reference_A=...)`.
+Subclasses should return the teacher matrix used to generate targets. This is used by experiment plots and metric telemetry, usually through `MetricsConfig(..., reference_A=...)`.
 
 #### `reference_bias_vector`
 
@@ -319,7 +319,10 @@ def reference_weight_matrix(self) -> np.ndarray:
 Used for:
 
 ```python
-h = model.train_instrumented(..., reference_A=dataset.reference_weight_matrix)
+h = model.train_instrumented(
+    ...,
+    metrics=MetricsConfig(reference_A=dataset.reference_weight_matrix),
+)
 ```
 
 #### `reference_bias_vector`

@@ -6,7 +6,7 @@ tags:
   - todo
   - placeholder
   - implementation
-last_modified: 2026-05-15
+last_modified: 2026-05-19
 author: mbvalentin
 ---
 # 🗺️ Code Map
@@ -81,7 +81,14 @@ enabol/
   dtypes.py        # HLS-style ap_fixed/ap_ufixed/ap_int/ap_uint descriptors
   precision.py     # layer-indexed PrecisionDict
   quantization.py  # TensorFlow/NumPy quantization and rail statistics
-  nn.py            # small dense models and custom instrumented training loop
+  nn/
+    __init__.py    # public neural-network/training exports
+    models.py      # dense models and BaseModel public entry points
+    controller.py  # global-throttle controllers and Controller.from_str
+    training.py    # InstrumentedTrainer online loop
+    optimizer.py   # optimizer-style raw update rules
+    telemetry.py   # tensor-native sensors and history recorder
+    applier.py     # applies controller-approved updates
   history.py       # FitHistory container and default plots
   utils.py         # norms, Hessian helpers, stability metrics
 ```
@@ -92,5 +99,5 @@ The future <ENABOL /> comparison work may add:
 enabol/
   budgeting.py     # kappa allocation and projection policies
   metrics.py       # richer per-layer saturation and recovery metrics
-  training.py      # extracted trainer objects if nn.py grows too large
+  metrics.py       # additional aggregate metrics if telemetry grows too large
 ```

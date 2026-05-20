@@ -65,7 +65,9 @@ return FitHistory(**{k: np.asarray(v) for k, v in history.items()})
 Typical notebook usage:
 
 ```python
-history = model.train_instrumented(X, Y, use_controller=True)
+from enabol import Controller
+
+history = model.train_instrumented(X, Y, controller=Controller.from_str("gt-order-0"))
 print(history)
 history.plot_results(title="EXP-000A controller run")
 ```
