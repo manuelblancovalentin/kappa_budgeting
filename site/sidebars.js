@@ -114,6 +114,10 @@ const sidebars = {
     'handoff/handoff-checklist',
     'handoff/known-issues',
   ],
+  MeetingsSidebar: [
+    'meetings/index',
+    'meetings/2026-05-20-meeting-seda-alan-manu',
+  ],
 };
 
 export default sidebars;

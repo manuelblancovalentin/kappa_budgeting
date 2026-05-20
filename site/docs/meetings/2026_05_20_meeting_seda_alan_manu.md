@@ -1,7 +1,7 @@
 ---
 id: 2026-05-20-meeting-seda-alan-manu
 title: "Alan, Seda, Manu sync"
-sidebar_label: "2026-05-20 Seda/Alan/Manu"
+sidebar_label: "🗞️ 2026-05-20 Seda/Alan/Manu"
 slug: /meetings/2026-05-20-meeting-seda-alan-manu
 status:
   - completed

@@ -1,6 +1,6 @@
 ---
 title: "Meetings"
-sidebar_label: "Meetings"
+sidebar_label: "📅 Calendar"
 status:
   - preliminary
 tags:
