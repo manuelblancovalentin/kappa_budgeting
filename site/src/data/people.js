@@ -39,6 +39,22 @@ const people = {
     role: 'PI / advisor',
     github: 'https://github.com/sedaogrenci',
   },
+  'andrew-tieu': {
+    id: 'andrew-tieu',
+    handle: 'tieuandrew',
+    name: 'Andrew Tieu',
+    shortName: 'Andrew',
+    role: 'Undergrad student',
+    github: 'https://github.com/tieuandrew',
+  },
+  'darrel-zhao': {
+    id: 'darrel-zhao',
+    handle: 'darrel-zhao',
+    name: 'Darrel Zhao',
+    shortName: 'Darrel',
+    role: 'Undergrad student',
+    github: 'https://github.com/darrel-zhao',
+  },
 };
 
 export const lab = {
