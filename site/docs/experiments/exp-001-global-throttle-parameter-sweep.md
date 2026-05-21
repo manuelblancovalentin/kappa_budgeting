@@ -401,7 +401,7 @@ Estimated area of divergence region fraction: $30.9028\%$
 ### Global throttle order 0
 <Figure 
   id="fig-phase-diagram-controller-gt-order-0"
-  src="https://github.com/manuelblancovalentin/kappa_budgeting/blob/a8545cb83d255089f0b43c6101b52a30a5e71c76/workspace/ablations/exp_001_lin1_stability_phase_diagram/results/controller_gt0_result.png?raw=true" 
+  src="https://github.com/manuelblancovalentin/kappa_budgeting/blob/13b4958ed35b59be448b8d0ba8c20ef883e04e99/workspace/ablations/exp_001_lin1_stability_phase_diagram/results/controller_none_result.png?raw=true" 
   alt="Phase diagram for the global throttle order 0"
   maxWidth="100%"
   label="Figure 4"
@@ -410,6 +410,14 @@ Estimated area of divergence region fraction: $30.9028\%$
 Estimated area of divergence region fraction: $13.1944\%$
 
 ### Global throttle order 1
-![Global throttle order 1](../../../workspace/ablations/exp_001_lin1_stability_phase_diagram/results/controller_gt1_result.png)
+
+<Figure 
+  id="fig-phase-diagram-controller-gt-order-1"
+  src="https://github.com/manuelblancovalentin/kappa_budgeting/blob/13b4958ed35b59be448b8d0ba8c20ef883e04e99/workspace/ablations/exp_001_lin1_stability_phase_diagram/results/controller_gt1_result.png?raw=true" 
+  alt="Phase diagram for the global throttle order 1"
+  maxWidth="100%"
+  label="Figure 5"
+  caption="Phase diagram for the case where the global throttle controller of order 1 is used. The divergence region (where log_final_loss is NaN) is significantly reduced compared to the no controller case." 
+/>
 
 Estimated area of divergence region fraction: $1.4375\%$
