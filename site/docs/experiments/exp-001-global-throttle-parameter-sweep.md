@@ -384,40 +384,106 @@ The final results are shown below. The results mainly consist of a set of plots 
 - Global throttle of order 1: <ControllerBadge controller="gt-order-1" />
 
 ### No controller
-In this case no controller was used, which means that the result is just the plain SGD algorithm without any stability control. As mentioned at the top, we would expect a large divergence region for any condition over 
+In this case no controller was used, which means that the result is just the plain SGD algorithm without any stability control. As mentioned at the top, we would expect a large divergence region for any condition over $\eta \gtrsim \frac{\chi}{\widehat{C}}\frac{1}{\gamma^2}$. <FigureRef target="fig-phase-diagram-controller-none"> Figure 3</FigureRef> shows the phase diagram for three metrics: `log of the final loss value`, `minimum update cosine similarity`, and `minimum alpha value`. For each plot, the dashed line represents precisely this theoretical boundary of divergence (note plots are in log-log scale, so the boundary is a straight line with slope -2).
+
+The most outstanding elements shown in this plot are:
+
+  - The divergence area (estimated to be around $28.5\%$ of the total shown area) is quite large and it is almost exactly located to the NE of the theoretical boundary, which is consistent. The only reason why the boundary is not sharper is hypothesized to be that the simulation did not run for long enough.
+
 
 
 <Figure 
   id="fig-phase-diagram-controller-none"
-  src="https://github.com/manuelblancovalentin/kappa_budgeting/blob/a8545cb83d255089f0b43c6101b52a30a5e71c76/workspace/ablations/exp_001_lin1_stability_phase_diagram/results/controller_none_result.png?raw=true" 
+  src="https://github.com/manuelblancovalentin/kappa_budgeting/blob/2b52c4b9f9bc80c9769877f5623ba1e5b0973656/workspace/ablations/exp_001_lin1_stability_phase_diagram/results/controller_none_result.png?raw=true" 
   alt="Phase diagram for the no controller"
   maxWidth="100%"
   label="Figure 3"
   caption="Phase diagram for the case where no global throttle controller is used. The divergence region (where log_final_loss is NaN) is quite large, especially for higher values of gamma and eta, which is consistent with our theoretical analysis." 
 />
 
-Estimated area of divergence region fraction: $30.9028\%$
 
 ### Global throttle order 0
+
+In this case, we activate the simplest throttle controller, which is of order $0$. This means that at any time $t$, the controller tries to apply a deterministic $\alpha_t$ value computed according to:
+
+```math
+\alpha_t = \min\left(1, \frac{\chi}{\widehat{C}_t + \epsilon}\right)
+```
+
+where $\epsilon$ is just a small value to avoid division by zero. The expectation is that this control mechanism will reduce the divergence area. The results are shown in <FigureRef target="fig-phase-diagram-controller-gt-order-0"> Figure 4</FigureRef>. The most outstanding elements are:
+
+  - The divergence area is significantly reduced (estimated to be around $12.2\%$ of the total shown area), which is consistent with our expectations and shows that the global throttle controller is effective in improving stability.
+  - <font color="red">Note that in reality, the divergence area shown in this plot does not necessarily correlate with true network divergence</font>, but rather with the fact that the final loss is above the `BLOWUP_LOSS` threshold. What this means is that, as long as those regions have an equivalent $\alpha$ value of $0$, the network will remain stable, since the updates will be effectively stopped.
+
 <Figure 
   id="fig-phase-diagram-controller-gt-order-0"
-  src="https://github.com/manuelblancovalentin/kappa_budgeting/blob/13b4958ed35b59be448b8d0ba8c20ef883e04e99/workspace/ablations/exp_001_lin1_stability_phase_diagram/results/controller_none_result.png?raw=true" 
+  src="https://github.com/manuelblancovalentin/kappa_budgeting/blob/c99abc221a6b804eefcedd70b2bf6421280bd826/workspace/ablations/exp_001_lin1_stability_phase_diagram/results/controller_gt0_result.png?raw=true" 
   alt="Phase diagram for the global throttle order 0"
   maxWidth="100%"
   label="Figure 4"
   caption="Phase diagram for the case where the global throttle controller of order 0 is used. The divergence region (where log_final_loss is NaN) is significantly reduced compared to the no controller case." 
 />
-Estimated area of divergence region fraction: $13.1944\%$
 
 ### Global throttle order 1
 
+In this final case, we activate the global throttle controller of order 1. This means that at any time $t$, the $\alpha$ coefficient *reacts* to the curvature via the following dynamics:
+
+```math
+\begin{aligned}
+\dot{\alpha}_t &= k_\alpha\left( \chi - \eta\alpha_t\widehat{C}_t \right) \\
+\alpha_t &\leftarrow \min(1, \alpha_t)
+\end{aligned}
+```
+
+Because the initial alpha is $\alpha(0)=0$, this means that this system is inherently much more stable than the previous one, since it starts with a very conservative throttle and only after some iterations of stable curvature it starts to increase the throttle and allow for more aggressive updates. The results are shown in <FigureRef target="fig-phase-diagram-controller-gt-order-1"> Figure 5</FigureRef>. The most outstanding elements are:
+
+  - The divergence area is further reduced (estimated to be around $1.4\%$ of the total shown area), which is consistent with our expectations and shows that the global throttle controller of order 1 is even more effective in improving stability compared to the order 0 controller.
+  - Again, we want to highlight that the divergence area shown in this plot does not necessarily correlate with true network divergence, but rather with the fact that the final loss is above the `BLOWUP_LOSS` threshold. As long as those regions have an equivalent $\alpha$ value of $0$, the network will remain stable, since the updates will be effectively stopped.
+
 <Figure 
   id="fig-phase-diagram-controller-gt-order-1"
-  src="https://github.com/manuelblancovalentin/kappa_budgeting/blob/13b4958ed35b59be448b8d0ba8c20ef883e04e99/workspace/ablations/exp_001_lin1_stability_phase_diagram/results/controller_gt1_result.png?raw=true" 
+  src="https://github.com/manuelblancovalentin/kappa_budgeting/blob/c99abc221a6b804eefcedd70b2bf6421280bd826/workspace/ablations/exp_001_lin1_stability_phase_diagram/results/controller_gt1_result.png?raw=true" 
   alt="Phase diagram for the global throttle order 1"
   maxWidth="100%"
   label="Figure 5"
   caption="Phase diagram for the case where the global throttle controller of order 1 is used. The divergence region (where log_final_loss is NaN) is significantly reduced compared to the no controller case." 
 />
 
-Estimated area of divergence region fraction: $1.4375\%$
+--- 
+
+## Conclusions
+
+
+
+<TBox type="success" title="Summary">
+  The results of this experiment show a clear improvement in stability when using the global throttle controllers, especially the order 1 controller. The divergence area is significantly reduced compared to the no controller case, which is consistent with our theoretical analysis. 
+
+
+  <div style={{"align": "center", "width": "100%"}}>
+    <table style={{"marginLeft": "auto", "marginRight": "auto", "border-color": "#000000", "border-width": "1px", "border-style": "solid", "width": "fit-content"}}>
+      <thead>
+        <tr>
+          <th style={{"background-color": "#e3dede"}}>Controller</th>
+          <th style={{"background-color": "#e3dede"}}>Divergence area fraction</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style={{"textAlign": "center"}}>
+          <td style={{"background-color": "#faf8f8"}}><ControllerBadge controller="none" /></td>
+          <td style={{"background-color": "#faf8f8"}}>28.5%</td>
+        </tr>
+        <tr style={{"textAlign": "center"}}>
+          <td style={{"background-color": "#faf8f8"}}><ControllerBadge controller="gt-order-0" /></td>
+          <td style={{"background-color": "#faf8f8"}}>12.2%</td>
+        </tr>
+        <tr style={{"textAlign": "center"}}>
+          <td style={{"background-color": "#faf8f8"}}><ControllerBadge controller="gt-order-1" /></td>
+          <td style={{"background-color": "#faf8f8"}}>1.4%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  **The main conclusion is that the global throttle controllers are effective in improving stability and guaranteeing convergence in a much larger region of the hyperparameter space, at least for the ablation test of drift and learning rate.**
+
+</TBox>
