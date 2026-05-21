@@ -3,7 +3,6 @@ id: exp-000b-global-throttle-qfx-lin1
 title: "EXP-000B: Global Throttle QFX LIN1"
 sidebar_label: "EXP-000B: GLTHR QFX LIN1"
 status:
-  - preliminary
   - valid
 tags:
   - experiment

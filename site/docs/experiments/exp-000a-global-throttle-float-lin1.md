@@ -4,7 +4,6 @@ title: "EXP-000A: Global Throttle Float LIN1"
 sidebar_label: "EXP-000A: GLTHR Float LIN1"
 status:
   - valid
-  - inprogress
 tags:
   - experiment
   - global-throttle

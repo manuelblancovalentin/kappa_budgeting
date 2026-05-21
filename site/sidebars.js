@@ -95,6 +95,7 @@ const sidebars = {
         'experiments/index',
         'experiments/exp-000a-global-throttle-float-lin1',
         'experiments/exp-000b-global-throttle-qfx-lin1',
+        'experiments/exp-001-global-throttle-parameter-sweep',
         // 'experiments/experiment-template',
       ],
     },
