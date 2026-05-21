@@ -58,7 +58,7 @@ attendees:
 
 ## Updates on global throttling
 <TBox type="success" title="Global throttling updates (Manu)" >
-    Manu has been working on a new version of the stability algorithm that uses a global throttle instead of a per-layer independent budgeting/throttle. It also created this documentation page and ran the initial ablation tests on a dummy model to test the hypothesis [exp-000-a](../experiments/exp-000a-global-throttle-float-lin1.md) and [exp-000-b](../experiments/exp-000b-global-throttle-qfx-lin1.md). The results show that indeed there is a divergence zone that will make the quantized model be unstable, and that global throttling can fix this [exp-000-c](../experiments/exp-000c-global-throttle-parameter-sweep.md). It's left for us to decide how we can reconcile this with the old $\kappa$-budgeting idea: are we just saying that this is a `new implementation` of the idea? Or this is ruling out our previous method? 
+    Manu has been working on a new version of the stability algorithm that uses a global throttle instead of a per-layer independent budgeting/throttle. It also created this documentation page and ran the initial ablation tests on a dummy model to test the hypothesis [exp-000-a](../experiments/exp-000a-global-throttle-float-lin1.md) and [exp-000-b](../experiments/exp-000b-global-throttle-qfx-lin1.md). The results show that indeed there is a divergence zone that will make the quantized model be unstable, and that global throttling can fix this [exp-001](../experiments/exp-001-global-throttle-parameter-sweep.md). It's left for us to decide how we can reconcile this with the old $\kappa$-budgeting idea: are we just saying that this is a `new implementation` of the idea? Or this is ruling out our previous method? 
 
 </TBox>
 
