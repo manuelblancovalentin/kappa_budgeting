@@ -387,7 +387,14 @@ The final results are shown below. The results mainly consist of a set of plots 
 In this case no controller was used, which means that the result is just the plain SGD algorithm without any stability control. As mentioned at the top, we would expect a large divergence region for any condition over 
 
 
-![No controller](../../../workspace/ablations/exp_001_lin1_stability_phase_diagram/results/controller_none_result.png)
+<Figure 
+  id="fig-phase-diagram-controller-none"
+  src="https://github.com/manuelblancovalentin/kappa_budgeting/blob/a8545cb83d255089f0b43c6101b52a30a5e71c76/workspace/ablations/exp_001_lin1_stability_phase_diagram/results/controller_none_result.png?raw=true" 
+  alt="Phase diagram for the no controller"
+  maxWidth="100%"
+  label="Figure 3"
+  caption="Phase diagram for the case where no global throttle controller is used. The divergence region (where log_final_loss is NaN) is quite large, especially for higher values of gamma and eta, which is consistent with our theoretical analysis." 
+/>
 
 Estimated area of divergence region fraction: $30.9028\%$
 
