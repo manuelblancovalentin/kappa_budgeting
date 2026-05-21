@@ -332,7 +332,7 @@ class GlobalThrottleOrder1Controller(BaseController):
 
     controller_id = "CTRL-GT-ORDER-1"
 
-    def __init__(self, *, k_alpha: float = 0.1, initial_alpha: float = 1.0, **kwargs: Any):
+    def __init__(self, *, k_alpha: float = 0.1, initial_alpha: float = 0.0, **kwargs: Any):
         super().__init__(**kwargs)
         self.k_alpha = float(k_alpha)
         self.initial_alpha = float(initial_alpha)
@@ -393,7 +393,7 @@ class GlobalThrottleOrder2Controller(BaseController):
         *,
         k_alpha: float = 0.1,
         beta: float = 0.8,
-        initial_alpha: float = 1.0,
+        initial_alpha: float = 0.0,
         **kwargs: Any,
     ):
         super().__init__(**kwargs)
