@@ -2159,3 +2159,66 @@
     border-right: 0;
   }
 }
+
+
+/* Controller Tags */
+.controller-line__label {
+  font-weight: 650;
+  color: var(--ifm-color-emphasis-800);
+}
+.controller-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.35rem 0 1rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.95rem;
+}
+
+.controller-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 0.58rem 0.58rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.controller-badge__math .katex {
+  font-size: 1em;
+}
+
+.controller-badge__math,
+.controller-badge__math * {
+  text-transform: none;
+}
+
+.controller-badge-link {
+  display: inline-flex;
+  text-decoration: none;
+}
+
+.controller-badge-link:hover {
+  text-decoration: none;
+}
+
+.controller-badge-link:hover .controller-badge {
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
+}
+
+/* Always grayish */
+.controller-badge--none,
+.controller-badge--gt-order-0,
+.controller-badge--gt-order-1,
+.controller-badge--gt-order-2 {
+  border-color: #b1bac6;
+  background: #f1f5f9;
+  color: #475569;
+}

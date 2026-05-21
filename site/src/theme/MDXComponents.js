@@ -1,5 +1,6 @@
 import MDXComponents from '@theme-original/MDXComponents';
 import StatusBadges, {Badge} from '@site/src/components/StatusBadges';
+import {ControllerBadge} from '@site/src/components/ControllerTag';
 import PageMeta from '@site/src/components/PageMeta';
 import Todo from '@site/src/components/Todo';
 import TBox from '@site/src/components/TBox';
@@ -21,6 +22,7 @@ export default {
   ...MDXComponents,
   StatusBadges,
   Badge,
+  ControllerBadge,
   PageMeta,
   Todo,
   TBox,
