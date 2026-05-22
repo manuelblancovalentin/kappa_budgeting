@@ -2,7 +2,7 @@
 title: "Phase 2: Graph and Flow Integration"
 sidebar_label: "🚧 Phase 2: Graph + Flow"
 status:
-  - planned
+  - inprogress
 tags:
   - hls4ml
   - implementation
@@ -39,6 +39,19 @@ The flow should perform these jobs:
 | reverse traversal | Produce a deterministic backward layer order for supported sequential graphs. |
 | precision resolution | Attach trainable typedef names to each layer. |
 | template resolution | Attach `backward_config_cpp`, `backward_function_cpp`, loss snippets, and controller snippets. |
+
+## Implemented So Far
+
+| Task | Commit | Files | What changed |
+|---|---|---|---|
+| [HLS4ML-002](/docs/status/tasks?query=HLS4ML-002) | `48a25d86` | `hls4ml/backends/vivado/vivado_backend.py`, `test/pytest/test_trainable_config.py` | Registered `vivado:trainable` as a backend flow that runs after `vivado:apply_templates` and before the writer-facing `vivado:ip` completion point. |
+| [HLS4ML-002](/docs/status/tasks?query=HLS4ML-002) | `084968db` | `hls4ml/backends/vivado/passes/trainable.py`, `hls4ml/backends/vivado/vivado_backend.py`, `test/pytest/test_trainable_config.py` | Added `vivado:validate_trainable_config`. It is a no-op for inference models and, for trainable models, currently requires positive `BatchSize`, `half_mse`, `sgd`, a supported controller, one output, at least one trainable layer, Dense-only trainable layers, and the required trainable precision attributes. |
+| [HLS4ML-002](/docs/status/tasks?query=HLS4ML-002) | `68165be0` | `hls4ml/backends/vivado/passes/trainable.py`, `hls4ml/backends/vivado/vivado_backend.py`, `test/pytest/test_trainable_config.py` | Added `vivado:resolve_trainable_backward_order`. It resolves a single sequential path from model output to model input, rejects branching graphs, and attaches `trainable_forward_path`, `trainable_forward_order`, `trainable_backward_order`, and `trainable_output_layer` to the `ModelGraph`. |
+| [HLS4ML-006](/docs/status/tasks?query=HLS4ML-006) | `56f9ff00` | `hls4ml/backends/vivado/passes/trainable.py`, `hls4ml/backends/vivado/vivado_backend.py`, `test/pytest/test_trainable_config.py` | Added `vivado:resolve_trainable_loss_endpoints`. It attaches graph-level metadata for the one-output `half_mse` path: ground-truth input name, scalar loss name/type, loss-gradient seed name/type, loss input tensor/type/shape, output layer, and gradient scale. |
+
+The current resolved metadata is intentionally graph-level metadata, not writer logic. The writer should later consume `model.trainable_backward_order` instead of deriving the backward pass from layer order or generated C++ strings.
+
+Endpoint metadata has started under [HLS4ML-006](/docs/status/tasks?query=HLS4ML-006). The remaining `HLS4ML-006` work is now codegen-facing: loss config structs, loss helper kernels, ground-truth top-level IO, scalar loss outputs, and actual `dL/dy` buffer emission. That is the point where we need to review and slim down the old template/header code before porting it.
 
 ## Initial Graph Support
 

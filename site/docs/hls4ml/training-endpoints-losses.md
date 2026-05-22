@@ -55,6 +55,29 @@ Create a normalized endpoint record for each output:
 
 This endpoint record becomes the source for top-level IO, loss config structs, and the first `grads_in` value for reverse traversal.
 
+## Current Implementation
+
+`HLS4ML-006` has started with metadata only. Commit `56f9ff00` added `vivado:resolve_trainable_loss_endpoints` to the `vivado:trainable` flow after backward-order resolution.
+
+For the first supported graph shape, the pass attaches:
+
+| Field | Current behavior |
+|---|---|
+| `output_name` | The single model output, or `Loss.Output` if explicitly provided and valid. |
+| `output_layer` | The graph layer resolved by `vivado:resolve_trainable_backward_order`. |
+| `ground_truth_name` | `Loss.GroundTruthName`, otherwise `{output_name}_truth`. |
+| `loss_name` | Canonical normalized loss kind. Currently only `half_mse`. |
+| `effective_loss_name` | Same as `loss_name` for `half_mse`; from-logits rewiring is future work. |
+| `loss_input_name` | The tensor consumed by the loss. Currently the nominal output. |
+| `loss_input_type` | The output tensor type name already known to the graph. |
+| `loss_input_shape` / `loss_input_size` | Shape and flattened size of the loss input tensor. |
+| `loss_scalar_name` / `loss_scalar_type` | `Loss.LossScalarName` or `loss0`, with `loss0_t`. |
+| `loss_gradient_name` / `loss_gradient_type` | `Loss.LossGradientName` or `{output_name}_loss_grad`, with `{output_name}_loss_grad_t`. |
+| `loss_gradient_scale` | `1.0` for `half_mse`, meaning `dL/dy = y_hat - y`. |
+| `skip_backward_layer` | `None` for now. |
+
+This is deliberately not template generation yet. The next step crosses into codegen: loss config structs, loss helper kernels, ground-truth top-level IO, scalar loss outputs, and actual `dL/dy` buffer emission.
+
 ## From-Logits Handling
 
 For cross-entropy losses, the numerically stable path is often:
@@ -123,4 +146,3 @@ Normalize loss lists early:
 - many losses: require length equal to number of outputs.
 
 Then freeze the endpoint list. Later passes should not re-broadcast or infer output counts.
-

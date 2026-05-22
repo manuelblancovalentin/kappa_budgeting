@@ -1,6 +1,6 @@
 ---
 title: "hls4ml Implementation Roadmap"
-sidebar_label: "Roadmap"
+sidebar_label: "🏁 Roadmap"
 status:
   - preliminary
   - inprogress
@@ -59,14 +59,14 @@ Only after that path is stable should we generalize to two dense layers, activat
 | 1. Config | Define the normalized `Model.Training` schema. | [HLS4ML-001](/docs/status/tasks?query=HLS4ML-001) | `hls4ml/model/graph.py`, ENABOL bridge code | `Trainable`, losses, optimizer, controller, batch size, and trainable precision fields have stable config names. |
 | 1. Config | Add parser/accessor methods for trainable config. | [HLS4ML-001](/docs/status/tasks?query=HLS4ML-001) | `HLSConfig` | Code can ask `is_trainable()`, `get_training_config()`, `get_loss_config()`, `get_optimizer_config()`, and `get_controller_config()` without reading raw dict paths everywhere. |
 | 1. Config | Add early validation for impossible training configurations. | [HLS4ML-002](/docs/status/tasks?query=HLS4ML-002) | `HLSConfig`, trainable validation pass | Missing losses, unsupported layers, invalid controller names, and ambiguous loss/output counts fail before writing C++. |
-| 2. Flow | Register a Vivado trainable flow. | [HLS4ML-002](/docs/status/tasks?query=HLS4ML-002) | `hls4ml/backends/vivado/vivado_backend.py`, `hls4ml/model/flow` | The trainable flow runs after normal forward template resolution and before writer emission. |
-| 2. Flow | Add trainable validation pass. | [HLS4ML-002](/docs/status/tasks?query=HLS4ML-002) | `backends/vivado/passes/*` | Trainable config is checked without generating C++. |
-| 2. Flow | Resolve reverse traversal order. | [HLS4ML-002](/docs/status/tasks?query=HLS4ML-002) | `ModelGraph`, trainable flow pass | Sequential Dense graphs produce a deterministic backward layer list. Unsupported branches are either rejected or explicitly marked future work. |
+| 2. Flow | ✅ Register a Vivado trainable flow. | [HLS4ML-002](/docs/status/tasks?query=HLS4ML-002) | `hls4ml/backends/vivado/vivado_backend.py`, `hls4ml/model/flow` | `vivado:trainable` runs after normal forward template resolution and before writer emission. |
+| 2. Flow | ✅ Add trainable validation pass. | [HLS4ML-002](/docs/status/tasks?query=HLS4ML-002) | `hls4ml/backends/vivado/passes/trainable.py` | `vivado:validate_trainable_config` checks the first Dense trainable subset without generating C++. |
+| 2. Flow | ✅ Resolve reverse traversal order. | [HLS4ML-002](/docs/status/tasks?query=HLS4ML-002) | `hls4ml/backends/vivado/passes/trainable.py`, `ModelGraph` | Sequential Dense graphs produce `trainable_backward_order`; unsupported branches are rejected. |
 | 3. Layer metadata | Add trainable layer attributes. | [HLS4ML-003](/docs/status/tasks?query=HLS4ML-003) | `model/attributes.py`, backend layer wrappers or trainable passes | Layers can hold `trainable`, `grad_in_t`, `grad_out_t`, update types, backward function code, backward config code, and headers. |
 | 3. Layer metadata | Normalize ENABOL semantic precision into hls4ml trainable fields. | [HLS4ML-003](/docs/status/tasks?query=HLS4ML-003) / [HLS4ML-012](/docs/status/tasks?query=HLS4ML-012) | `enabol/precision.py`, ENABOL hls4ml bridge | `PrecisionDict` fields like `gradient`, `update`, and `accumulator` map to explicit hls4ml typedefs. |
 | 4. Static assets | Port autograd and loss headers from the deprecated fork. | [HLS4ML-004](/docs/status/tasks?query=HLS4ML-004) | `templates/vivado/autograd`, `templates/vivado/losses` | Static headers copy into generated projects without relying on old writer-specific insertion logic. |
 | 4. Static assets | Trim old headers to generic template-driven kernels. | [HLS4ML-004](/docs/status/tasks?query=HLS4ML-004) | `autograd/*.h`, `losses/*.h` | Dense/loss headers depend on generated config structs, not hardcoded ENABOL assumptions. |
-| 5. Loss endpoint | Generate endpoint metadata for each model output. | [HLS4ML-006](/docs/status/tasks?query=HLS4ML-006) | trainable endpoint pass | Each output has ground-truth name, scalar loss name, loss input, gradient seed, effective loss, and optional skipped activation. |
+| 5. Loss endpoint | ✅ Generate endpoint metadata for each model output. | [HLS4ML-006](/docs/status/tasks?query=HLS4ML-006) | `hls4ml/backends/vivado/passes/trainable.py` | The first one-output `half_mse` path has ground-truth name, scalar loss name/type, loss input, gradient seed name/type, output layer, and gradient scale metadata. |
 | 5. Loss endpoint | Generate loss typedefs and config structs. | [HLS4ML-006](/docs/status/tasks?query=HLS4ML-006) | loss template pass, `parameters.h` emission | `mse` or `half_mse` config compiles and creates `loss_*_t` and `loss_*_grads_t`. |
 | 5. Loss endpoint | Decide and document `half_mse` versus full `mse` scaling. | [HLS4ML-006](/docs/status/tasks?query=HLS4ML-006) | loss headers, ENABOL comparison traces | Hardware gradients match the software reference scale. |
 | 6. Dense backpass | Implement Dense backward config template. | [HLS4ML-005](/docs/status/tasks?query=HLS4ML-005) | `backends/vivado/passes/*`, `nnet_dense_backprop.h` | Generated Dense config includes data, gradient, update, accumulator, and raw-update typedefs. |
