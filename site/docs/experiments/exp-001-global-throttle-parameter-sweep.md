@@ -83,7 +83,7 @@ CHI = 1.0
 PRECISIONS = [[16, 6]] # [[WL, IWL]]
 ```
 
-The creation of the dataset and the model is exactly as shown in [EXP-000A](exp-000a-global-throttle-float-lin1.md) and [EXP-000B](exp-000b-global-throttle-fixed-lin1.md), so we skip the details here. Because this test does require a few utilities, we'll add them here explicitly. 
+The creation of the dataset and the model is exactly as shown in [EXP-000A](exp-000a-global-throttle-float-lin1.md) and [EXP-000B](exp-000b-global-throttle-qfx-lin1.md), so we skip the details here. Because this test does require a few utilities, we'll add them here explicitly. 
 
 ### Reinitialization utility
 We need to make sure that **all tests start from the same initial conditions** (same initial weights, same data distribution, etc) to make sure that the results are comparable. For that, we create a utility to reset the model weights to their initial state before every run of the simulation.

@@ -18,52 +18,7 @@ This page explains the project to someone joining it for the first time.
 </TBox>
 
 <ProjectTimeline
-  title="ENABOL Ablation Roadmap"
-  months={['May 2026', 'Jun', 'Jul', 'Aug', 'Sep']}
-  stages={[
-    {
-      title: 'Framing',
-      status: 'done',
-      start: 1,
-      end: 1,
-      details: ['Closed-loop stability formulation', 'Documentation skeleton'],
-    },
-    {
-      title: 'Float LIN1',
-      status: 'done',
-      start: 1,
-      end: 2,
-      details: ['EXP-000A', 'Affine drift', 'Global throttle sanity'],
-    },
-    {
-      title: 'QFX LIN1',
-      status: 'active',
-      start: 2,
-      end: 3,
-      details: ['EXP-000B', 'Rails and saturation', 'Quantized diagnostics'],
-    },
-    {
-      title: 'Multi-layer',
-      status: 'planned',
-      start: 3,
-      end: 4,
-      details: ['Two Dense layers', 'Inter-layer gradients', 'Activation rails'],
-    },
-    {
-      title: 'Benchmarks',
-      status: 'planned',
-      start: 4,
-      end: 5,
-      details: ['Dataset/model registry expansion', 'Compare controllers'],
-    },
-    {
-      title: 'Handoff',
-      status: 'planned',
-      start: 5,
-      end: 5,
-      details: ['Final notes', 'Decision log', 'Reusable notebooks'],
-    },
-  ]}
+  title="ENABOL Project Roadmap"
 />
 
 

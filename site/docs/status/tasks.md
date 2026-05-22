@@ -7,7 +7,7 @@ status:
 tags:
   - status
   - task-log
-last_modified: 2026-05-18
+last_modified: 2026-05-21
 author: mbvalentin
 ---
 # ✅ Tasks
@@ -20,11 +20,17 @@ This page tracks project work that may or may not be connected to a specific exp
 
 </TBox>
 
-The task log is generated from the shared task registry in `site/src/data/tasks.js`. Experiment links are optional.
+The task log is generated from the shared task registry in `site/src/data/tasks.js`. The same registry now drives the project roadmap on the overview page.
 
 <TBox type="summary" title="Task lifecycle convention">
 
 A task with status `todo` is unassigned. Once someone starts working on it, set `status: 'inprogress'`, add that person to `owners`, and fill `start_date`. Once finished, set `status: 'completed'` and fill `end_date`. `due_date` may be left empty, which renders as `UNDEFINED`.
+
+Each task is classified by three axes:
+
+- `stage`: lifecycle position, such as research, implementation, validation, integration, deployment, or publication.
+- `target`: the artifact or system being changed, such as `enabol`, `software`, `hls4ml`, `cpp_backend`, `csim`, `fpga`, or `paper`.
+- `action`: the kind of work, such as design, development, documentation, experiment, testing, integration, analysis, or writing.
 
 </TBox>
 
@@ -56,7 +62,9 @@ A task with status `todo` is unassigned. Once someone starts working on it, set 
 <TaskBoard status="todo" />
 <TaskBoard owner="__unassigned__" />
 <TaskBoard owner="mbvalentin" />
-<TaskBoard type="ops" />
-<TaskBoard area="controllers" />
+<TaskBoard stage="validation" />
+<TaskBoard target="enabol" />
+<TaskBoard action="development" />
+<TaskBoard tag="global-throttle" />
 <TaskBoard statuses={["todo", "inprogress"]} view="labels" />
 ```

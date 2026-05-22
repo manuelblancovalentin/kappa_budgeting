@@ -132,18 +132,25 @@ First, go to `site/src/data/tasks.js` and add a new entry to the `tasks` object 
 {
   id: 'unique-task-id',
   title: 'Task Title',
-  description: 'Task description goes here.',
   status: 'todo', // can be 'todo', 'inprogress', 'completed', or 'blocked'
-  type: 'research', // can be 'research', 'code', 'ops', etc.
-  area: 'controllers', // can be 'controllers', 'formulation', etc.
+  priority: 'high', // can be 'high', 'medium', or 'low'
+  stage: 'validation', // lifecycle stage: research, design, implementation, validation, integration, deployment, publication
+  target: 'software', // artifact/system: enabol, software, hls4ml, cpp_backend, csim, fpga, paper, etc.
+  action: 'experiment', // work type: design, development, documentation, experiment, testing, integration, analysis, writing, ops
+  summaryTags: ['EXP-001', 'global-throttle'],
+  timeline: true,
   owners: ['mbvalentin'], // array of person ids from the people registry
   start_date: '2026-05-15',
   due_date: '2026-06-01',
   end_date: null, // set this when the task is completed
+  links: {
+    docs: [{label: 'Related page', href: '/docs/...'}],
+  },
+  notes: 'Short task note.',
 },
 ```
 
-Then, you can view this task in the [Tasks page](../status/tasks.md) and filter it by status, type, area, or owner. You can also update the status and other fields as the task progresses.
+Then, you can view this task in the [Tasks page](../status/tasks.md) and filter it by status, stage, target, action, tag, or owner. You can also update the status and other fields as the task progresses.
 
 Some generic notes on tasks so we keep this sane (please):
 * Each task should ideally be small and actionable, something that can be done in a few hours to a couple of days. If a task is too big, consider breaking it down into smaller subtasks.
@@ -154,7 +161,7 @@ Some generic notes on tasks so we keep this sane (please):
 * Changing the ownership of an already completed task is unmoral and ethical 🙂. Don't.
 
 ### How does the task table work?
-The task table is rendered using a React component that reads the `tasks` data and displays it in a nice format. The table allows filtering by status, type, area, and owner. It also allows updating the status of each task directly from the table. The component is designed to be reusable, so you can use it in other pages if needed. The filtering and interactivity are handled using React state and event handlers. If you want to modify the table or add new features, you can check the source code in `site/src/components/TaskBoard/index.js`, but to be honest **you probably don't need to**. Just adding tasks to the `tasks.js` file and updating their status as you work on them should be enough for most use cases.
+The task table is rendered using a React component that reads the `tasks` data and displays it in a nice format. The table allows filtering by status, stage, target, action, tag, priority, and owner. The project timeline also reads the same registry and groups tasks by `stage`. The component is designed to be reusable, so you can use it in other pages if needed. The filtering and interactivity are handled using React state and event handlers. If you want to modify the table or add new features, you can check the source code in `site/src/components/TaskBoard/index.js`, but to be honest **you probably don't need to**. Just adding tasks to the `tasks.js` file and updating their status as you work on them should be enough for most cases.
 
 
 ---
@@ -367,4 +374,3 @@ Note this terminal is literally just for visualization purposes. Just to show so
 </TBox>
 
 ---
-
