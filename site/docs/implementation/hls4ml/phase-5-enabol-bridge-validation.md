@@ -1,6 +1,6 @@
 ---
 title: "Phase 5: ENABOL Bridge and Validation"
-sidebar_label: "Phase 5: Bridge + Validation"
+sidebar_label: "🚧 Phase 5: Bridge + Validation"
 status:
   - planned
 tags:

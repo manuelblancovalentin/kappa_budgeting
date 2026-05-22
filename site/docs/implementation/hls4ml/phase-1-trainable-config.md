@@ -1,6 +1,6 @@
 ---
 title: "Phase 1: Trainable Configuration"
-sidebar_label: "Phase 1: Config"
+sidebar_label: "✅ Phase 1: Config"
 status:
   - complete
 tags:

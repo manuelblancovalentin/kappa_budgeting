@@ -1,6 +1,6 @@
 ---
 title: "Phase 2: Graph and Flow Integration"
-sidebar_label: "Phase 2: Graph + Flow"
+sidebar_label: "🚧 Phase 2: Graph + Flow"
 status:
   - planned
 tags:

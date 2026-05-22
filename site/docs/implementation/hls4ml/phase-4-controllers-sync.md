@@ -1,6 +1,6 @@
 ---
 title: "Phase 4: Controllers and Synchronization"
-sidebar_label: "Phase 4: Controllers"
+sidebar_label: "🚧 Phase 4: Controllers"
 status:
   - planned
 tags:

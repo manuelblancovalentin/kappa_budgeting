@@ -1,6 +1,6 @@
 ---
 title: "Phase 0: Architecture Map"
-sidebar_label: "Phase 0: Architecture"
+sidebar_label: "✅ Phase 0: Architecture"
 status:
   - complete
 tags:

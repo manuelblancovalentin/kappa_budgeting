@@ -1,6 +1,6 @@
 ---
 title: "Phase 3: Templates and Kernels"
-sidebar_label: "Phase 3: Templates"
+sidebar_label: "🚧 Phase 3: Templates"
 status:
   - planned
 tags:
