@@ -64,6 +64,7 @@ const sidebars = {
         },
         'implementation/dataset',
         'implementation/dtypes',
+        'implementation/toolchain',
         'implementation/history',
         'implementation/nn',
         'implementation/precision',

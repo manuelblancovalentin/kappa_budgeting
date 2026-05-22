@@ -41,6 +41,7 @@ It should become the small, reproducible path from current ENABOL model construc
 The ENABOL bridge should:
 
 - build a simple model and dataset
+- apply a requested toolchain profile through `enabol.toolchain.toolchain_environment()`
 - compute precision recommendations
 - emit `Model.Training`
 - emit per-layer trainable precision overrides
@@ -50,6 +51,8 @@ The ENABOL bridge should:
 ## Validation Policy
 
 Start with local CSIM and software trace comparison. Vitis/Vivado synthesis can happen later on the server; it should not block the first config and codegen work on the Mac.
+
+Toolchain setup is tracked separately in [Toolchain Profiles](/docs/implementation/toolchain). The notebook should not set compiler paths directly; it should pass a profile name into the compile bridge once `enabol.compile` is implemented.
 
 The first validation target should be:
 

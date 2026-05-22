@@ -9,9 +9,13 @@ dependencies = [
     "matplotlib>=3.8,<4",
     "numpy>=1.26,<3",
     "tensorflow>=2.15,<3",
+    "tomli>=2.0; python_version<'3.11'",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["enabol*"]
 namespaces = false
+
+[tool.setuptools.package-data]
+enabol = ["config/*.toml"]

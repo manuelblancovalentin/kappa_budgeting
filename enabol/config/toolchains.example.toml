@@ -1,0 +1,77 @@
+# Example ENABOL toolchain profiles.
+#
+# Copy this file to one of:
+#   ~/.config/enabol/toolchains.toml
+#   ./enabol/config/toolchains.local.toml
+#
+# Or point ENABOL to another file with:
+#   ENABOL_TOOLCHAIN_CONFIG=/path/to/toolchains.toml
+#
+# Local machine profiles should not be committed. This example is safe to commit
+# because it documents the expected structure and the known lab server layout.
+
+[profiles.kona-vivado-2023_2]
+backend = "Vivado"
+platforms = ["linux"]
+hosts = ["kona-ubuntu"]
+required_commands = ["vivado_hls"]
+
+[profiles.kona-vivado-2023_2.env.PATH]
+prepend = [
+  "/usr/local/bin",
+  "/usr/bin",
+  "/mnt/raid5/fpga/cad/xilinx/Vivado/2023.2/bin",
+]
+
+[profiles.kona-vivado-2023_2.env.LD_LIBRARY_PATH]
+prepend = [
+  "/usr/lib/x86_64-linux-gnu",
+  "/usr/lib32",
+  "/mnt/raid5/fpga/cad/xilinx/Vivado/2023.2/lib/lnx64.o",
+]
+
+[profiles.kona-vivado-2023_2.env.LIBRARY_PATH]
+prepend = [
+  "/usr/lib/x86_64-linux-gnu",
+  "/usr/lib32",
+  "/mnt/raid5/fpga/cad/xilinx/Vivado/2023.2/lib/lnx64.o",
+]
+
+[profiles.kona-vivado-2023_2.env.CXXFLAGS]
+set = "-D_GLIBCXX_USE_CXX11_ABI=0"
+
+[profiles.kona-vitis-2024_1]
+backend = "Vitis"
+platforms = ["linux"]
+hosts = ["kona-ubuntu"]
+required_commands = ["vitis-run"]
+
+[profiles.kona-vitis-2024_1.env.PATH]
+prepend = [
+  "/usr/local/bin",
+  "/usr/bin",
+  "/mnt/raid5/fpga/cad/xilinx/Vitis_HLS/2024.1/bin",
+  "/mnt/raid5/fpga/cad/xilinx/Vitis/2024.1/bin",
+  "/mnt/raid5/fpga/cad/xilinx/Vivado/2024.1/bin",
+]
+
+[profiles.kona-vitis-2024_1.env.LD_LIBRARY_PATH]
+prepend = [
+  "/usr/lib/x86_64-linux-gnu",
+  "/usr/lib32",
+  "/mnt/raid5/fpga/cad/xilinx/Vitis_HLS/2024.1/lib/lnx64.o",
+  "/mnt/raid5/fpga/cad/xilinx/Vitis/2024.1/lib/lnx64.o",
+  "/mnt/raid5/fpga/cad/xilinx/Vivado/2024.1/lib/lnx64.o",
+]
+
+[profiles.kona-vitis-2024_1.env.LIBRARY_PATH]
+prepend = [
+  "/usr/lib/x86_64-linux-gnu",
+  "/usr/lib32",
+  "/mnt/raid5/fpga/cad/xilinx/Vitis_HLS/2024.1/lib/lnx64.o",
+  "/mnt/raid5/fpga/cad/xilinx/Vitis/2024.1/lib/lnx64.o",
+  "/mnt/raid5/fpga/cad/xilinx/Vivado/2024.1/lib/lnx64.o",
+]
+
+[profiles.kona-vitis-2024_1.env.CXXFLAGS]
+set = "-D_GLIBCXX_USE_CXX11_ABI=0"
