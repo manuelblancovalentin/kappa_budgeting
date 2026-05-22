@@ -233,9 +233,9 @@ def _write_dataset_for_testbench(dataset: BaseDataset | None, output_dir: str | 
     if dataset is None:
         return None, None
 
-    tb_dir = Path(output_dir) / 'tb_data'
-    dataset.to_dat(prefix=str(tb_dir))
-    return str(tb_dir / 'tb_input_features.dat'), str(tb_dir / 'tb_output_predictions.dat')
+    staging_dir = Path(output_dir) / 'enabol_tb_data'
+    dataset.to_dat(prefix=str(staging_dir))
+    return str(staging_dir / 'tb_input_features.dat'), str(staging_dir / 'tb_output_predictions.dat')
 
 
 def compile(
