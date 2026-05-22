@@ -78,6 +78,7 @@ hls_model, hls_config = compile(
     batch_size=1,
     loss="half_mse",
     controller="ctrl-gt-order-0",
+    precision=precision_dict,
     write=True,
     compile_cpp=False,
     build=False,
@@ -86,11 +87,46 @@ hls_model, hls_config = compile(
 
 `toolchain="auto"` is applied only when `build=True`. This lets Mac notebooks generate and inspect the hls4ml project without failing on Kona-only paths. On Kona, setting `build=True` activates the default 2024.1 toolchain profile before hls4ml calls `vitis-run`.
 
+For the first notebook trace, use an explicit `PrecisionDict`:
+
+```python
+from enabol.precision import PrecisionDict
+
+precision_dict = PrecisionDict({
+    "input": {
+        "value": "ap_fixed<16,8,AP_RND,AP_SAT>",
+    },
+    "dense0": {
+        "weight": "ap_fixed<16,6,AP_RND,AP_SAT>",
+        "activation": "ap_fixed<16,8,AP_RND,AP_SAT>",
+        "gradient": "ap_fixed<20,8,AP_RND,AP_SAT>",
+        "update": "ap_fixed<20,6,AP_RND,AP_SAT>",
+        "accumulator": "ap_fixed<28,14,AP_RND,AP_SAT>",
+    },
+    "loss": {
+        "value": "ap_fixed<32,16,AP_RND,AP_SAT>",
+    },
+})
+```
+
+The bridge expands these semantic fields into hls4ml trainable fields:
+
+| ENABOL field | hls4ml trainable fields |
+|---|---|
+| `loss.value` | `Model.Training.Precision.loss` |
+| `dense0.gradient` | `grad_in`, `grad_out`, `weight_grad`, `bias_grad`, `loss_grad` |
+| `dense0.update` | `raw_update`, `update`, `optimizer_state` |
+| `dense0.accumulator` | `gradient_accum`, `controller_metric` |
+
+If no `PrecisionDict` is passed, the bridge emits conservative placeholder trainable defaults. Those defaults are only for bring-up; automatic precision inference is tracked separately.
+
 ## Bridge Change Log
 
 | Task | Date | Files | Summary |
 |---|---|---|---|
 | [HLS4ML-012](/docs/status/tasks?query=HLS4ML-012) | 2026-05-22 | `enabol/compile.py`, `enabol/__init__.py`, `tests/test_compile.py` | Added `compile(...)`, `build_hls_config(...)`, trainability resolution, `PrecisionDict` mapping into ordinary and trainable hls4ml precision fields, dataset testbench export, internal toolchain context use for HLS build, and focused config tests. |
+| [HLS4ML-012](/docs/status/tasks?query=HLS4ML-012) | 2026-05-22 | `enabol/compile.py`, `tests/test_compile.py` | Added default trainable precision emission, expanded semantic precision aliases, and changed `trainable=True` to apply only to parameterized layers such as Dense. |
+| [HLS4ML-012](/docs/status/tasks?query=HLS4ML-012) | 2026-05-22 | `enabol/precision.py`, `enabol/compile.py`, `tests/test_precision.py` | Moved hls4ml precision translation out of `compile.py`; `compile.py` now calls `apply_hls_precision_config(...)` from `precision.py`. |
 
 The first validation target should be:
 

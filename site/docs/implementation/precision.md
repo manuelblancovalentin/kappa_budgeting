@@ -7,7 +7,7 @@ tags:
   - implementation
   - precision
   - quantization
-last_modified: 2026-05-15
+last_modified: 2026-05-22
 author: mbvalentin
 source: "enabol/precision.py"
 source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master/enabol/precision.py"
@@ -17,7 +17,7 @@ source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master
 ---
 
 <TBox type="summary" title="What this page covers">
-This page is a coder-facing reference for `enabol/precision.py`: the explicit layer-indexed `PrecisionDict`, reserved precision scopes, dtype parsing, model validation, and usage patterns for per-layer quantization studies.
+This page is a coder-facing reference for `enabol/precision.py`: the explicit layer-indexed `PrecisionDict`, reserved precision scopes, dtype parsing, model validation, hls4ml precision translation, and usage patterns for per-layer quantization studies.
 </TBox>
 
 ## Module Map
@@ -25,8 +25,9 @@ This page is a coder-facing reference for `enabol/precision.py`: the explicit la
 | Group | Objects | Purpose |
 |---|---|---|
 | Constants | `RESERVED_NAMES` | Semantic scopes that should not be ordinary layer names. |
+| Constants | `STANDARD_LAYER_PRECISION_FIELDS`, `TRAINABLE_PRECISION_FIELDS`, `DEFAULT_TRAINABLE_PRECISION` | hls4ml precision mapping tables and bring-up defaults. |
 | Class | `PrecisionDict` | Explicit layer/field precision map. |
-| Module-level functions | `ensure_precision_dict(...)` | Normalize user input into a `PrecisionDict`. |
+| Module-level functions | `ensure_precision_dict(...)`, `dtype_to_hls(...)`, `apply_hls_precision_config(...)` | Normalize user input and apply ENABOL precision semantics to hls4ml config dictionaries. |
 
 ## Imports And Dependencies
 
@@ -39,7 +40,7 @@ import tensorflow as tf
 from .dtypes import HLSDataType
 ```
 
-The only package-level dependency is `HLSDataType`, which parses strings and validates dtype objects.
+The only package-level dependencies are `HLSDataType` and concrete dtype constructors such as `ap_fixed`, which parse strings and define default precision policies.
 
 ## Constants
 
@@ -58,6 +59,37 @@ Meaning:
 | `__default__` | Optional fallback precision fields. |
 
 No Keras layer should be named `input` or `loss`.
+
+## hls4ml Translation
+
+`precision.py` owns the translation from ENABOL semantic fields into hls4ml config fields. `compile.py` should not duplicate these maps.
+
+Ordinary layer precision maps to hls4ml layer precision:
+
+| ENABOL field | hls4ml field |
+|---|---|
+| `weight` | `Precision.weight` |
+| `bias` | `Precision.bias` |
+| `activation` / `result` | `Precision.result` |
+| `accumulator` / `accum` | `Precision.accum` |
+
+Trainable precision maps to explicit training fields:
+
+| ENABOL field | hls4ml trainable field(s) |
+|---|---|
+| `loss.value` | `Model.Training.Precision.loss` |
+| `gradient` | `grad_in`, `grad_out`, `weight_grad`, `bias_grad`, `loss_grad` |
+| `update` | `raw_update`, `update`, `optimizer_state` |
+| `accumulator` | `gradient_accum`, `controller_metric` |
+| explicit trainable fields | same named hls4ml field, when recognized |
+
+The public helper for the compile bridge is:
+
+```python
+apply_hls_precision_config(hls_config, precision_dict)
+```
+
+It mutates the hls4ml config in place and fills missing model-level trainable fields from `DEFAULT_TRAINABLE_PRECISION`. These defaults are conservative bring-up placeholders, not the final deployment policy.
 
 ## Classes
 

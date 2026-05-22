@@ -12,44 +12,11 @@ from .dataset import BaseDataset
 from .dtypes import HLSDataType, ap_fixed
 from .nn.controller import BaseController, make_controller
 from .nn.models import BaseModel
-from .precision import PrecisionDict, ensure_precision_dict
+from .precision import PrecisionDict, apply_hls_precision_config, dtype_to_hls, ensure_precision_dict
 from .toolchain import toolchain_environment
 
 
 TrainableSpec = bool | int | Sequence[str | int]
-
-_STANDARD_LAYER_PRECISION_FIELDS = {
-    'weight': 'weight',
-    'bias': 'bias',
-    'activation': 'result',
-    'result': 'result',
-    'accumulator': 'accum',
-    'accum': 'accum',
-}
-
-_TRAINABLE_PRECISION_FIELDS = {
-    'loss': 'loss',
-    'loss_grad': 'loss_grad',
-    'gradient': 'grad_out',
-    'grad_in': 'grad_in',
-    'grad_out': 'grad_out',
-    'weight_grad': 'weight_grad',
-    'bias_grad': 'bias_grad',
-    'gradient_accum': 'gradient_accum',
-    'raw_update': 'raw_update',
-    'update': 'update',
-    'optimizer_state': 'optimizer_state',
-    'controller_metric': 'controller_metric',
-    'alpha': 'alpha',
-}
-
-
-def _dtype_to_hls(dtype: HLSDataType | str | None) -> str | None:
-    if dtype is None:
-        return None
-    if isinstance(dtype, HLSDataType):
-        return repr(dtype)
-    return str(dtype)
 
 
 def _normalize_learning_rate(learning_rate: float | None) -> float | None:
@@ -111,52 +78,20 @@ def _resolve_trainable_layers(layer_names: Sequence[str], trainable: TrainableSp
     return {name: name in selected_names for name in layer_names}
 
 
-def _set_standard_precision(layer_config: dict[str, Any], field: str, dtype: HLSDataType | None) -> None:
-    hls_field = _STANDARD_LAYER_PRECISION_FIELDS.get(field)
-    hls_dtype = _dtype_to_hls(dtype)
-    if hls_field is None or hls_dtype is None:
-        return
-    layer_config.setdefault('Precision', {})[hls_field] = hls_dtype
+def _is_parameter_layer_config(layer_config: Mapping[str, Any]) -> bool:
+    precision_config = layer_config.get('Precision', {})
+    return 'weight' in precision_config or 'bias' in precision_config
 
 
-def _set_trainable_precision(training_config: dict[str, Any], field: str, dtype: HLSDataType | None) -> None:
-    hls_field = _TRAINABLE_PRECISION_FIELDS.get(field)
-    hls_dtype = _dtype_to_hls(dtype)
-    if hls_field is None or hls_dtype is None:
-        return
-    training_config.setdefault('Precision', {})[hls_field] = hls_dtype
+def _resolve_trainable_layer_configs(layer_configs: Mapping[str, Mapping[str, Any]], trainable: TrainableSpec) -> dict[str, bool]:
+    layer_names = list(layer_configs.keys())
+    parameter_layer_names = [name for name, config in layer_configs.items() if _is_parameter_layer_config(config)]
 
+    if isinstance(trainable, bool):
+        return {name: bool(trainable) and name in parameter_layer_names for name in layer_names}
 
-def _apply_precision_config(hls_config: dict[str, Any], precision: PrecisionDict | None) -> None:
-    if precision is None:
-        return
-
-    model_config = hls_config.setdefault('Model', {})
-    model_training = model_config.setdefault('Training', {})
-
-    default_fields = precision.get('__default__', {})
-    for field, dtype in default_fields.items():
-        hls_dtype = _dtype_to_hls(dtype)
-        if hls_dtype is None:
-            continue
-        if field in _STANDARD_LAYER_PRECISION_FIELDS:
-            model_config.setdefault('Precision', {})[_STANDARD_LAYER_PRECISION_FIELDS[field]] = hls_dtype
-        if field in _TRAINABLE_PRECISION_FIELDS:
-            model_training.setdefault('Precision', {})[_TRAINABLE_PRECISION_FIELDS[field]] = hls_dtype
-
-    for layer_name, fields in precision.items():
-        if layer_name in {'__default__', 'input'}:
-            continue
-        if layer_name == 'loss':
-            for field, dtype in fields.items():
-                _set_trainable_precision(model_training, field, dtype)
-            continue
-
-        layer_config = hls_config.setdefault('LayerName', {}).setdefault(layer_name, {})
-        layer_training = layer_config.setdefault('Training', {})
-        for field, dtype in fields.items():
-            _set_standard_precision(layer_config, field, dtype)
-            _set_trainable_precision(layer_training, field, dtype)
+    resolved_parameter_layers = _resolve_trainable_layers(parameter_layer_names, trainable)
+    return {name: resolved_parameter_layers.get(name, False) for name in layer_names}
 
 
 def build_hls_config(
@@ -197,7 +132,7 @@ def build_hls_config(
         keras_model,
         granularity=granularity,
         backend=backend,
-        default_precision=_dtype_to_hls(default_precision),
+        default_precision=dtype_to_hls(default_precision),
         default_reuse_factor=reuse_factor,
     )
 
@@ -217,7 +152,7 @@ def build_hls_config(
     }
 
     layer_name_config = hls_config.setdefault('LayerName', {})
-    trainable_layers = _resolve_trainable_layers(list(layer_name_config.keys()), trainable)
+    trainable_layers = _resolve_trainable_layer_configs(layer_name_config, trainable)
     model_config['Training']['Trainable'] = any(trainable_layers.values())
 
     for layer_name, is_trainable in trainable_layers.items():
@@ -225,7 +160,7 @@ def build_hls_config(
         layer_config['Trace'] = trace
         layer_config.setdefault('Training', {})['Trainable'] = is_trainable
 
-    _apply_precision_config(hls_config, precision_dict)
+    apply_hls_precision_config(hls_config, precision_dict)
     return hls_config
 
 

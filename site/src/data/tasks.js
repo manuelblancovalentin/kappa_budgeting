@@ -736,7 +736,7 @@ const tasks = [
         {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
       ],
     },
-    notes: 'Initial bridge implemented in enabol.compile.compile: builds hls4ml config, emits Model.Training, maps PrecisionDict fields, applies toolchain profiles for build=True, exports dataset testbench files, converts/writes/builds through hls4ml. Remaining work: reference traces for loss, gradients, alpha, and updated parameters once trainable kernels exist.',
+    notes: 'Initial bridge implemented in enabol.compile.compile: builds hls4ml config, emits Model.Training, delegates PrecisionDict to hls4ml precision mapping to enabol.precision, applies toolchain profiles for build=True, exports dataset testbench files, converts/writes/builds through hls4ml. Remaining work: reference traces for loss, gradients, alpha, and updated parameters once trainable kernels exist.',
   },
   {
     id: 'HLS4ML-013',
@@ -906,6 +906,30 @@ const tasks = [
       ],
     },
     notes: 'Added enabol.toolchain with profile loading, host/platform/backend validation, scoped environment application/restoration, required command checks, and tracked example profiles for the kona-ubuntu Vivado/Vitis installs. The default profile is kona-vitis-2024_1 because 2023.2 CSIM is not reliable on Ubuntu 24.04 without a container.',
+  },
+  {
+    id: 'ENB-023',
+    title: 'Infer hls4ml trainable precisions from ENABOL model, dataset, optimizer, and controller',
+    status: 'todo',
+    priority: 'high',
+    stage: 'integration',
+    target: 'precision',
+    action: 'development',
+    summaryTags: ['precision', 'hls4ml', 'trainable-config', 'inference'],
+    timeline: true,
+    owners: [],
+    created: '2026-05-22',
+    due_date: null,
+    start_date: null,
+    end_date: null,
+    dependsOn: ['HLS4ML-012'],
+    links: {
+      docs: [
+        {label: 'Precision', href: '/docs/implementation/precision'},
+        {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
+      ],
+    },
+    notes: 'Replace placeholder/default trainable precision fields with an inference pass that uses model ranges, dataset ranges, learning rate, batch size, optimizer state, controller metrics, loss scale, and fixed-point safety margins.',
   },
 ];
 
