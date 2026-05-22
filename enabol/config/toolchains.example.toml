@@ -10,6 +10,8 @@
 # Local machine profiles should not be committed. This example is safe to commit
 # because it documents the expected structure and the known lab server layout.
 
+default_profile = "kona-vitis-2024_1"
+
 [profiles.kona-vivado-2023_2]
 backend = "Vivado"
 platforms = ["linux"]

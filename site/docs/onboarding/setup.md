@@ -155,6 +155,37 @@ hls4ml: /Users/mbvalentin/scripts/ENABOL/hls4ml-trainable/hls4ml/__init__.py
 </Terminal>
 
 
+## Server Toolchain Check
+
+On `kona-ubuntu`, ENABOL uses toolchain profiles so notebooks do not have to source Vivado/Vitis shell files manually. The default profile is:
+
+```text
+kona-vitis-2024_1
+```
+
+Verify the profile machinery from the repository root:
+
+```bash
+python - <<'PY'
+from enabol.toolchain import list_toolchain_profiles, toolchain_environment
+
+print(list_toolchain_profiles())
+with toolchain_environment("auto", backend="Vitis") as profile:
+    print(profile)
+PY
+```
+
+The 2024.1 profile should be the default because CSIM with 2023.2 is not reliable on Ubuntu 24.04 without a container. Before running the first hls4ml build on `kona-ubuntu`, also check:
+
+```bash
+which vitis-run
+which vitis_hls
+vitis_hls -version
+```
+
+The older compatibility profile `kona-vivado-2023_2` is still documented because `/usr/local/bin/vivado_hls` exists on `kona-ubuntu`, but it should not be the default compile path.
+
+
 
 
 ## Build the documentation site

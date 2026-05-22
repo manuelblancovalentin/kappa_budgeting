@@ -102,6 +102,43 @@ def list_toolchain_profiles(config_path: str | os.PathLike[str] | None = None) -
     return tuple(sorted(config.get('profiles', {}).keys()))
 
 
+def get_default_toolchain_profile_name(config_path: str | os.PathLike[str] | None = None) -> str | None:
+    """Return the configured default profile name, if any."""
+
+    env_profile = os.environ.get('ENABOL_TOOLCHAIN_PROFILE')
+    if env_profile:
+        return env_profile
+
+    config = load_toolchain_config(config_path)
+    return config.get('default_profile')
+
+
+def resolve_toolchain_profile_name(
+    profile: str | None,
+    config_path: str | os.PathLike[str] | None = None,
+) -> str | None:
+    """Resolve profile aliases used by compile paths.
+
+    ``None`` and ``"none"`` mean no toolchain environment should be applied.
+    ``"auto"`` means use ``ENABOL_TOOLCHAIN_PROFILE`` if set, otherwise the
+    config file's ``default_profile``.
+    """
+
+    if profile is None:
+        return None
+
+    normalized_profile = profile.lower()
+    if normalized_profile == 'none':
+        return None
+    if normalized_profile == 'auto':
+        default_profile = get_default_toolchain_profile_name(config_path)
+        if default_profile is None:
+            raise ToolchainError('Toolchain profile "auto" requested, but no default_profile is configured.')
+        return default_profile
+
+    return profile
+
+
 def get_toolchain_profile(
     profile: str,
     config_path: str | os.PathLike[str] | None = None,
@@ -224,11 +261,12 @@ def toolchain_environment(
     still keeping the same control flow.
     """
 
-    if profile is None:
+    resolved_profile_name = resolve_toolchain_profile_name(profile, config_path)
+    if resolved_profile_name is None:
         yield None
         return
 
-    resolved_profile = get_toolchain_profile(profile, config_path)
+    resolved_profile = get_toolchain_profile(resolved_profile_name, config_path)
     original_env = os.environ.copy()
 
     try:

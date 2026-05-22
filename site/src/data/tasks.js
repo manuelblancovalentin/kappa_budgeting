@@ -904,7 +904,7 @@ const tasks = [
         {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
       ],
     },
-    notes: 'Added enabol.toolchain with profile loading, host/platform/backend validation, scoped environment application/restoration, required command checks, and tracked example profiles for the kona-ubuntu Vivado/Vitis installs. The near-term compile profile is kona-vivado-2023_2 because /usr/local/bin/vivado_hls exists and reports Vitis HLS 2023.2.',
+    notes: 'Added enabol.toolchain with profile loading, host/platform/backend validation, scoped environment application/restoration, required command checks, and tracked example profiles for the kona-ubuntu Vivado/Vitis installs. The default profile is kona-vitis-2024_1 because 2023.2 CSIM is not reliable on Ubuntu 24.04 without a container.',
   },
 ];
 

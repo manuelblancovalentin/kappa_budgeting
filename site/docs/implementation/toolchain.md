@@ -50,6 +50,8 @@ The structure is still the same idea as the old config: named profiles with expl
 ## Profile Shape
 
 ```toml
+default_profile = "kona-vitis-2024_1"
+
 [profiles.kona-vitis-2024_1]
 backend = "Vitis"
 platforms = ["linux"]
@@ -100,6 +102,21 @@ Values are de-duplicated and the previous environment is restored after the cont
 
 This is intentionally stricter than a notebook cell that mutates `PATH`: it should fail early with a precise error if the server layout changes.
 
+## Default Profile
+
+`toolchain_environment("auto", backend=...)` resolves the profile in this order:
+
+1. `ENABOL_TOOLCHAIN_PROFILE`, if set.
+2. `default_profile` from the toolchain config.
+
+The example config currently sets:
+
+```toml
+default_profile = "kona-vitis-2024_1"
+```
+
+This reflects the lab decision to move to the latest hls4ml-supported 2024.1 toolchain because CSIM in 2023.2 is not reliable on Ubuntu 24.04 without a container.
+
 ## Current Server Profiles
 
 The first example profiles target:
@@ -109,9 +126,9 @@ The first example profiles target:
 | `kona-vivado-2023_2` | `kona-ubuntu` | `Vivado` | `/usr/local/bin/vivado_hls`, reporting Vitis HLS 2023.2 |
 | `kona-vitis-2024_1` | `kona-ubuntu` | `Vitis` | `/mnt/raid5/fpga/cad/xilinx/Vitis_HLS/2024.1/bin/vitis_hls` plus Vitis/Vivado 2024.1 paths |
 
-The Vivado profile currently requires `vivado_hls`, because that is what hls4ml's Vivado backend calls. On `kona-ubuntu`, `/usr/local/bin/vivado_hls` exists and reports Vitis HLS 2023.2, so `kona-vivado-2023_2` is the first profile to use for the near-term hls4ml-trainable path.
+The Vivado profile currently requires `vivado_hls`, because that is what hls4ml's Vivado backend calls. On `kona-ubuntu`, `/usr/local/bin/vivado_hls` exists and reports Vitis HLS 2023.2. This profile is retained for compatibility and for debugging older generated projects, but it should not be the default path on Ubuntu 24.04.
 
-The Vitis HLS 2024.1 install exposes `vitis_hls`, but the current hls4ml Vitis backend checks for `vitis-run`. That means the `kona-vitis-2024_1` profile should be considered a documented server target, not the first compile target, until we either verify `vitis-run` on the server or adapt the backend/bridge intentionally.
+The default profile is now `kona-vitis-2024_1`. The Vitis HLS 2024.1 install exposes `vitis_hls`, while the current hls4ml Vitis backend checks for `vitis-run`. Before running the first server build, verify `which vitis-run` on `kona-ubuntu`. If `vitis-run` is unavailable, we should either add the path that provides it or decide explicitly whether the bridge should call the Vivado backend with a 2024.1-compatible HLS command.
 
 ## Linked Task
 
