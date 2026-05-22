@@ -54,13 +54,13 @@ The current `requirements-dev.txt` includes:
 
 ```text
 -e .
+-e ./hls4ml-trainable
 jupyter
 ipykernel
 pytest
 ```
 
-The `-e .` entry installs the local `enabol` package in editable mode. This
-means notebooks, scripts, and tests can import <ENABOL /> without manually editing
+The `-e .` entry installs the local `enabol` package in editable mode, while the `-e ./hls4ml-trainable` entry installs the local `hls4ml` package in editable mode. This means notebooks, scripts, and tests can import <ENABOL /> without manually editing
 `sys.path`:
 
 ```python
@@ -92,6 +92,70 @@ Which should print a message like:
 <Terminal title="import check">
 [INFO] - ENABOL imported successfully! Version: 0.1.0, URL: https://manuelblancovalentin.github.io/ENABOL/
 </Terminal>
+
+
+
+
+### Setting up hls4ml trainable
+1. Fork the [hls4ml repository](https://github.com/fastmachinelearning/hls4ml) directly on your Github.
+2. Clone that forked repo to your local machine (inside the ENABOL folder!) -- it might take a bit.
+> ```bash
+> git clone git@github.com:<YOUR_USERNAME>/hls4ml.git hls4ml-trainable
+> ```
+3. Move onto that directory and add the official repo as upstream.
+> ```bash
+> cd hls4ml-trainable
+> git remote add upstream https://github.com/fastmachinelearning/hls4ml.git
+> git remote -v
+> ```
+
+You should see something like:
+<Terminal title="git remote -v" >
+  origin    git@github.com:YOUR_USERNAME/hls4ml.git (fetch)
+origin    git@github.com:YOUR_USERNAME/hls4ml.git (push)
+upstream  https://github.com/fastmachinelearning/hls4ml.git (fetch)
+upstream  https://github.com/fastmachinelearning/hls4ml.git (push)
+</Terminal>
+
+4. Now fetch the latest upstream changes:
+> ```bash
+> git fetch upstream
+> ```
+
+5. Create your development branch from official main:
+> ```bash
+> git checkout -b hls4ml-trainable upstream/main
+> ```
+
+6. Push that branch to your fork:
+> ```bash
+> git push -u origin hls4ml-trainable
+> ```
+
+7. Now you can finally install your local hls4ml-trainable branch in editable mode like (<font color="red">MAKE SURE YOU HAVE THE RIGHT ENVIRONMENT ACTIVATED!</font>):
+> ```bash
+> python -m pip install -e ./hls4ml-trainable
+> ```
+
+8. Finally verify that both imports work:
+> ```bash
+> python - <<'PY'
+> import enabol
+> import hls4ml
+> print("enabol:", enabol.__file__)
+> print("hls4ml:", hls4ml.__file__)
+> PY
+> ```
+
+> You should see something like:
+<Terminal title="import check" >
+[INFO] - ENABOL imported successfully! Version: 0.1.0, URL: https://manuelblancovalentin.github.io/ENABOL/
+enabol: /Users/mbvalentin/scripts/ENABOL/enabol/__init__.py
+hls4ml: /Users/mbvalentin/scripts/ENABOL/hls4ml-trainable/hls4ml/__init__.py
+</Terminal>
+
+
+
 
 ## Build the documentation site
 
