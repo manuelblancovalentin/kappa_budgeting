@@ -173,6 +173,11 @@ project:
   permalink: /project
   description: Pages tagged Project.
 
+hls4ml:
+  label: hls4ml
+  permalink: /hls4ml
+  description: Pages tagged hls4ml.
+
 people:
   label: People
   permalink: /people

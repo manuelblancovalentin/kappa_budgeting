@@ -31,6 +31,21 @@ const sidebars = {
     },
     {
       type: 'category',
+      label: '🟣 hls4ml',
+      items: [
+        'hls4ml/index',
+        'hls4ml/hlsconfig',
+        'hls4ml/modelgraph-flows',
+        'hls4ml/layer-attributes',
+        'hls4ml/backend-template-passes',
+        'hls4ml/vivado-writer',
+        'hls4ml/training-endpoints-losses',
+        'hls4ml/optimizer-controller',
+        'hls4ml/enabol-bridge',
+      ],
+    },
+    {
+      type: 'category',
       label: '🔩 Implementation',
       items: [
         'implementation/code-map',
