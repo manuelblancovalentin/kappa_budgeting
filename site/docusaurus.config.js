@@ -141,6 +141,7 @@ const config = {
             to: '/docs/formulation/',
             items: [
               {type: 'doc', docId: 'formulation/overview', label: 'Formulation'},
+              {type: 'doc', docId: 'hls4ml/index', label: 'hls4ml'},
               {type: 'doc', docId: 'implementation/code-map', label: 'Implementation'},
               {type: 'doc', docId: 'datasets/datasets-index', label: 'Datasets'},
               {type: 'doc', docId: 'models/models-index', label: 'Models'},

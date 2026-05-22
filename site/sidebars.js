@@ -49,6 +49,19 @@ const sidebars = {
       label: '🔩 Implementation',
       items: [
         'implementation/code-map',
+        {
+          type: 'category',
+          label: 'hls4ml Trainable',
+          items: [
+            'implementation/hls4ml/index',
+            'implementation/hls4ml/phase-0-architecture-map',
+            'implementation/hls4ml/phase-1-trainable-config',
+            'implementation/hls4ml/phase-2-graph-flow',
+            'implementation/hls4ml/phase-3-templates-kernels',
+            'implementation/hls4ml/phase-4-controllers-sync',
+            'implementation/hls4ml/phase-5-enabol-bridge-validation',
+          ],
+        },
         'implementation/dataset',
         'implementation/dtypes',
         'implementation/history',

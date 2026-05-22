@@ -8,7 +8,7 @@ tags:
   - status
   - experiment
   - global-throttle
-last_modified: 2026-05-15
+last_modified: 2026-05-21
 author: mbvalentin
 ---
 # 📸 Current Snapshot
@@ -17,7 +17,7 @@ author: mbvalentin
 ---
 
 <TBox type="summary" title="Snapshot">
-<ENABOL /> ablation work has pivoted from hard row/column $\kappa$ projection toward a closed-loop stability controller. The current algorithm keeps static $\kappa$-style constraints as loose representational rails, but stabilizes online learning with one global throttle $\alpha_t$ that scales the full parameter update. This preserves the optimizer direction while reducing effective learning rate when curvature, saturation, or quantization pressure increases.
+<ENABOL /> now has a cleaner formulation that connects the ICCAD $\kappa$-budgeting story to the global throttle work. $\kappa$-budgeting defines the fixed-point safety envelope: the admissible region where weights, activations, gradients, and updates remain bounded. Global throttling defines the trajectory controller inside that envelope: one scalar $\alpha_t$ scales the full parameter update so learning slows down when curvature or fixed-point pressure makes the current step too aggressive.
 </TBox>
 
 
@@ -44,13 +44,80 @@ C_t =
 {\lVert \theta_t-\theta_{t-1}\rVert + \varepsilon}.
 ```
 
-Then $\alpha_t$ is selected so the effective update is damped during high-curvature or numerically fragile regimes. The key design rule is that $\alpha_t$ is global across all layers.
+Then $\alpha_t$ is selected so the effective update is damped during high-curvature or numerically fragile regimes. The key design rule is that $\alpha_t$ is global across all trainable parameters.
+
+## How κ and global throttle fit together
+
+The project should no longer frame global throttling as replacing $\kappa$-budgeting. The combined view is:
+
+```math
+\boxed{\text{$\kappa$-budgeting defines the admissible fixed-point region.}}
+```
+
+```math
+\boxed{\text{global throttle controls the learning speed inside that region.}}
+```
+
+Let $\mathcal{S}_{\kappa}$ be the set of parameters satisfying the selected $\kappa$ budgets. A direction-preserving controller can compute two global limits:
+
+```math
+\alpha_{\mathrm{curv},t}
+=
+\frac{\chi}
+{\eta(\widehat{C}_t+\varepsilon)}
+```
+
+and
+
+```math
+\alpha_{\kappa,t}
+=
+\max \left\{
+\alpha \in [0,1]:
+\theta_t+\alpha\Delta\theta_t^{\mathrm{raw}}
+\in
+\mathcal{S}_{\kappa}
+\right\}.
+```
+
+The applied scalar is:
+
+```math
+\alpha_t
+=
+\operatorname{clip}
+\left(
+\min(\alpha_{\mathrm{curv},t},\alpha_{\kappa,t}),
+\alpha_{\min},
+\alpha_{\max}
+\right).
+```
+
+This keeps one global update direction:
+
+```math
+\theta_{t+1}
+=
+\theta_t+\alpha_t\Delta\theta_t^{\mathrm{raw}}.
+```
+
+The distinction is useful:
+
+| Limiting signal | Meaning |
+|---|---|
+| $\alpha_{\kappa,t}<\alpha_{\mathrm{curv},t}$ | The proposed update would hit a fixed-point gain or rail budget first. $\kappa$ is limiting the step. |
+| $\alpha_{\mathrm{curv},t}<\alpha_{\kappa,t}$ | The update fits the $\kappa$ envelope, but the local learning dynamics are too stiff. Curvature is limiting the step. |
+| both near 1 | The update is inside the envelope and dynamically safe enough to apply normally. |
+
+This reconciles the submitted $\kappa$-budgeting formulation with the new global-throttle direction-preservation result. The old row/column projection path remains useful for reproduction and comparison, but the preferred direction-preserving formulation is a $\kappa$-aware global alpha.
 
 ## What is currently proven
 
 - <Badge status="valid" /> The floating-point one-layer sanity test shows that a global throttle can prevent divergence after input-gain drift.
 - <Badge status="valid" /> The fake-fixed-point path works for staged quantization experiments: weights, updates, activations, rails, saturation counters, and update distortion plots.
+- <Badge status="valid" /> The update-direction argument is clear: multiplying the flattened update by one scalar preserves the optimizer direction before fixed-point rounding and saturation.
 - <Badge status="preliminary" /> Quantized one-layer tests support the controller idea, but tight update precision can still distort late-stage learning when gradients become small.
+- <Badge status="preliminary" /> The $\kappa$-aware global-alpha formulation reconciles $\kappa$ safety rails with global throttling, but has not yet been implemented or validated in hls4ml.
 - <Badge status="preliminary" /> The phase/cosine diagnostics are useful as software observability tools, but should not be treated as direct hardware controller inputs yet.
 
 ## Tested systems
@@ -77,7 +144,8 @@ Then $\alpha_t$ is selected so the effective update is damped during high-curvat
 - Only the one-layer linear model has been tested end-to-end.
 - Current quantization tests are software fake-fixed-point, not firmware-equivalent HLS traces.
 - The global throttle law is still heuristic; we have not analytically tuned $\chi$, rail tightness, or precision maps.
-- Row/column $\kappa$ projection is intentionally not the priority right now because it may rotate the update direction.
+- Legacy row/column $\kappa$ projection may rotate the update direction when it rescales different rows, columns, or layers differently.
+- The $\kappa$-aware global alpha is still a formulation target, not a validated hardware implementation.
 
 </TBox>
 
@@ -85,16 +153,18 @@ Then $\alpha_t$ is selected so the effective update is damped during high-curvat
 
 <TBox type="todo" title="Near-term TODOs">
 
-- [ ] Add the clean curvature-only `EXP-001A` run with Hessian-selected learning rates.
-- [ ] Add the rail/saturation-focused `EXP-001B` run with tighter fixed-point formats.
-- [ ] Move to a two-layer linear model to expose inter-layer coupling without activation nonlinearities.
-- [ ] Add a first precision-map registry once multiple quantization configurations are reused.
-- [ ] Clone latest `hls4ml` and modify it to start synthesizing the current controller algorithm.
+- [ ] Start the hls4ml implementation with the direction-preserving trainable path: `HLS4ML-001` through `HLS4ML-006`.
+- [ ] Keep the first correctness target narrow: one Dense layer, one MSE or half-MSE loss, SGD, `CTRL-NONE`, and `CTRL-GT-ORDER-0`.
+- [ ] Add the trainable config schema so `SafetyBudget` and `Controller` can be selected independently later.
+- [ ] Implement pure global throttle first, then add $\kappa$-aware global alpha as the reconciliation mode.
+- [ ] Preserve legacy row/column $\kappa$ projection as a selectable reproduction/comparison mode, not as the default learning controller.
+- [ ] Run the one-layer Dense CSIM comparison against ENABOL software traces before optimizing the delayed-alpha schedule.
 
 </TBox>
 
 ## Things not to repeat
 
-- [x] ~~Do not lead with legacy row/column $\kappa$ projection as the main ablation path. It is useful as a later comparison, but it is not the cleanest first controller story.~~
+- [x] ~~Do not describe global throttle as abandoning $\kappa$-budgeting. The better framing is envelope plus trajectory controller.~~
+- [x] ~~Do not lead with legacy row/column $\kappa$ projection as the main implementation path. It is useful as a reproduction/comparison mode, but it should not be the default controller.~~
 - [x] ~~Do not mix curvature instability and rail/saturation instability in the first diagnostic experiment. The plots become hard to interpret.~~
 - [x] ~~Do not treat update cosine as a hardware-available controller signal. It is a software diagnostic for update distortion.~~
