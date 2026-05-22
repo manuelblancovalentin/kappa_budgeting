@@ -25,6 +25,7 @@ from .nn import (
     UpdateApplier,
 )
 from .precision import PrecisionDict
+from .compile import compile
 
 
 # Print a welcome message when the package is imported

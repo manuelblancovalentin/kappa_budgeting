@@ -54,6 +54,44 @@ Start with local CSIM and software trace comparison. Vitis/Vivado synthesis can 
 
 Toolchain setup is tracked separately in [Toolchain Profiles](/docs/implementation/toolchain). The notebook should not set compiler paths directly; it should pass a profile name into the compile bridge once `enabol.compile` is implemented.
 
+## Compile API
+
+The first bridge entry point is:
+
+```python
+from enabol.compile import compile
+
+hls_model, hls_config = compile(
+    model=model,
+    dataset=dataset,
+    backend="Vitis",
+    toolchain="auto",
+    output_dir="workspace/compilation/pipe000_first_compilation_pipeline",
+    project_name="pipe000_dense",
+    part="xcku035-fbva676-2-e",
+    io_type="io_parallel",
+    strategy="Latency",
+    reuse_factor=1,
+    trainable=True,
+    optimizer="sgd",
+    learning_rate=0.01,
+    batch_size=1,
+    loss="half_mse",
+    controller="ctrl-gt-order-0",
+    write=True,
+    compile_cpp=False,
+    build=False,
+)
+```
+
+`toolchain="auto"` is applied only when `build=True`. This lets Mac notebooks generate and inspect the hls4ml project without failing on Kona-only paths. On Kona, setting `build=True` activates the default 2024.1 toolchain profile before hls4ml calls `vitis-run`.
+
+## Bridge Change Log
+
+| Task | Date | Files | Summary |
+|---|---|---|---|
+| [HLS4ML-012](/docs/status/tasks?query=HLS4ML-012) | 2026-05-22 | `enabol/compile.py`, `enabol/__init__.py`, `tests/test_compile.py` | Added `compile(...)`, `build_hls_config(...)`, trainability resolution, `PrecisionDict` mapping into ordinary and trainable hls4ml precision fields, dataset testbench export, internal toolchain context use for HLS build, and focused config tests. |
+
 The first validation target should be:
 
 ```text
