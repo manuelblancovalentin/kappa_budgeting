@@ -215,6 +215,7 @@
 
 .status-badge--valid,
 .status-badge--done,
+.status-badge--complete,
 .status-badge--passed,
 .status-badge--priority-low {
   border-color: #86efac;
