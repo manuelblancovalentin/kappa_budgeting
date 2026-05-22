@@ -717,7 +717,7 @@ const tasks = [
   {
     id: 'HLS4ML-012',
     title: 'HLS4ML - Build the ENABOL to hls4ml trainable config bridge',
-    status: 'inprogress',
+    status: 'done',
     priority: 'high',
     stage: 'integration',
     target: 'enabol',
@@ -728,7 +728,7 @@ const tasks = [
     created: '2026-05-21',
     due_date: null,
     start_date: '2026-05-22',
-    end_date: null,
+    end_date: '2026-05-22',
     dependsOn: ['HLS4ML-001', 'ENB-006'],
     links: {
       docs: [
@@ -736,7 +736,7 @@ const tasks = [
         {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
       ],
     },
-    notes: 'Initial bridge implemented in enabol.compile.compile: builds hls4ml config, emits Model.Training, delegates PrecisionDict to hls4ml precision mapping to enabol.precision, applies toolchain profiles for build=True, exports dataset testbench files, converts/writes/builds through hls4ml. Remaining work: reference traces for loss, gradients, alpha, and updated parameters once trainable kernels exist.',
+    notes: 'Done for the config bridge: enabol.compile.compile builds hls4ml config, emits Model.Training, delegates PrecisionDict to hls4ml precision mapping to enabol.precision, applies toolchain profiles for build=True, exports dataset testbench files, and converts/writes/builds through hls4ml. Reference trace comparison continues under HLS4ML-013 once trainable kernels exist.',
   },
   {
     id: 'HLS4ML-013',

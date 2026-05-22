@@ -2,7 +2,7 @@
 title: "Phase 1: Trainable Configuration"
 sidebar_label: "Phase 1: Config"
 status:
-  - inprogress
+  - complete
 tags:
   - hls4ml
   - implementation
@@ -189,7 +189,8 @@ This is the first concrete handoff from config into hls4ml graph metadata. Later
 |---|---|---|---|
 | [HLS4ML-001](/docs/status/tasks?query=HLS4ML-001) | 2026-05-22 | `hls4ml/model/graph.py`, `test/pytest/test_trainable_config.py` | Added normalized `Model.Training` defaults, training/loss/optimizer/controller/precision accessors, layer-level trainable config accessor, and unit tests for defaults, overrides, copy behavior, and boolean shorthand. |
 | [HLS4ML-003](/docs/status/tasks?query=HLS4ML-003) | 2026-05-22 | `hls4ml/model/graph.py`, `hls4ml/model/layers.py`, `test/pytest/test_trainable_config.py` | Added merged trainable precision resolution, converted trainable precision lookup, and `Layer._set_trainable_attributes()` so configured fields become graph `NamedType` attributes like `grad_in_t`, `raw_update_t`, and `alpha_t`. |
+| [HLS4ML-012](/docs/status/tasks?query=HLS4ML-012) | 2026-05-22 | `enabol/compile.py`, `enabol/precision.py`, `tests/test_compile.py`, `tests/test_precision.py` | Added ENABOL-side `compile(...)`, hls4ml config generation, `Model.Training` emission, semantic precision translation, default trainable precision fill, dataset testbench staging, and write-only hls4ml project generation. |
 
 ## Exit Criteria
 
-Phase 1 is done when hls4ml can load a trainable config, expose stable accessor methods, and fail early on unsupported or ambiguous training settings without generating C++.
+Phase 1 is done. hls4ml can load a trainable config, expose stable accessor methods, attach configured trainable precision as layer attributes, and ENABOL can emit that schema into a generated hls4ml project.
