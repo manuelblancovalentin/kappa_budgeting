@@ -47,8 +47,8 @@ git clone --branch hls4ml-trainable https://github.com/manuelblancovalentin/hls4
 Verify the layout from the ENABOL repository root:
 
 ```bash
-test -d enabol
-test -d hls4ml-trainable/hls4ml
+test -d enabol && echo "enabol exists"
+test -d hls4ml-trainable/hls4ml && echo "hls4ml-trainable exists"
 ```
 
 <TBox type="warning" title="Most users should not create a new hls4ml fork">
