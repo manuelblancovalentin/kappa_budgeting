@@ -76,9 +76,8 @@ The first upstreamable version should be conservative:
 2. Parse trainable config into explicit model and layer attributes.
 3. Add a Vivado trainable flow that runs after normal forward templates and before writing.
 4. Generate loss endpoint metadata and backpass function snippets through backend passes.
-5. Add static Vivado headers for autograd kernels, losses, optimizer helpers, and controller helpers.
+5. Add static Vivado headers under `templates/vivado/trainable/`, split into `common`, `losses`, `backprop`, `optimizers`, and `controllers`.
 6. Keep writer changes small: top-level trainable signature, IO pragmas, includes, loss configs, and backpass function emission.
 7. Keep ENABOL as the config producer, not as a generated-C++ patcher.
 
 Implementation details can live in later pages once code starts changing. These pages should remain the design map: what hls4ml does today, why that matters, and where ENABOL should attach its trainable behavior.
-

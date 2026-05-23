@@ -22,7 +22,7 @@ Port the useful deprecated trainable kernels into the new hls4ml backend structu
 
 ## Linked Tasks
 
-- [HLS4ML-004](/docs/status/tasks?query=HLS4ML-004): static autograd and loss headers.
+- [HLS4ML-004](/docs/status/tasks?query=HLS4ML-004): static trainable headers.
 - [HLS4ML-005](/docs/status/tasks?query=HLS4ML-005): Dense backpass templates.
 - [HLS4ML-006](/docs/status/tasks?query=HLS4ML-006): loss endpoint templates.
 - [HLS4ML-007](/docs/status/tasks?query=HLS4ML-007): two-phase raw update storage.

@@ -75,18 +75,17 @@ The writer can then emit forward code and backward code separately.
 
 ## Required Static Headers
 
-The deprecated fork already had useful kernel headers under `templates/vivado/autograd` and `templates/vivado/losses`. In the new fork, these should be copied as static firmware assets:
+The deprecated fork already had useful kernel headers under `templates/vivado/autograd` and `templates/vivado/losses`. In the new fork, those names should be treated as source material, not as the new layout.
+
+Use one trainable umbrella folder:
 
 | Header group | Purpose |
 |---|---|
-| `autograd/nnet_dense_backprop.h` | Dense gradient and update code. |
-| `autograd/nnet_conv_backprop.h` | Convolution gradient and update code. |
-| `autograd/nnet_activation_backprop.h` | Activation gradient transport. |
-| `autograd/nnet_common_backprop.h` | Reshape/flatten common backpasses. |
-| `autograd/nnet_pooling_backprop.h` | Pooling backpasses. |
-| `autograd/optimizers.h` | SGD/Adam/update helper code. |
-| `autograd/controller.h` | New home for global throttle controller code. |
-| `losses/*.h` | Loss and initial gradient computation. |
+| `trainable/common/*.h` | Shared fixed-point helpers, trainable config helpers, and small utilities. |
+| `trainable/losses/*.h` | Loss values and initial output-gradient seeds. |
+| `trainable/backprop/*.h` | Layer-local backward kernels such as Dense, activation, convolution, pooling, and layout backpasses. |
+| `trainable/optimizers/*.h` | Raw update proposal and optimizer-state update helpers such as SGD and Adam. |
+| `trainable/controllers/*.h` | Global throttle controllers, `CTRL-NONE`, and optional kappa safety-budget code. |
 
 The static headers should be generic and template-driven. Per-model constants and typedefs should come from generated config structs.
 
@@ -121,4 +120,3 @@ Do not make the Vivado writer:
 - calculate controller state layout.
 
 Those are pass/template responsibilities.
-
