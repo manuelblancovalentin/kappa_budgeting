@@ -1466,13 +1466,13 @@ const tasks = [
   },
   {
     id: 'ENB-024',
-    title: 'Add FitHistory loader and plots for hls4ml trainable traces',
+    title: 'Add TestbenchData loader and plots for hls4ml trainable traces',
     status: 'done',
     priority: 'high',
     stage: 'validation',
     target: 'csim',
     action: 'development',
-    summaryTags: ['FitHistory', 'hls4ml', 'training-traces', 'plots'],
+    summaryTags: ['TestbenchData', 'hls4ml', 'training-traces', 'plots'],
     timeline: true,
     owners: ['mbvalentin'],
     created: '2026-05-23',
@@ -1483,10 +1483,11 @@ const tasks = [
     links: {
       docs: [
         {label: 'history.py', href: '/docs/implementation/history'},
+        {label: 'testbench.py', href: '/docs/implementation/testbench'},
         {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
       ],
     },
-    notes: 'Added FitHistory.from_dir/from_trainable_dir for tb_data/training/*.dat traces and FitHistory.plot_training() for a compact metadata panel, smoothed loss/alpha plots, global-step x-axis, and epoch top axis.',
+    notes: 'Added TestbenchData.from_dir/from_trainable_dir for tb_data/training/*.dat traces and TestbenchData.plot_training() for a compact metadata panel, smoothed loss/alpha plots, global-step x-axis, and epoch top axis. FitHistory remains scoped to software training histories.',
   },
 ];
 

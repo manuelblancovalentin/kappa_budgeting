@@ -90,6 +90,7 @@ enabol/
     telemetry.py   # tensor-native sensors and history recorder
     applier.py     # applies controller-approved updates
   history.py       # FitHistory container and default plots
+  testbench.py     # hls4ml CSIM tb_data readers and plots
   utils.py         # norms, Hessian helpers, stability metrics
 ```
 

@@ -27,6 +27,7 @@ from .nn import (
 from .precision import PrecisionDict
 from .compile import compile
 from .history import FitHistory
+from .testbench import TestbenchData
 
 
 # Print a welcome message when the package is imported

@@ -3,6 +3,7 @@ import matplotlib
 matplotlib.use('Agg')
 
 from enabol.history import FitHistory
+from enabol.testbench import TestbenchData
 
 
 def write_trace(path, trace, metric, values):
@@ -37,30 +38,37 @@ def write_trace(path, trace, metric, values):
     path.write_text('\n'.join(rows) + '\n')
 
 
-def test_fit_history_loads_trainable_traces(tmp_path):
+def test_fit_history_stays_software_training_container():
+    history = FitHistory(loss=[1, 2, 3])
+
+    assert 'loss' in history
+    assert not hasattr(history, 'from_dir')
+
+
+def test_testbench_data_loads_trainable_traces(tmp_path):
     trace_dir = tmp_path / 'tb_data' / 'training'
     trace_dir.mkdir(parents=True)
     write_trace(trace_dir / 'loss.dat', 'loss', 'loss', [1.0, 0.5, 0.25, 0.125])
     write_trace(trace_dir / 'alpha.dat', 'alpha', 'alpha', [1.0, 1.0, 1.0, 1.0])
 
-    history = FitHistory.from_dir(tmp_path)
+    data = TestbenchData.from_dir(tmp_path)
 
-    assert history.frame is not None
-    assert list(history.frame.columns) == ['alpha', 'loss']
-    assert history.frame.index.names == ['epoch', 'sample', 'global_step', 'sample_index']
-    assert history.metadata['Project'] == 'LinearBlockModel'
-    assert history.metadata_by_trace['loss']['Controller'] == 'CTRL-NONE'
-    assert history['loss'].shape == (4,)
+    assert list(data.frame.columns) == ['alpha', 'loss']
+    assert data.frame.index.names == ['epoch', 'sample', 'global_step', 'sample_index']
+    assert data.metadata['Project'] == 'LinearBlockModel'
+    assert data.metadata_by_trace['loss']['Controller'] == 'CTRL-NONE'
+    assert data['loss'].shape == (4,)
+    assert data.metrics == ['alpha', 'loss']
 
 
-def test_fit_history_plot_training_returns_figure(tmp_path):
+def test_testbench_data_plot_training_returns_figure(tmp_path):
     trace_dir = tmp_path / 'tb_data' / 'training'
     trace_dir.mkdir(parents=True)
     write_trace(trace_dir / 'loss.dat', 'loss', 'loss', [1.0, 0.5, 0.25, 0.125])
     write_trace(trace_dir / 'alpha.dat', 'alpha', 'alpha', [1.0, 1.0, 1.0, 1.0])
 
-    history = FitHistory.from_trainable_dir(trace_dir)
-    fig, axes = history.plot_training(window_size=2, show=False)
+    data = TestbenchData.from_trainable_dir(trace_dir)
+    fig, axes = data.plot_training(window_size=2, show=False)
 
     assert fig is not None
     assert len(axes) == 2

@@ -208,6 +208,16 @@ hls4ml:
   permalink: /hls4ml
   description: Pages tagged hls4ml.
 
+csim:
+  label: CSIM
+  permalink: /csim
+  description: Pages tagged CSIM.
+
+testbench:
+  label: Testbench
+  permalink: /testbench
+  description: Pages tagged Testbench.
+
 people:
   label: People
   permalink: /people

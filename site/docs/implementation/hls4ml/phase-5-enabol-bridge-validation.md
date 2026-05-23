@@ -178,16 +178,16 @@ The generated console output is similarly compact:
 Epoch [1/2] - sample 1/128: loss 2.02597, alpha: 1
 ```
 
-ENABOL reads these traces through `FitHistory`:
+ENABOL reads these traces through `TestbenchData`:
 
 ```python
-from enabol import FitHistory
+from enabol import TestbenchData
 
-history = FitHistory.from_dir(hls_model.config.get_output_dir())
-history.plot_training(window_size=30)
+tb = TestbenchData.from_dir(hls_model.config.get_output_dir())
+tb.plot_training(window_size=30)
 ```
 
-`FitHistory.from_dir(...)` accepts the hls4ml output directory, `tb_data`, or `tb_data/training`. The returned object keeps the merged dataframe at `history.frame` and parsed trace metadata at `history.metadata`.
+`TestbenchData.from_dir(...)` accepts the hls4ml output directory, `tb_data`, or `tb_data/training`. The returned object keeps the merged dataframe at `tb.frame` and parsed trace metadata at `tb.metadata`.
 
 ## Bridge Change Log
 
@@ -199,7 +199,7 @@ history.plot_training(window_size=30)
 | [HLS4ML-020](/docs/status/tasks?query=HLS4ML-020) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `hls4ml/model/graph.py`, `enabol/compile.py`, `test/pytest/test_trainable_config.py`, `tests/test_compile.py` | Replaced literal trainable buffer dimensions with generated config constants, moved static learning rate into the trainable config struct, and added the generated trainable epoch/shuffle/loss-log CSIM testbench. |
 | [HLS4ML-020](/docs/status/tasks?query=HLS4ML-020) | 2026-05-23 | `enabol/compile.py` | Fixed the bridge build path so `build=True` writes the hls4ml project before Vitis runs, even when dataset staging already created the output directory. |
 | [HLS4ML-037](/docs/status/tasks?query=HLS4ML-037) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `hls4ml/model/graph.py`, `enabol/compile.py` | Replaced verbose prediction printing with compact progress logs and added metadata-bearing `.dat` traces under `tb_data/training/` for loss and alpha. |
-| [ENB-024](/docs/status/tasks?query=ENB-024) | 2026-05-23 | `enabol/history.py`, `tests/test_history.py` | Added ENABOL-side trace loading and plotting through `FitHistory.from_dir(...)` and `FitHistory.plot_training(...)`. |
+| [ENB-024](/docs/status/tasks?query=ENB-024) | 2026-05-23 | `enabol/testbench.py`, `enabol/history.py`, `tests/test_history.py` | Added ENABOL-side testbench trace loading and plotting through `TestbenchData.from_dir(...)` and `TestbenchData.plot_training(...)`, while keeping `FitHistory` scoped to software training. |
 
 The first validation target should be:
 

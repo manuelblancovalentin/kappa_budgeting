@@ -78,6 +78,7 @@ const sidebars = {
         'implementation/dtypes',
         'implementation/toolchain',
         'implementation/history',
+        'implementation/testbench',
         'implementation/nn',
         'implementation/precision',
         'implementation/utils',
