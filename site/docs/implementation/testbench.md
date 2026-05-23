@@ -26,6 +26,7 @@ source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master
 | Object | Kind | Purpose |
 |---|---|---|
 | `TestbenchData` | class | Container for hls4ml testbench outputs and trainable CSIM traces. |
+| `TestbenchLayerData` | class | Per-layer container for raw parameter traces and parameter summary statistics. |
 | `TestbenchData.from_dir(...)` | classmethod | Loads traces from an hls4ml output directory, `tb_data`, or `tb_data/training`. |
 | `TestbenchData.from_trainable_dir(...)` | classmethod | Alias for explicit trainable-trace loading. |
 | `TestbenchData.plot_training(...)` | method | Plots hls4ml trainable traces with metadata and epoch/global-step axes. |
@@ -68,15 +69,19 @@ The repeated index columns are intentional. Traces are allowed to have different
 
 Dense weights use the same row-major flattening convention as hls4ml dense kernels: `weight_<input>_<output>` maps to flat index `input * n_out + output`.
 
-`TestbenchData.from_dir(...)` recursively discovers trace files and outer-merges them on the shared index. Sparse traces therefore become columns with `NaN` values on steps where that trace did not write a row. Top-level traces keep their natural metric names such as `loss` and `alpha`; nested traces are namespaced by path, for example `dense0.weights.weight_0_0` and `dense0.biases.bias_0`. `plot_training(...)` drops missing values per metric before computing the rolling mean and quantile bands, so the rolling window is expressed in available samples for that metric, not in global train steps. This keeps dense loss plots and sparse weight plots valid in the same object.
+`TestbenchData.from_dir(...)` recursively discovers trace files, but it does not put raw parameter matrices into the main dataframe. Top-level traces such as `loss.dat` and `alpha.dat` are outer-merged into `tb.frame`. Per-layer parameter traces are loaded into `tb.layers[layer_name]` when `load_weights` allows that layer.
+
+Parameter traces have their own raw dataframes and summary statistics. For example, `tb.layers["dense0"].weights` is the raw weights dataframe, and `tb.layers["dense0"].stats` is a dataframe of scalar summaries computed from weights and biases. Sparse traces therefore remain sparse at the layer level, while `tb.stats_frame` exposes scalar summaries with names such as `dense0.weights.mean` and `dense0.biases.norm_l2`.
 
 ## Usage
 
 ```python
 from enabol import TestbenchData
 
-tb = TestbenchData.from_dir(hls_model.config.get_output_dir())
+tb = TestbenchData.from_dir(hls_model.config.get_output_dir(), load_weights=True)
 tb.frame.head()
+tb.layers["dense0"].weights.head()
+tb.layers["dense0"].stats.head()
 tb.plot_training(window_size=30)
 print(tb)
 ```
@@ -87,7 +92,15 @@ print(tb)
 - the `tb_data` directory
 - the final `tb_data/training` directory
 
-The merged dataframe is stored at `tb.frame` and indexed by:
+`load_weights` controls whether per-layer parameter traces are loaded:
+
+| Value | Behavior |
+|---|---|
+| `True` | Load all layer parameter traces. |
+| `False` | Load only top-level traces such as `loss` and `alpha`. |
+| `["dense0", "dense1"]` | Load only those layer parameter traces. |
+
+The top-level merged dataframe is stored at `tb.frame` and indexed by:
 
 ```text
 epoch, sample, global_step, sample_index
@@ -101,6 +114,9 @@ Trace comments are parsed into dictionaries:
 |---|---|
 | `tb.metadata` | Metadata from the first trace file, normally enough for display. |
 | `tb.metadata_by_trace` | Metadata keyed by trace name, for example `loss`, `alpha`, `dense0/weights`, and `dense0/biases`. |
+| `tb.layers` | Mapping from layer name to `TestbenchLayerData`. |
+| `tb.stats_frame` | Scalar summaries computed from loaded layer parameter traces. |
+| `tb.scalar_frame` | `tb.frame` plus `tb.stats_frame`, used by `plot_training(...)`. |
 
 The `TestbenchData` representation prints a compact table with the directory, traces, metrics, and key run metadata:
 
@@ -110,9 +126,23 @@ TestbenchData
 | Directory  | .../tb_data/training           |
 | Rows       | 2002                           |
 | Traces     | alpha, dense0/biases, dense0/weights, loss |
-| Metrics    | alpha, dense0.weights.weight_0_0, loss     |
+| Metrics    | alpha, loss                    |
+| Layers     | dense0                         |
+| Layer Stats | dense0.weights.mean, dense0.weights.std, ... |
 +------------+--------------------------------+
 ```
+
+## Parameter Statistics
+
+For each loaded parameter trace, ENABOL computes:
+
+```text
+mean, std, min, max, median, q05, q25, q75, q95,
+norm_l2, norm_inf, sparsity_fraction,
+saturation_fraction, near_rail_fraction, underflow_fraction
+```
+
+The rail and underflow fractions are present now but return `NaN` until the reader receives explicit rail/underflow thresholds from precision metadata. This keeps the dataframe schema stable while avoiding fake hardware-safety numbers.
 
 ## Plotting
 
@@ -123,15 +153,15 @@ TestbenchData
 | Metadata | Compact run metadata parsed from trace comments. |
 | Loss | Rolling mean and quantile bands on a log scale. |
 | Alpha | Rolling mean and quantile bands for the controller output. |
-| Parameter metrics | Rolling mean and quantile bands for selected scalar parameter elements, after dropping missing sparse-trace rows. |
+| Parameter metrics | Rolling mean and quantile bands for loaded parameter summary statistics, after dropping missing sparse-trace rows. |
 
-The bottom x-axis is `global_step`. The top x-axis of the first metric panel marks epoch starts. By default, `plot_training()` plots every loaded scalar metric. Pass `metrics=[...]` to inspect one weight or a smaller subset:
+The bottom x-axis is `global_step`. The top x-axis of the first metric panel marks epoch starts. By default, `plot_training()` plots every loaded scalar metric in `tb.scalar_frame`, including parameter statistics. Pass `metrics=[...]` to inspect a smaller subset:
 
 ```python
-tb.plot_training(metrics=["loss", "dense0.weights.weight_0_0"], window_size=1)
+tb.plot_training(metrics=["loss", "dense0.weights.mean", "dense0.weights.norm_l2"], window_size=1)
 ```
 
-For larger networks, scalar traces are the data backend. The more useful visual views will be layered on top: per-layer mean/std envelopes, before/after histograms, and weight-matrix heatmaps.
+Raw individual parameter values remain available through `tb.layers[layer].weights` and `tb.layers[layer].biases`. For larger networks, scalar summaries are the default plot backend. More specialized views can be layered on top later: selected element line plots, before/after histograms, and weight-matrix heatmaps.
 
 Use `show=False` in tests or scripts that need the figure object:
 
@@ -145,3 +175,4 @@ fig, axes = tb.plot_training(show=False)
 |---|---|---|---|
 | [ENB-024](/docs/status/tasks?query=ENB-024) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Added `TestbenchData.from_dir(...)`, metadata parsing, merged trace dataframe storage, and `plot_training(...)` for hls4ml trainable CSIM traces. |
 | [HLS4ML-037](/docs/status/tasks?query=HLS4ML-037) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `enabol/testbench.py`, `tests/test_history.py` | Added per-layer epoch-level parameter traces, sparse nested-trace loading, default all-metric plotting, and a table-style `TestbenchData` representation. |
+| [ENB-025](/docs/status/tasks?query=ENB-025) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Moved raw parameter traces into per-layer objects, added `load_weights`, and computed per-layer parameter summary dataframes for plotting. |

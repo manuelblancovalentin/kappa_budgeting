@@ -1489,6 +1489,30 @@ const tasks = [
     },
     notes: 'Added TestbenchData.from_dir/from_trainable_dir for recursive tb_data/training/*.dat traces, per-trace metadata parsing, a table-style representation, sparse-cadence trace merging, namespaced nested trace columns, and TestbenchData.plot_training() for metadata, smoothed traces, global-step x-axis, and epoch top axis. FitHistory remains scoped to software training histories.',
   },
+  {
+    id: 'ENB-025',
+    title: 'Add per-layer parameter trace loading and statistics',
+    status: 'done',
+    priority: 'medium',
+    stage: 'validation',
+    target: 'csim',
+    action: 'development',
+    summaryTags: ['TestbenchData', 'parameters', 'weights', 'statistics'],
+    timeline: true,
+    owners: ['mbvalentin'],
+    created: '2026-05-23',
+    due_date: null,
+    start_date: '2026-05-23',
+    end_date: '2026-05-23',
+    dependsOn: ['ENB-024', 'HLS4ML-037'],
+    links: {
+      docs: [
+        {label: 'testbench.py', href: '/docs/implementation/testbench'},
+        {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
+      ],
+    },
+    notes: 'Raw weights and biases now load into per-layer TestbenchLayerData objects instead of tb.frame. TestbenchData.from_dir(..., load_weights=True/False/[layers]) controls loading, and tb.stats_frame/tb.scalar_frame expose per-layer parameter summaries for plotting.',
+  },
 ];
 
 export default tasks;

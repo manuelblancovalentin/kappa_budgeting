@@ -87,10 +87,34 @@ def test_testbench_data_handles_sparse_trace_cadences(tmp_path):
     write_trace(layer_dir / 'biases.dat', 'dense0/biases', 'bias_0', [0.0, 0.125], every=2)
 
     data = TestbenchData.from_dir(tmp_path)
-    fig, axes = data.plot_training(window_size=2, show=False)
+    fig, axes = data.plot_training(metrics=['loss', 'dense0.weights.mean', 'dense0.biases.mean'], window_size=2, show=False)
 
     assert data.metadata_by_trace['dense0/weights']['_path'] == 'dense0/weights.dat'
-    assert data.frame['dense0.weights.weight_0_0'].notna().sum() == 2
-    assert data.frame['dense0.biases.bias_0'].notna().sum() == 2
+    assert 'dense0' in data.layers
+    assert data.layers['dense0'].weights['weight_0_0'].notna().sum() == 2
+    assert data.layers['dense0'].biases['bias_0'].notna().sum() == 2
+    assert 'dense0.weights.mean' in data.stats_frame.columns
+    assert 'dense0.biases.mean' in data.scalar_metrics
+    assert 'dense0.weights.weight_0_0' not in data.frame.columns
     assert fig is not None
     assert len(axes) == 3
+
+
+def test_testbench_data_can_skip_or_select_parameter_layers(tmp_path):
+    trace_dir = tmp_path / 'tb_data' / 'training'
+    trace_dir.mkdir(parents=True)
+    dense0_dir = trace_dir / 'dense0'
+    dense1_dir = trace_dir / 'dense1'
+    dense0_dir.mkdir()
+    dense1_dir.mkdir()
+    write_trace(trace_dir / 'loss.dat', 'loss', 'loss', [1.0])
+    write_trace(dense0_dir / 'weights.dat', 'dense0/weights', 'weight_0_0', [0.25])
+    write_trace(dense1_dir / 'weights.dat', 'dense1/weights', 'weight_0_0', [0.5])
+
+    no_weights = TestbenchData.from_dir(tmp_path, load_weights=False)
+    only_dense1 = TestbenchData.from_dir(tmp_path, load_weights=['dense1'])
+
+    assert no_weights.layers == {}
+    assert list(no_weights.frame.columns) == ['loss']
+    assert list(only_dense1.layers) == ['dense1']
+    assert 'dense1.weights.mean' in only_dense1.stats_frame.columns

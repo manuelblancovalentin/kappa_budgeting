@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 import textwrap
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -11,6 +12,52 @@ import pandas as pd
 
 
 INDEX_COLUMNS = ['epoch', 'sample', 'global_step', 'sample_index']
+PARAMETER_TRACE_NAMES = {'weights', 'biases'}
+PARAMETER_STAT_COLUMNS = [
+    'mean',
+    'std',
+    'min',
+    'max',
+    'median',
+    'q05',
+    'q25',
+    'q75',
+    'q95',
+    'norm_l2',
+    'norm_inf',
+    'sparsity_fraction',
+    'saturation_fraction',
+    'near_rail_fraction',
+    'underflow_fraction',
+]
+
+
+@dataclass
+class TestbenchLayerData:
+    """Per-layer parameter traces loaded from ``tb_data/training/<layer>``."""
+
+    name: str
+    traces: dict[str, pd.DataFrame]
+    metadata_by_trace: dict[str, dict[str, str]]
+
+    @property
+    def weights(self) -> pd.DataFrame | None:
+        return self.traces.get('weights')
+
+    @property
+    def biases(self) -> pd.DataFrame | None:
+        return self.traces.get('biases')
+
+    @property
+    def stats(self) -> pd.DataFrame:
+        frames = []
+        for trace_name, frame in self.traces.items():
+            stats = _parameter_stats_frame(frame)
+            stats = stats.rename(columns={column: f'{trace_name}.{column}' for column in stats.columns})
+            frames.append(stats)
+        if not frames:
+            return pd.DataFrame()
+        return pd.concat(frames, axis=1).sort_index()
 
 
 class TestbenchData:
@@ -25,11 +72,13 @@ class TestbenchData:
         metadata: dict[str, str] | None = None,
         metadata_by_trace: dict[str, dict[str, str]] | None = None,
         source_dir: str | Path | None = None,
+        layers: dict[str, TestbenchLayerData] | None = None,
     ):
         self.frame = frame
         self.metadata = metadata or {}
         self.metadata_by_trace = metadata_by_trace or {}
         self.source_dir = Path(source_dir) if source_dir is not None else None
+        self.layers = layers or {}
 
     def __repr__(self) -> str:
         rows = [
@@ -38,6 +87,8 @@ class TestbenchData:
             ('Index', ', '.join(self.frame.index.names)),
             ('Traces', ', '.join(sorted(self.metadata_by_trace)) or '<none>'),
             ('Metrics', ', '.join(self.metrics) or '<none>'),
+            ('Layers', ', '.join(sorted(self.layers)) or '<none>'),
+            ('Layer Stats', ', '.join(self.layer_metrics) or '<none>'),
         ]
         for key in ['Project', 'Backend', 'Controller', 'Optimizer', 'Loss', 'Epochs', 'BatchSize']:
             if key in self.metadata:
@@ -58,8 +109,35 @@ class TestbenchData:
     def metrics(self) -> list[str]:
         return list(self.frame.columns)
 
+    @property
+    def stats_frame(self) -> pd.DataFrame:
+        frames = []
+        for layer_name, layer in self.layers.items():
+            stats = layer.stats
+            if not stats.empty:
+                stats = stats.rename(columns={column: f'{layer_name}.{column}' for column in stats.columns})
+                frames.append(stats)
+        if not frames:
+            return pd.DataFrame(index=self.frame.index)
+        return pd.concat(frames, axis=1).sort_index()
+
+    @property
+    def scalar_frame(self) -> pd.DataFrame:
+        stats = self.stats_frame
+        if stats.empty:
+            return self.frame
+        return pd.concat([self.frame, stats], axis=1).sort_index()
+
+    @property
+    def layer_metrics(self) -> list[str]:
+        return list(self.stats_frame.columns)
+
+    @property
+    def scalar_metrics(self) -> list[str]:
+        return list(self.scalar_frame.columns)
+
     @classmethod
-    def from_dir(cls, path: str | Path) -> 'TestbenchData':
+    def from_dir(cls, path: str | Path, *, load_weights: bool | list[str] | tuple[str, ...] | set[str] = True) -> 'TestbenchData':
         """Load hls4ml trainable traces.
 
         ``path`` may be the hls4ml output directory, the ``tb_data`` directory,
@@ -72,6 +150,8 @@ class TestbenchData:
             raise FileNotFoundError(f'No trainable trace .dat files found in {trace_dir}.')
 
         frames = []
+        layer_traces: dict[str, dict[str, pd.DataFrame]] = {}
+        layer_metadata: dict[str, dict[str, dict[str, str]]] = {}
         metadata_by_trace = {}
         for trace_file in trace_files:
             comments, metadata = _read_metadata(trace_file)
@@ -81,20 +161,53 @@ class TestbenchData:
                 raise ValueError(f'Trace file {trace_file} is missing index columns: {missing}')
             frame = frame.set_index(INDEX_COLUMNS)
             trace_name = metadata.get('Trace', _trace_name_from_path(trace_dir, trace_file))
-            frame = _namespace_trace_columns(frame, trace_name, trace_file.parent == trace_dir)
-            frames.append(frame)
             metadata['_comments'] = '\n'.join(comments)
             metadata['_path'] = str(trace_file.relative_to(trace_dir))
+
+            parameter_info = _parameter_trace_info(trace_dir, trace_file)
+            if parameter_info is not None:
+                layer_name, trace_kind = parameter_info
+                if _should_load_layer(layer_name, load_weights):
+                    layer_traces.setdefault(layer_name, {})[trace_kind] = frame
+                    layer_metadata.setdefault(layer_name, {})[trace_kind] = metadata
+                    metadata_by_trace[trace_name] = metadata
+                continue
+
+            frames.append(frame)
             metadata_by_trace[trace_name] = metadata
 
-        merged = pd.concat(frames, axis=1).sort_index()
-        first_metadata = next(iter(metadata_by_trace.values()), {})
+        if frames:
+            merged = pd.concat(frames, axis=1).sort_index()
+        else:
+            merged = pd.DataFrame()
+            merged.index.names = INDEX_COLUMNS
 
-        return cls(frame=merged, metadata=dict(first_metadata), metadata_by_trace=metadata_by_trace, source_dir=trace_dir)
+        first_metadata = next(iter(metadata_by_trace.values()), {})
+        layers = {
+            layer_name: TestbenchLayerData(
+                name=layer_name,
+                traces=traces,
+                metadata_by_trace=layer_metadata.get(layer_name, {}),
+            )
+            for layer_name, traces in layer_traces.items()
+        }
+
+        return cls(
+            frame=merged,
+            metadata=dict(first_metadata),
+            metadata_by_trace=metadata_by_trace,
+            source_dir=trace_dir,
+            layers=layers,
+        )
 
     @classmethod
-    def from_trainable_dir(cls, path: str | Path) -> 'TestbenchData':
-        return cls.from_dir(path)
+    def from_trainable_dir(
+        cls,
+        path: str | Path,
+        *,
+        load_weights: bool | list[str] | tuple[str, ...] | set[str] = True,
+    ) -> 'TestbenchData':
+        return cls.from_dir(path, load_weights=load_weights)
 
     def plot_training(
         self,
@@ -107,11 +220,12 @@ class TestbenchData:
         figsize: tuple[float, float] | None = None,
         show: bool = True,
     ):
+        plot_frame = self.scalar_frame
         if metrics is None:
-            metrics = list(self.frame.columns)
-        metrics = [metric for metric in metrics if metric in self.frame.columns]
+            metrics = list(plot_frame.columns)
+        metrics = [metric for metric in metrics if metric in plot_frame.columns]
         if not metrics:
-            raise ValueError(f'None of the requested metrics are available. Available metrics: {list(self.frame.columns)}')
+            raise ValueError(f'None of the requested metrics are available. Available metrics: {list(plot_frame.columns)}')
 
         metadata_lines = _metadata_lines(self.metadata) if show_metadata else []
         n_metric_axes = len(metrics)
@@ -134,7 +248,7 @@ class TestbenchData:
             ax = fig.add_subplot(grid[row + i, 0], sharex=axes[0] if axes else None)
             axes.append(ax)
             _turn_grid_on(ax)
-            _plot_metric(ax, self.frame, metric, window_size=window_size, levels=levels)
+            _plot_metric(ax, plot_frame, metric, window_size=window_size, levels=levels)
             if metric == 'loss':
                 ax.set_yscale('log')
                 ax.set_ylabel('Loss')
@@ -143,7 +257,7 @@ class TestbenchData:
             else:
                 ax.set_ylabel(metric)
 
-        _add_epoch_axis(axes[0], self.frame)
+        _add_epoch_axis(axes[0], plot_frame)
         axes[-1].set_xlabel('Global Step')
         if title:
             fig.suptitle(title)
@@ -170,12 +284,88 @@ def _trace_name_from_path(trace_dir: Path, trace_file: Path) -> str:
     return trace_file.relative_to(trace_dir).with_suffix('').as_posix()
 
 
-def _namespace_trace_columns(frame: pd.DataFrame, trace_name: str, is_top_level: bool) -> pd.DataFrame:
-    if is_top_level:
-        return frame
+def _parameter_trace_info(trace_dir: Path, trace_file: Path) -> tuple[str, str] | None:
+    relative = trace_file.relative_to(trace_dir)
+    if len(relative.parts) != 2:
+        return None
 
-    prefix = trace_name.replace('/', '.')
-    return frame.rename(columns={column: f'{prefix}.{column}' for column in frame.columns})
+    layer_name = relative.parts[0]
+    trace_kind = relative.with_suffix('').parts[1]
+    if trace_kind not in PARAMETER_TRACE_NAMES:
+        return None
+    return layer_name, trace_kind
+
+
+def _should_load_layer(layer_name: str, load_weights: bool | list[str] | tuple[str, ...] | set[str]) -> bool:
+    if isinstance(load_weights, bool):
+        return load_weights
+    return layer_name in set(load_weights)
+
+
+def _parameter_stats_frame(
+    frame: pd.DataFrame,
+    *,
+    zero_tol: float = 0.0,
+    saturation_abs: float | None = None,
+    near_rail_fraction: float = 0.95,
+    underflow_abs: float | None = None,
+) -> pd.DataFrame:
+    rows = []
+    for index, row in frame.iterrows():
+        values = row.to_numpy(dtype=float)
+        values = values[np.isfinite(values)]
+        rows.append(
+            _parameter_stats_row(
+                values,
+                zero_tol=zero_tol,
+                saturation_abs=saturation_abs,
+                near_rail_fraction=near_rail_fraction,
+                underflow_abs=underflow_abs,
+            )
+        )
+
+    stats = pd.DataFrame(rows, index=frame.index, columns=PARAMETER_STAT_COLUMNS)
+    return stats
+
+
+def _parameter_stats_row(
+    values: np.ndarray,
+    *,
+    zero_tol: float,
+    saturation_abs: float | None,
+    near_rail_fraction: float,
+    underflow_abs: float | None,
+) -> dict[str, float]:
+    if values.size == 0:
+        return {column: np.nan for column in PARAMETER_STAT_COLUMNS}
+
+    abs_values = np.abs(values)
+    stats = {
+        'mean': float(np.mean(values)),
+        'std': float(np.std(values)),
+        'min': float(np.min(values)),
+        'max': float(np.max(values)),
+        'median': float(np.median(values)),
+        'q05': float(np.quantile(values, 0.05)),
+        'q25': float(np.quantile(values, 0.25)),
+        'q75': float(np.quantile(values, 0.75)),
+        'q95': float(np.quantile(values, 0.95)),
+        'norm_l2': float(np.linalg.norm(values, ord=2)),
+        'norm_inf': float(np.max(abs_values)),
+        'sparsity_fraction': float(np.mean(abs_values <= zero_tol)),
+        'saturation_fraction': np.nan,
+        'near_rail_fraction': np.nan,
+        'underflow_fraction': np.nan,
+    }
+
+    if saturation_abs is not None:
+        stats['saturation_fraction'] = float(np.mean(abs_values >= saturation_abs))
+        stats['near_rail_fraction'] = float(np.mean(abs_values >= near_rail_fraction * saturation_abs))
+
+    if underflow_abs is not None:
+        stats['underflow_fraction'] = float(np.mean((abs_values > 0) & (abs_values < underflow_abs)))
+
+    return stats
 
 
 def _read_metadata(path: Path) -> tuple[list[str], dict[str, str]]:
