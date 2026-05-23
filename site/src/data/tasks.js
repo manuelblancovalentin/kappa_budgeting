@@ -1464,6 +1464,30 @@ const tasks = [
     },
     notes: 'Replace placeholder/default trainable precision fields with an inference pass that uses model ranges, dataset ranges, learning rate, batch size, optimizer state, controller metrics, loss scale, and fixed-point safety margins.',
   },
+  {
+    id: 'ENB-024',
+    title: 'Add FitHistory loader and plots for hls4ml trainable traces',
+    status: 'done',
+    priority: 'high',
+    stage: 'validation',
+    target: 'csim',
+    action: 'development',
+    summaryTags: ['FitHistory', 'hls4ml', 'training-traces', 'plots'],
+    timeline: true,
+    owners: ['mbvalentin'],
+    created: '2026-05-23',
+    due_date: null,
+    start_date: '2026-05-23',
+    end_date: '2026-05-23',
+    dependsOn: ['HLS4ML-037'],
+    links: {
+      docs: [
+        {label: 'history.py', href: '/docs/implementation/history'},
+        {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
+      ],
+    },
+    notes: 'Added FitHistory.from_dir/from_trainable_dir for tb_data/training/*.dat traces and FitHistory.plot_training() for a compact metadata panel, smoothed loss/alpha plots, global-step x-axis, and epoch top axis.',
+  },
 ];
 
 export default tasks;
