@@ -3,7 +3,7 @@ status:
   - preliminary
 tags:
   - onboarding
-last_modified: 2026-05-15
+last_modified: 2026-05-22
 author: mbvalentin
 ---
 # ⚙️ Setup
@@ -26,6 +26,35 @@ notebooks under `workspace/`.
 git clone https://github.com/manuelblancovalentin/ENABOL
 cd ENABOL
 ```
+
+## Clone hls4ml-trainable
+
+The development requirements install `./hls4ml-trainable` in editable mode, so the hls4ml fork must exist next to `enabol/` before running `pip install -r requirements-dev.txt`.
+
+For the current ENABOL trainable workflow, clone the maintained fork and branch:
+
+```bash
+git clone --branch hls4ml-trainable git@github.com:manuelblancovalentin/hls4ml.git hls4ml-trainable
+```
+
+If SSH is not configured on the machine, use HTTPS:
+
+```bash
+git clone --branch hls4ml-trainable https://github.com/manuelblancovalentin/hls4ml.git hls4ml-trainable
+```
+
+Verify the layout from the ENABOL repository root:
+
+```bash
+test -d enabol
+test -d hls4ml-trainable/hls4ml
+```
+
+<TBox type="warning" title="Most users should not create a new hls4ml fork">
+
+The commands above clone the existing ENABOL hls4ml-trainable dependency. You only need to create a fresh personal hls4ml fork if you are changing the upstream integration strategy or preparing a separate hls4ml pull request. That advanced workflow is documented in [Advanced: creating a fresh hls4ml fork](#advanced-creating-a-fresh-hls4ml-fork).
+
+</TBox>
 
 ## Python Environment Setup
 
@@ -93,67 +122,19 @@ Which should print a message like:
 [INFO] - ENABOL imported successfully! Version: 0.1.0, URL: https://manuelblancovalentin.github.io/ENABOL/
 </Terminal>
 
+Also verify that `hls4ml` resolves to the local trainable fork:
 
+```bash
+python - <<'PY'
+import enabol
+import hls4ml
 
+print("enabol:", enabol.__file__)
+print("hls4ml:", hls4ml.__file__)
+PY
+```
 
-### Setting up hls4ml trainable
-1. Fork the [hls4ml repository](https://github.com/fastmachinelearning/hls4ml) directly on your Github.
-2. Clone that forked repo to your local machine (inside the ENABOL folder!) -- it might take a bit.
-> ```bash
-> git clone git@github.com:<YOUR_USERNAME>/hls4ml.git hls4ml-trainable
-> ```
-3. Move onto that directory and add the official repo as upstream.
-> ```bash
-> cd hls4ml-trainable
-> git remote add upstream https://github.com/fastmachinelearning/hls4ml.git
-> git remote -v
-> ```
-
-You should see something like:
-<Terminal title="git remote -v" >
-  origin    git@github.com:YOUR_USERNAME/hls4ml.git (fetch)
-origin    git@github.com:YOUR_USERNAME/hls4ml.git (push)
-upstream  https://github.com/fastmachinelearning/hls4ml.git (fetch)
-upstream  https://github.com/fastmachinelearning/hls4ml.git (push)
-</Terminal>
-
-4. Now fetch the latest upstream changes:
-> ```bash
-> git fetch upstream
-> ```
-
-5. Create your development branch from official main:
-> ```bash
-> git checkout -b hls4ml-trainable upstream/main
-> ```
-
-6. Push that branch to your fork:
-> ```bash
-> git push -u origin hls4ml-trainable
-> ```
-
-7. Now you can finally install your local hls4ml-trainable branch in editable mode like (<font color="red">MAKE SURE YOU HAVE THE RIGHT ENVIRONMENT ACTIVATED!</font>):
-> ```bash
-> python -m pip install -e ./hls4ml-trainable
-> ```
-
-8. Finally verify that both imports work:
-> ```bash
-> python - <<'PY'
-> import enabol
-> import hls4ml
-> print("enabol:", enabol.__file__)
-> print("hls4ml:", hls4ml.__file__)
-> PY
-> ```
-
-> You should see something like:
-<Terminal title="import check" >
-[INFO] - ENABOL imported successfully! Version: 0.1.0, URL: https://manuelblancovalentin.github.io/ENABOL/
-enabol: /Users/mbvalentin/scripts/ENABOL/enabol/__init__.py
-hls4ml: /Users/mbvalentin/scripts/ENABOL/hls4ml-trainable/hls4ml/__init__.py
-</Terminal>
-
+The `hls4ml` path should point inside the local `hls4ml-trainable` directory.
 
 ## Server Toolchain Check
 
@@ -185,6 +166,88 @@ vitis_hls -version
 
 The older compatibility profile `kona-vivado-2023_2` is still documented because `/usr/local/bin/vivado_hls` exists on `kona-ubuntu`, but it should not be the default compile path.
 
+## First hls4ml Compilation Check
+
+On a laptop without Vitis/Vivado, you can still run ENABOL conversion and hls4ml project generation:
+
+```python
+from enabol.compile import compile
+
+hls_model, hls_config = compile(
+    model=model,
+    dataset=dataset,
+    backend="Vitis",
+    toolchain="auto",
+    part="xcku035-fbva676-2-e",
+    trainable=True,
+    controller="none",
+    write=True,
+    compile_cpp=False,
+    build=False,
+    output_dir=f"../../sandbox/{model.name}_hls",
+)
+```
+
+Set `compile_cpp=True` or `build=True` only on a machine where the required local C++/HLS toolchain works. For the current trainable hardware path, use `controller="none"` for the first validation because the global-throttle controllers are not wired yet.
+
+On `kona-ubuntu`, the next validation step is to run the same notebook with:
+
+```python
+compile_cpp=True
+build=True
+csim=True
+synth=False
+```
+
+That runs the generated testbench through the configured Vitis HLS toolchain.
+
+## Advanced: creating a fresh hls4ml fork
+
+<TBox type="warning" title="You probably do not need this">
+
+This section is only for maintainers who need to create a new hls4ml fork/branch from official `fastmachinelearning/hls4ml`. Normal ENABOL users should clone the existing `hls4ml-trainable` dependency using the commands near the top of this page.
+
+</TBox>
+
+1. Fork the [hls4ml repository](https://github.com/fastmachinelearning/hls4ml) directly on GitHub.
+
+2. Clone that fork inside the ENABOL folder:
+
+```bash
+git clone git@github.com:<YOUR_USERNAME>/hls4ml.git hls4ml-trainable
+```
+
+3. Add the official repository as upstream:
+
+```bash
+cd hls4ml-trainable
+git remote add upstream https://github.com/fastmachinelearning/hls4ml.git
+git remote -v
+```
+
+You should see something like:
+
+<Terminal title="git remote -v">
+origin    git@github.com:YOUR_USERNAME/hls4ml.git (fetch)
+origin    git@github.com:YOUR_USERNAME/hls4ml.git (push)
+upstream  https://github.com/fastmachinelearning/hls4ml.git (fetch)
+upstream  https://github.com/fastmachinelearning/hls4ml.git (push)
+</Terminal>
+
+4. Fetch upstream and create the development branch:
+
+```bash
+git fetch upstream
+git checkout -b hls4ml-trainable upstream/main
+git push -u origin hls4ml-trainable
+```
+
+5. Return to ENABOL and reinstall editable dependencies:
+
+```bash
+cd ..
+python -m pip install -r requirements-dev.txt
+```
 
 
 
