@@ -122,4 +122,15 @@ Trainable signatures also affect:
 - `myproject_bridge.cpp`
 - Python bridge/predict path
 
-The first implementation can keep `predict()` inference-only by calling the top function with `train=false` and dummy loss/ground-truth buffers. Longer term, expose a separate `train_step()` interface from generated bridges.
+The first implementation keeps `predict()` inference-only by calling the top function with `train=false` and dummy loss/ground-truth buffers.
+
+For C simulation, trainable projects now get a generated trainable testbench through the same `write_test_bench()` entry point. The normal inference testbench remains unchanged for non-trainable models. When `Model.Training.Trainable` is true, the writer emits:
+
+- all samples loaded from `tb_input_features.dat` and `tb_output_predictions.dat`
+- a per-epoch shuffled order controlled by `Model.Training.Shuffle` and `ShuffleSeed`
+- an epoch loop controlled by `Model.Training.Epochs`
+- batch reset/end flags derived from rounded `Model.Training.BatchSize`
+- prediction output to the ordinary CSIM result log
+- `tb_data/trainable_loss.log` with `epoch`, `step`, `sample`, `global_step`, `loss`, and `alpha`
+
+Longer term, expose a separate `train_step()` interface from generated bridges.

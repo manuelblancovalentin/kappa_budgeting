@@ -116,6 +116,10 @@ def build_hls_config(
     learning_rate: float | None = 0.01,
     learning_rate_input: str | None = None,
     batch_size: int = 1,
+    epochs: int = 1,
+    shuffle: bool = True,
+    shuffle_seed: int = 13,
+    log_every: int = 1,
     loss: str = 'half_mse',
     controller: str | BaseController | None = None,
     precision: PrecisionDict | Mapping[str, Mapping[str, Any]] | None = None,
@@ -130,6 +134,10 @@ def build_hls_config(
         raise ValueError('ENABOL model has not been built yet.')
     if reuse_factor <= 0:
         raise ValueError('reuse_factor must be positive.')
+    if epochs <= 0:
+        raise ValueError('epochs must be positive.')
+    if log_every <= 0:
+        raise ValueError('log_every must be positive.')
 
     rounded_batch_size, batch_size_log2 = _power_of_two_batch_size(batch_size)
 
@@ -154,6 +162,10 @@ def build_hls_config(
         'BatchSize': rounded_batch_size,
         'BatchSizeRequested': int(batch_size),
         'BatchSizeLog2': batch_size_log2,
+        'Epochs': int(epochs),
+        'Shuffle': bool(shuffle),
+        'ShuffleSeed': int(shuffle_seed),
+        'LogEvery': int(log_every),
         'Loss': {
             'Kind': loss,
         },
@@ -203,6 +215,10 @@ def compile(
     learning_rate: float | None = 0.01,
     learning_rate_input: str | None = None,
     batch_size: int = 1,
+    epochs: int = 1,
+    shuffle: bool = True,
+    shuffle_seed: int = 13,
+    log_every: int = 1,
     loss: str = 'half_mse',
     controller: str | BaseController | None = None,
     precision: PrecisionDict | Mapping[str, Mapping[str, Any]] | None = None,
@@ -258,6 +274,10 @@ def compile(
         learning_rate=learning_rate,
         learning_rate_input=learning_rate_input,
         batch_size=batch_size,
+        epochs=epochs,
+        shuffle=shuffle,
+        shuffle_seed=shuffle_seed,
+        log_every=log_every,
         loss=loss,
         controller=controller,
         precision=precision,

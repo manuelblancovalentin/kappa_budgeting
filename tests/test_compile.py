@@ -48,6 +48,10 @@ def test_build_hls_config_emits_training_schema():
         trainable=True,
         learning_rate=0.025,
         batch_size=4,
+        epochs=3,
+        shuffle=False,
+        shuffle_seed=21,
+        log_every=2,
         controller='ctrl-gt-order-0',
         precision={
             '__default__': {'gradient': ap_fixed(18, 8), 'alpha': ap_fixed(16, 4)},
@@ -62,6 +66,10 @@ def test_build_hls_config_emits_training_schema():
     assert training['BatchSize'] == 4
     assert training['BatchSizeRequested'] == 4
     assert training['BatchSizeLog2'] == 2
+    assert training['Epochs'] == 3
+    assert training['Shuffle'] is False
+    assert training['ShuffleSeed'] == 21
+    assert training['LogEvery'] == 2
     assert training['Loss']['Kind'] == 'half_mse'
     assert training['Optimizer']['Kind'] == 'sgd'
     assert training['Optimizer']['LearningRate'] == 0.025

@@ -922,7 +922,7 @@ const tasks = [
         {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
       ],
     },
-    notes: 'Ready for server-side validation: generated C++ now contains the one-Dense half_mse -> Dense backpass -> SGD -> CTRL-NONE -> apply-update path. Next step is CSIM/build on kona and numerical comparison against ENABOL software traces.',
+    notes: 'Ready for server-side validation: generated C++ now contains the one-Dense half_mse -> Dense backpass -> SGD -> CTRL-NONE -> apply-update path. Trainable projects now emit config-sized local buffers, static learning rate in trainable_configN, and an epoch/shuffle CSIM testbench with tb_data/trainable_loss.log. Next step is CSIM/build on kona and numerical comparison against ENABOL software traces.',
   },
   {
     id: 'HLS4ML-021',
