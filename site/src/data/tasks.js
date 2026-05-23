@@ -904,7 +904,7 @@ const tasks = [
   {
     id: 'HLS4ML-020',
     title: 'HLS4ML - Validate minimal CTRL-NONE trainable compile path',
-    status: 'inprogress',
+    status: 'done',
     priority: 'high',
     stage: 'validation',
     target: 'csim',
@@ -915,14 +915,14 @@ const tasks = [
     created: '2026-05-22',
     due_date: null,
     start_date: '2026-05-22',
-    end_date: null,
+    end_date: '2026-05-23',
     dependsOn: ['HLS4ML-017', 'HLS4ML-019'],
     links: {
       docs: [
         {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
       ],
     },
-    notes: 'Ready for server-side validation: generated C++ now contains the one-Dense half_mse -> Dense backpass -> SGD -> CTRL-NONE -> apply-update path. Trainable projects now emit config-sized local buffers, static learning rate in trainable_configN, and an epoch/shuffle CSIM testbench with compact console progress plus tb_data/training/loss.dat and alpha.dat. Next step is CSIM/build on kona and numerical comparison against ENABOL software traces.',
+    notes: 'Done: the one-Dense half_mse -> Dense backpass -> SGD -> CTRL-NONE -> apply-update path runs in CSIM on kona and produces training loss curves. Trainable projects emit config-sized local buffers, static learning rate in trainable_configN, an epoch/shuffle CSIM testbench, compact console progress, and tb_data/training traces.',
   },
   {
     id: 'HLS4ML-021',
@@ -1315,7 +1315,7 @@ const tasks = [
         {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
       ],
     },
-    notes: 'First slice implemented: generated trainable CSIM now writes metadata-bearing comma-delimited .dat traces under tb_data/training/ for loss and alpha, with repeated epoch/sample/global_step/sample_index columns so future sparse traces can use different cadences. Broader trace selection for weights, gradients, and controller internals remains open.',
+    notes: 'Current slice implemented: generated trainable CSIM writes metadata-bearing comma-delimited .dat traces under tb_data/training/ for loss, alpha, and epoch-level weights. Repeated epoch/sample/global_step/sample_index columns allow sparse traces with different cadences. Broader trace selection for gradients and controller internals remains open.',
   },
   {
     id: 'ENB-017',
@@ -1487,7 +1487,7 @@ const tasks = [
         {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
       ],
     },
-    notes: 'Added TestbenchData.from_dir/from_trainable_dir for tb_data/training/*.dat traces and TestbenchData.plot_training() for a compact metadata panel, smoothed loss/alpha plots, global-step x-axis, and epoch top axis. FitHistory remains scoped to software training histories.',
+    notes: 'Added TestbenchData.from_dir/from_trainable_dir for tb_data/training/*.dat traces, per-trace metadata parsing, a table-style representation, sparse-cadence trace merging, and TestbenchData.plot_training() for metadata, smoothed traces, global-step x-axis, and epoch top axis. FitHistory remains scoped to software training histories.',
   },
 ];
 

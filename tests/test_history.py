@@ -6,7 +6,7 @@ from enabol.history import FitHistory
 from enabol.testbench import TestbenchData
 
 
-def write_trace(path, trace, metric, values):
+def write_trace(path, trace, metric, values, *, every=1):
     rows = [
         '# ----',
         f'# Trace: {trace}',
@@ -30,7 +30,8 @@ def write_trace(path, trace, metric, values):
         '# ---',
         f'epoch,sample,global_step,sample_index,{metric}',
     ]
-    for global_step, value in enumerate(values):
+    for row_index, value in enumerate(values):
+        global_step = row_index * every
         epoch = 1 + global_step // 2
         sample = 1 + global_step % 2
         sample_index = global_step % 2
@@ -59,6 +60,8 @@ def test_testbench_data_loads_trainable_traces(tmp_path):
     assert data.metadata_by_trace['loss']['Controller'] == 'CTRL-NONE'
     assert data['loss'].shape == (4,)
     assert data.metrics == ['alpha', 'loss']
+    assert 'TestbenchData' in repr(data)
+    assert 'loss' in repr(data)
 
 
 def test_testbench_data_plot_training_returns_figure(tmp_path):
@@ -70,5 +73,19 @@ def test_testbench_data_plot_training_returns_figure(tmp_path):
     data = TestbenchData.from_trainable_dir(trace_dir)
     fig, axes = data.plot_training(window_size=2, show=False)
 
+    assert fig is not None
+    assert len(axes) == 2
+
+
+def test_testbench_data_handles_sparse_trace_cadences(tmp_path):
+    trace_dir = tmp_path / 'tb_data' / 'training'
+    trace_dir.mkdir(parents=True)
+    write_trace(trace_dir / 'loss.dat', 'loss', 'loss', [1.0, 0.5, 0.25, 0.125])
+    write_trace(trace_dir / 'weights.dat', 'weights', 'dense0_weight_0', [0.25, 0.125], every=2)
+
+    data = TestbenchData.from_dir(tmp_path)
+    fig, axes = data.plot_training(metrics=['loss', 'dense0_weight_0'], window_size=2, show=False)
+
+    assert data.frame['dense0_weight_0'].notna().sum() == 2
     assert fig is not None
     assert len(axes) == 2

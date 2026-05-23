@@ -32,7 +32,24 @@ class TestbenchData:
         self.source_dir = Path(source_dir) if source_dir is not None else None
 
     def __repr__(self) -> str:
-        return f'TestbenchData(frame={self.frame.shape}, source_dir={self.source_dir})'
+        rows = [
+            ('Directory', str(self.source_dir) if self.source_dir is not None else '<unknown>'),
+            ('Rows', str(len(self.frame))),
+            ('Index', ', '.join(self.frame.index.names)),
+            ('Traces', ', '.join(sorted(self.metadata_by_trace)) or '<none>'),
+            ('Metrics', ', '.join(self.metrics) or '<none>'),
+        ]
+        for key in ['Project', 'Backend', 'Controller', 'Optimizer', 'Loss', 'Epochs', 'BatchSize']:
+            if key in self.metadata:
+                rows.append((key, self.metadata[key]))
+
+        key_width = max(len(key) for key, _ in rows)
+        value_width = max(len(value) for _, value in rows)
+        border = '+' + '-' * (key_width + 2) + '+' + '-' * (value_width + 2) + '+'
+        lines = ['TestbenchData', border]
+        lines.extend(f'| {key:<{key_width}} | {value:<{value_width}} |' for key, value in rows)
+        lines.append(border)
+        return '\n'.join(lines)
 
     def __getitem__(self, key: str) -> pd.Series:
         return self.frame[key]
@@ -225,8 +242,9 @@ def _rolling_statistics(series: pd.Series, window_size: int, levels: int) -> dic
 
 
 def _plot_metric(ax, frame: pd.DataFrame, metric: str, *, window_size: int, levels: int) -> None:
-    x = frame.index.get_level_values('global_step').to_numpy()
-    stats = _rolling_statistics(frame[metric], window_size=window_size, levels=levels)
+    series = frame[metric].dropna()
+    x = series.index.get_level_values('global_step').to_numpy()
+    stats = _rolling_statistics(series, window_size=window_size, levels=levels)
     color = '#1f77b4' if metric == 'loss' else '#111111'
     shade_color = '#5b6dff' if metric == 'loss' else '#ffb347'
     label = 'Loss' if metric == 'loss' else ('Alpha' if metric == 'alpha' else metric)
