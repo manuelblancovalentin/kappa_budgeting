@@ -23,7 +23,8 @@ notebooks under `workspace/`.
 ## Clone the repository
 
 ```bash
-git clone https://github.com/manuelblancovalentin/ENABOL
+cd ~
+git clone git@github.com:manuelblancovalentin/kappa_budgeting.git ENABOL
 cd ENABOL
 ```
 
