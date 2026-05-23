@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from math import ceil, log2
 from pathlib import Path
+import sys
 from typing import Any, Literal
 
 import tensorflow as tf
@@ -18,6 +19,11 @@ from .toolchain import toolchain_environment
 
 
 TrainableSpec = bool | int | Sequence[str | int]
+
+
+def _enabol_version() -> str:
+    enabol_module = sys.modules.get('enabol')
+    return str(getattr(enabol_module, '__version__', 'unknown'))
 
 
 def _normalize_learning_rate(learning_rate: float | None) -> float | None:
@@ -166,6 +172,15 @@ def build_hls_config(
         'Shuffle': bool(shuffle),
         'ShuffleSeed': int(shuffle_seed),
         'LogEvery': int(log_every),
+        'Trace': {
+            'Loss': True,
+            'Alpha': True,
+        },
+        'Metadata': {
+            'GeneratedBy': 'enabol+hls4ml-trainable',
+            'EnabolVersion': _enabol_version(),
+            'Hls4mlTrainableVersion': '0.0.0a',
+        },
         'Loss': {
             'Kind': loss,
         },

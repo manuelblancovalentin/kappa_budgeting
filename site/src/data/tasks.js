@@ -922,7 +922,7 @@ const tasks = [
         {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
       ],
     },
-    notes: 'Ready for server-side validation: generated C++ now contains the one-Dense half_mse -> Dense backpass -> SGD -> CTRL-NONE -> apply-update path. Trainable projects now emit config-sized local buffers, static learning rate in trainable_configN, and an epoch/shuffle CSIM testbench with tb_data/trainable_loss.log. Next step is CSIM/build on kona and numerical comparison against ENABOL software traces.',
+    notes: 'Ready for server-side validation: generated C++ now contains the one-Dense half_mse -> Dense backpass -> SGD -> CTRL-NONE -> apply-update path. Trainable projects now emit config-sized local buffers, static learning rate in trainable_configN, and an epoch/shuffle CSIM testbench with compact console progress plus tb_data/training/loss.dat and alpha.dat. Next step is CSIM/build on kona and numerical comparison against ENABOL software traces.',
   },
   {
     id: 'HLS4ML-021',
@@ -1297,17 +1297,17 @@ const tasks = [
   {
     id: 'HLS4ML-037',
     title: 'HLS4ML - Add optional trainable CSIM trace logging',
-    status: 'todo',
+    status: 'inprogress',
     priority: 'low',
     stage: 'validation',
     target: 'csim',
     action: 'development',
     summaryTags: ['hls4ml', 'trace', 'debug', 'csim'],
     timeline: true,
-    owners: [],
+    owners: ['mbvalentin'],
     created: '2026-05-22',
     due_date: null,
-    start_date: null,
+    start_date: '2026-05-23',
     end_date: null,
     dependsOn: ['HLS4ML-020'],
     links: {
@@ -1315,7 +1315,7 @@ const tasks = [
         {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
       ],
     },
-    notes: 'Reintroduce selected old trainable/autograd logging only as optional CSIM instrumentation under the trainable structure. Keep synthesis path clean and avoid hardwired tb_data side effects in kernels.',
+    notes: 'First slice implemented: generated trainable CSIM now writes metadata-bearing comma-delimited .dat traces under tb_data/training/ for loss and alpha, with repeated epoch/sample/global_step/sample_index columns so future sparse traces can use different cadences. Broader trace selection for weights, gradients, and controller internals remains open.',
   },
   {
     id: 'ENB-017',

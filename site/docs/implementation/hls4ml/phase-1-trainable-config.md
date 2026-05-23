@@ -35,6 +35,8 @@ The model-level block should live under `Model.Training` in the hls4ml config. I
 | `Trainable` | Enables training code generation. |
 | `BatchSize`, `BatchSizeRequested`, `BatchSizeLog2` | Declares gradient-accumulation cadence and the shift used for power-of-two batch averaging. |
 | `Epochs`, `Shuffle`, `ShuffleSeed`, `LogEvery` | Declares trainable CSIM testbench behavior without changing firmware top-level IO. |
+| `Trace` | Declares first trainable CSIM trace switches. The first implementation emits loss and alpha traces. |
+| `Metadata` | Carries generator/version metadata into generated trainable trace files. |
 | `Loss` | Declares loss kind, endpoint mapping, ground-truth ports, and loss scale convention. |
 | `Optimizer` | Declares optimizer kind, learning-rate policy, batch-size policy, and update accumulation behavior. |
 | `Controller` | Declares global throttling controller kind, alpha rails, state precisions, curvature metrics, and optional safety-budget coupling. |
@@ -60,6 +62,13 @@ HLSConfig:
       Shuffle: true
       ShuffleSeed: 13
       LogEvery: 1
+      Trace:
+        Loss: true
+        Alpha: true
+      Metadata:
+        GeneratedBy: enabol+hls4ml-trainable
+        EnabolVersion: 0.1.0
+        Hls4mlTrainableVersion: 0.0.0a
       Loss:
         Kind: half_mse
         Output: output
@@ -199,6 +208,7 @@ This is the first concrete handoff from config into hls4ml graph metadata. Later
 | [HLS4ML-003](/docs/status/tasks?query=HLS4ML-003) | 2026-05-22 | `hls4ml/model/graph.py`, `hls4ml/model/layers.py`, `test/pytest/test_trainable_config.py` | Added merged trainable precision resolution, converted trainable precision lookup, and `Layer._set_trainable_attributes()` so configured fields become graph `NamedType` attributes like `grad_in_t`, `raw_update_t`, and `alpha_t`. |
 | [HLS4ML-012](/docs/status/tasks?query=HLS4ML-012) | 2026-05-22 | `enabol/compile.py`, `enabol/precision.py`, `tests/test_compile.py`, `tests/test_precision.py` | Added ENABOL-side `compile(...)`, hls4ml config generation, `Model.Training` emission, semantic precision translation, default trainable precision fill, dataset testbench staging, and write-only hls4ml project generation. |
 | [HLS4ML-020](/docs/status/tasks?query=HLS4ML-020) | 2026-05-23 | `hls4ml/model/graph.py`, `enabol/compile.py`, `test/pytest/test_trainable_config.py`, `tests/test_compile.py` | Added trainable testbench control fields: `Epochs`, `Shuffle`, `ShuffleSeed`, and `LogEvery`. Static learning rate remains an internal optimizer setting and is emitted into the generated trainable config struct rather than passed as a top-level input. |
+| [HLS4ML-037](/docs/status/tasks?query=HLS4ML-037) | 2026-05-23 | `hls4ml/model/graph.py`, `enabol/compile.py` | Added first trace metadata fields under `Model.Training.Trace` and `Model.Training.Metadata` so generated trainable logs identify generator, versions, host/user, run date, and training hyperparameters. |
 
 ## Exit Criteria
 

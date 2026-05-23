@@ -70,6 +70,10 @@ def test_build_hls_config_emits_training_schema():
     assert training['Shuffle'] is False
     assert training['ShuffleSeed'] == 21
     assert training['LogEvery'] == 2
+    assert training['Trace'] == {'Loss': True, 'Alpha': True}
+    assert training['Metadata']['GeneratedBy'] == 'enabol+hls4ml-trainable'
+    assert training['Metadata']['EnabolVersion'] != 'unknown'
+    assert training['Metadata']['Hls4mlTrainableVersion'] == '0.0.0a'
     assert training['Loss']['Kind'] == 'half_mse'
     assert training['Optimizer']['Kind'] == 'sgd'
     assert training['Optimizer']['LearningRate'] == 0.025

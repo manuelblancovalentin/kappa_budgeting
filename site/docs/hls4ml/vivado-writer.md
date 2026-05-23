@@ -131,6 +131,16 @@ For C simulation, trainable projects now get a generated trainable testbench thr
 - an epoch loop controlled by `Model.Training.Epochs`
 - batch reset/end flags derived from rounded `Model.Training.BatchSize`
 - prediction output to the ordinary CSIM result log
-- `tb_data/trainable_loss.log` with `epoch`, `step`, `sample`, `global_step`, `loss`, and `alpha`
+- compact console progress logs such as `Epoch [1/2] - sample 1/128: loss 2.02597, alpha: 1`
+- metadata-bearing trainable traces under `tb_data/training/`
+
+The first trainable trace files are:
+
+| File | Columns |
+|---|---|
+| `tb_data/training/loss.dat` | `epoch,sample,global_step,sample_index,loss` |
+| `tb_data/training/alpha.dat` | `epoch,sample,global_step,sample_index,alpha` |
+
+Each trace file repeats the index columns because future traces will not all have the same cadence. For example, loss may be logged every sample while weights are logged once per epoch.
 
 Longer term, expose a separate `train_step()` interface from generated bridges.
