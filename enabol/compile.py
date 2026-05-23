@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from math import ceil, log2
 from pathlib import Path
 from typing import Any, Literal
 
@@ -46,6 +47,14 @@ def _optimizer_config(optimizer: str, learning_rate: float | None, learning_rate
         'LearningRate': _normalize_learning_rate(learning_rate),
         'LearningRateInput': learning_rate_input,
     }
+
+
+def _power_of_two_batch_size(batch_size: int) -> tuple[int, int]:
+    if batch_size <= 0:
+        raise ValueError('batch_size must be positive.')
+
+    batch_size_log2 = int(ceil(log2(batch_size))) if batch_size > 1 else 0
+    return 1 << batch_size_log2, batch_size_log2
 
 
 def _resolve_trainable_layers(layer_names: Sequence[str], trainable: TrainableSpec) -> dict[str, bool]:
@@ -119,10 +128,10 @@ def build_hls_config(
     keras_model = model.model if isinstance(model, BaseModel) else model
     if keras_model is None:
         raise ValueError('ENABOL model has not been built yet.')
-    if batch_size <= 0:
-        raise ValueError('batch_size must be positive.')
     if reuse_factor <= 0:
         raise ValueError('reuse_factor must be positive.')
+
+    rounded_batch_size, batch_size_log2 = _power_of_two_batch_size(batch_size)
 
     precision_dict = ensure_precision_dict(precision)
     if precision_dict is not None:
@@ -142,7 +151,9 @@ def build_hls_config(
     model_config['TraceOutput'] = trace
     model_config['Training'] = {
         'Trainable': bool(trainable),
-        'BatchSize': int(batch_size),
+        'BatchSize': rounded_batch_size,
+        'BatchSizeRequested': int(batch_size),
+        'BatchSizeLog2': batch_size_log2,
         'Loss': {
             'Kind': loss,
         },

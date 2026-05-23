@@ -75,7 +75,7 @@ hls_model, hls_config = compile(
     trainable=True,
     optimizer="sgd",
     learning_rate=0.01,
-    batch_size=1,
+    batch_size=1,              # rounded up to a power of two in Model.Training.BatchSize
     loss="half_mse",
     controller="ctrl-gt-order-0",
     precision=precision_dict,
@@ -119,6 +119,8 @@ The bridge expands these semantic fields into hls4ml trainable fields:
 | `dense0.accumulator` | `gradient_accum`, `controller_metric` |
 
 If no `PrecisionDict` is passed, the bridge emits conservative placeholder trainable defaults. Those defaults are only for bring-up; automatic precision inference is tracked separately.
+
+Batch size is emitted as a power-of-two hardware cadence. `enabol.compile.build_hls_config(...)` rounds the requested `batch_size` up, writes the rounded value to `Model.Training.BatchSize`, records the original value in `Model.Training.BatchSizeRequested`, and writes `Model.Training.BatchSizeLog2` for shift-based gradient averaging in trainable kernels.
 
 ## Bridge Change Log
 

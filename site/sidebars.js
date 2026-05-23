@@ -31,7 +31,7 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: '🟣 hls4ml',
+      label: '♻️ hls4ml',
       items: [
         'hls4ml/index',
         'hls4ml/hlsconfig',
