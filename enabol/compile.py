@@ -302,17 +302,25 @@ def compile(
             **convert_kwargs,
         )
 
-        if write and not compile_cpp and not build:
+        wrote_project = False
+
+        if write and not compile_cpp:
             if verbose:
                 print('[INFO] - Writing hls4ml project.')
             hls_model.write()
+            wrote_project = True
 
         if compile_cpp:
             if verbose:
                 print('[INFO] - Compiling generated C++ shared library.')
             hls_model.compile()
+            wrote_project = True
 
         if build:
+            if not wrote_project:
+                if verbose:
+                    print('[INFO] - Writing hls4ml project before HLS build.')
+                hls_model.write()
             if verbose:
                 print('[INFO] - Running hls4ml HLS build.')
             hls_model.build(

@@ -91,6 +91,8 @@ hls_model, hls_config = compile(
 
 `toolchain="auto"` is applied only when `build=True`. This lets Mac notebooks generate and inspect the hls4ml project without failing on Kona-only paths. On Kona, setting `build=True` activates the default 2024.1 toolchain profile before hls4ml calls `vitis-run`.
 
+`build=True` also forces a project write before launching Vitis. This is necessary because ENABOL stages dataset files under the output directory before conversion; that makes the directory exist, so hls4ml's native `ModelGraph.build()` will not auto-write `build_prj.tcl` by directory-existence alone.
+
 For the first notebook trace, use an explicit `PrecisionDict`:
 
 ```python
@@ -153,6 +155,7 @@ The current logging is intentionally testbench-side. The firmware kernels stay c
 | [HLS4ML-012](/docs/status/tasks?query=HLS4ML-012) | 2026-05-22 | `enabol/compile.py`, `tests/test_compile.py` | Added default trainable precision emission, expanded semantic precision aliases, and changed `trainable=True` to apply only to parameterized layers such as Dense. |
 | [HLS4ML-012](/docs/status/tasks?query=HLS4ML-012) | 2026-05-22 | `enabol/precision.py`, `enabol/compile.py`, `tests/test_precision.py` | Moved hls4ml precision translation out of `compile.py`; `compile.py` now calls `apply_hls_precision_config(...)` from `precision.py`. |
 | [HLS4ML-020](/docs/status/tasks?query=HLS4ML-020) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `hls4ml/model/graph.py`, `enabol/compile.py`, `test/pytest/test_trainable_config.py`, `tests/test_compile.py` | Replaced literal trainable buffer dimensions with generated config constants, moved static learning rate into the trainable config struct, and added the generated trainable epoch/shuffle/loss-log CSIM testbench. |
+| [HLS4ML-020](/docs/status/tasks?query=HLS4ML-020) | 2026-05-23 | `enabol/compile.py` | Fixed the bridge build path so `build=True` writes the hls4ml project before Vitis runs, even when dataset staging already created the output directory. |
 
 The first validation target should be:
 
