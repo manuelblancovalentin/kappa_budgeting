@@ -138,6 +138,7 @@ const sidebars = {
         'experiments/exp-000a-global-throttle-float-lin1',
         'experiments/exp-000b-global-throttle-qfx-lin1',
         'experiments/exp-001-global-throttle-parameter-sweep',
+        'experiments/csim-001-global-throttle-csim-sanity',
         // 'experiments/experiment-template',
       ],
     },
