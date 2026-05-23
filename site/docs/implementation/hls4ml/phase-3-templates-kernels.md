@@ -41,6 +41,26 @@ apply update with scalar alpha
 
 This gives us a correctness baseline before adding controller complexity.
 
+## Static Template Tree
+
+The first concrete headers now live under:
+
+```text
+hls4ml/templates/vivado/trainable
+├── backprop
+│   └── nnet_dense_backprop.h
+├── common
+│   └── trainable_trace.h
+├── controllers
+│   └── global_throttle.h
+├── losses
+│   └── mse.h
+└── optimizers
+    └── sgd.h
+```
+
+See [Trainable Vivado Templates](./templates/index.md) for the file-by-file implementation notes.
+
 ## Template Policy
 
 Templates should consume config structs and layer attributes. They should not inspect arbitrary strings emitted by earlier templates.

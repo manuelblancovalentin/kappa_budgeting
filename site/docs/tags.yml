@@ -148,6 +148,36 @@ template:
   permalink: /template
   description: Template pages.
 
+templates:
+  label: Templates
+  permalink: /templates
+  description: Pages tagged Templates.
+
+trainable:
+  label: Trainable
+  permalink: /trainable
+  description: Pages tagged Trainable.
+
+trace:
+  label: Trace
+  permalink: /trace
+  description: Pages tagged Trace.
+
+backprop:
+  label: Backprop
+  permalink: /backprop
+  description: Pages tagged Backprop.
+
+loss:
+  label: Loss
+  permalink: /loss
+  description: Pages tagged Loss.
+
+sgd:
+  label: SGD
+  permalink: /sgd
+  description: Pages tagged SGD.
+
 architecture:
   label: Architecture
   permalink: /architecture
