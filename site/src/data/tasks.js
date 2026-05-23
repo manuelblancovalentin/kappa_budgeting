@@ -1315,7 +1315,7 @@ const tasks = [
         {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
       ],
     },
-    notes: 'Current slice implemented: generated trainable CSIM writes metadata-bearing comma-delimited .dat traces under tb_data/training/ for loss, alpha, and epoch-level weights. Repeated epoch/sample/global_step/sample_index columns allow sparse traces with different cadences. Broader trace selection for gradients and controller internals remains open.',
+    notes: 'Current slice implemented: generated trainable CSIM writes metadata-bearing comma-delimited .dat traces under tb_data/training/ for loss, alpha, and per-layer epoch-level parameter traces such as dense0/weights.dat and dense0/biases.dat. Repeated epoch/sample/global_step/sample_index columns allow sparse traces with different cadences. Broader trace selection for gradients and controller internals remains open.',
   },
   {
     id: 'ENB-017',
@@ -1487,7 +1487,7 @@ const tasks = [
         {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
       ],
     },
-    notes: 'Added TestbenchData.from_dir/from_trainable_dir for tb_data/training/*.dat traces, per-trace metadata parsing, a table-style representation, sparse-cadence trace merging, and TestbenchData.plot_training() for metadata, smoothed traces, global-step x-axis, and epoch top axis. FitHistory remains scoped to software training histories.',
+    notes: 'Added TestbenchData.from_dir/from_trainable_dir for recursive tb_data/training/*.dat traces, per-trace metadata parsing, a table-style representation, sparse-cadence trace merging, namespaced nested trace columns, and TestbenchData.plot_training() for metadata, smoothed traces, global-step x-axis, and epoch top axis. FitHistory remains scoped to software training histories.',
   },
 ];
 

@@ -55,7 +55,8 @@ The first files are:
 |---|---|
 | `loss.dat` | every logged training sample | `loss` |
 | `alpha.dat` | every logged training sample | `alpha` |
-| `weights.dat` | once per epoch | one column per generated trainable weight and bias |
+| `<layer>/weights.dat` | once per epoch | one column per flattened matrix element, named `weight_<input>_<output>` |
+| `<layer>/biases.dat` | once per epoch | one column per bias element, named `bias_<output>` |
 
 Each file repeats the same index columns:
 
@@ -63,9 +64,11 @@ Each file repeats the same index columns:
 epoch,sample,global_step,sample_index,loss
 ```
 
-The repeated index columns are intentional. Traces are allowed to have different cadences. For example, `loss.dat` and `alpha.dat` are dense per-sample traces, while `weights.dat` is written only once per epoch.
+The repeated index columns are intentional. Traces are allowed to have different cadences. For example, `loss.dat` and `alpha.dat` are dense per-sample traces, while per-layer parameter traces are written only once per epoch.
 
-`TestbenchData.from_dir(...)` outer-merges trace files on the shared index. Sparse traces therefore become columns with `NaN` values on steps where that trace did not write a row. `plot_training(...)` drops missing values per metric before computing the rolling mean and quantile bands, so the rolling window is expressed in available samples for that metric, not in global train steps. This keeps dense loss plots and sparse weight plots valid in the same object.
+Dense weights use the same row-major flattening convention as hls4ml dense kernels: `weight_<input>_<output>` maps to flat index `input * n_out + output`.
+
+`TestbenchData.from_dir(...)` recursively discovers trace files and outer-merges them on the shared index. Sparse traces therefore become columns with `NaN` values on steps where that trace did not write a row. Top-level traces keep their natural metric names such as `loss` and `alpha`; nested traces are namespaced by path, for example `dense0.weights.weight_0_0` and `dense0.biases.bias_0`. `plot_training(...)` drops missing values per metric before computing the rolling mean and quantile bands, so the rolling window is expressed in available samples for that metric, not in global train steps. This keeps dense loss plots and sparse weight plots valid in the same object.
 
 ## Usage
 
@@ -97,7 +100,7 @@ Trace comments are parsed into dictionaries:
 | Attribute | Meaning |
 |---|---|
 | `tb.metadata` | Metadata from the first trace file, normally enough for display. |
-| `tb.metadata_by_trace` | Metadata keyed by trace name, for example `loss`, `alpha`, and `weights`. |
+| `tb.metadata_by_trace` | Metadata keyed by trace name, for example `loss`, `alpha`, `dense0/weights`, and `dense0/biases`. |
 
 The `TestbenchData` representation prints a compact table with the directory, traces, metrics, and key run metadata:
 
@@ -106,8 +109,8 @@ TestbenchData
 +------------+--------------------------------+
 | Directory  | .../tb_data/training           |
 | Rows       | 2002                           |
-| Traces     | alpha, loss, weights           |
-| Metrics    | alpha, loss, dense0_weight_0   |
+| Traces     | alpha, dense0/biases, dense0/weights, loss |
+| Metrics    | alpha, dense0.weights.weight_0_0, loss     |
 +------------+--------------------------------+
 ```
 
@@ -120,9 +123,15 @@ TestbenchData
 | Metadata | Compact run metadata parsed from trace comments. |
 | Loss | Rolling mean and quantile bands on a log scale. |
 | Alpha | Rolling mean and quantile bands for the controller output. |
-| Other requested metrics | Rolling mean and quantile bands after dropping missing sparse-trace rows. |
+| Parameter metrics | Rolling mean and quantile bands for selected scalar parameter elements, after dropping missing sparse-trace rows. |
 
-The bottom x-axis is `global_step`. The top x-axis of the first metric panel marks epoch starts.
+The bottom x-axis is `global_step`. The top x-axis of the first metric panel marks epoch starts. By default, `plot_training()` plots every loaded scalar metric. Pass `metrics=[...]` to inspect one weight or a smaller subset:
+
+```python
+tb.plot_training(metrics=["loss", "dense0.weights.weight_0_0"], window_size=1)
+```
+
+For larger networks, scalar traces are the data backend. The more useful visual views will be layered on top: per-layer mean/std envelopes, before/after histograms, and weight-matrix heatmaps.
 
 Use `show=False` in tests or scripts that need the figure object:
 
@@ -135,4 +144,4 @@ fig, axes = tb.plot_training(show=False)
 | Task | Date | Files | Summary |
 |---|---|---|---|
 | [ENB-024](/docs/status/tasks?query=ENB-024) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Added `TestbenchData.from_dir(...)`, metadata parsing, merged trace dataframe storage, and `plot_training(...)` for hls4ml trainable CSIM traces. |
-| [HLS4ML-037](/docs/status/tasks?query=HLS4ML-037) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `enabol/testbench.py`, `tests/test_history.py` | Added epoch-level `weights.dat` support, sparse-trace plotting, and a table-style `TestbenchData` representation. |
+| [HLS4ML-037](/docs/status/tasks?query=HLS4ML-037) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `enabol/testbench.py`, `tests/test_history.py` | Added per-layer epoch-level parameter traces, sparse nested-trace loading, default all-metric plotting, and a table-style `TestbenchData` representation. |

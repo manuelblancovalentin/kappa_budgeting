@@ -67,7 +67,7 @@ class TestbenchData:
         """
 
         trace_dir = _resolve_training_trace_dir(path)
-        trace_files = sorted(trace_dir.glob('*.dat'))
+        trace_files = sorted(trace_dir.rglob('*.dat'))
         if not trace_files:
             raise FileNotFoundError(f'No trainable trace .dat files found in {trace_dir}.')
 
@@ -80,9 +80,11 @@ class TestbenchData:
             if missing:
                 raise ValueError(f'Trace file {trace_file} is missing index columns: {missing}')
             frame = frame.set_index(INDEX_COLUMNS)
+            trace_name = metadata.get('Trace', _trace_name_from_path(trace_dir, trace_file))
+            frame = _namespace_trace_columns(frame, trace_name, trace_file.parent == trace_dir)
             frames.append(frame)
-            trace_name = metadata.get('Trace', trace_file.stem)
             metadata['_comments'] = '\n'.join(comments)
+            metadata['_path'] = str(trace_file.relative_to(trace_dir))
             metadata_by_trace[trace_name] = metadata
 
         merged = pd.concat(frames, axis=1).sort_index()
@@ -96,7 +98,7 @@ class TestbenchData:
 
     def plot_training(
         self,
-        metrics: list[str] | tuple[str, ...] = ('loss', 'alpha'),
+        metrics: list[str] | tuple[str, ...] | None = None,
         *,
         window_size: int = 30,
         levels: int = 3,
@@ -105,6 +107,8 @@ class TestbenchData:
         figsize: tuple[float, float] | None = None,
         show: bool = True,
     ):
+        if metrics is None:
+            metrics = list(self.frame.columns)
         metrics = [metric for metric in metrics if metric in self.frame.columns]
         if not metrics:
             raise ValueError(f'None of the requested metrics are available. Available metrics: {list(self.frame.columns)}')
@@ -152,14 +156,26 @@ class TestbenchData:
 def _resolve_training_trace_dir(path: str | Path) -> Path:
     root = Path(path)
     candidates = [
-        root,
-        root / 'training',
         root / 'tb_data' / 'training',
+        root / 'training',
+        root,
     ]
     for candidate in candidates:
-        if candidate.is_dir() and any(candidate.glob('*.dat')):
+        if candidate.is_dir() and any(candidate.rglob('*.dat')):
             return candidate
     raise FileNotFoundError(f'Could not find trainable trace .dat files under {root}.')
+
+
+def _trace_name_from_path(trace_dir: Path, trace_file: Path) -> str:
+    return trace_file.relative_to(trace_dir).with_suffix('').as_posix()
+
+
+def _namespace_trace_columns(frame: pd.DataFrame, trace_name: str, is_top_level: bool) -> pd.DataFrame:
+    if is_top_level:
+        return frame
+
+    prefix = trace_name.replace('/', '.')
+    return frame.rename(columns={column: f'{prefix}.{column}' for column in frame.columns})
 
 
 def _read_metadata(path: Path) -> tuple[list[str], dict[str, str]]:

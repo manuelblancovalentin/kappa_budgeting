@@ -144,7 +144,7 @@ The generated trainable testbench:
 - writes predictions to the normal CSIM result log
 - writes loss to `tb_data/training/loss.dat`
 - writes alpha to `tb_data/training/alpha.dat`
-- writes trainable weights and biases once per epoch to `tb_data/training/weights.dat`
+- writes trainable weights and biases once per epoch to per-layer files under `tb_data/training/<layer>/`
 - prints compact progress every `Model.Training.LogEvery` global train steps
 
 The current logging is intentionally testbench-side. The firmware kernels stay clean except for the optional `HLS4ML_TRAINABLE_TRACE` hooks already fenced out of synthesis.
@@ -171,7 +171,16 @@ epoch,sample,global_step,sample_index,loss
 1,1,0,37,2.02597
 ```
 
-`epoch` and `sample` are one-based for readability. `global_step` and `sample_index` remain zero-based because they are counters and indexes into the original `.dat` dataset files. Repeating these columns in every trace file is deliberate: traces can be sparse. The current path logs loss and alpha every sample, and logs weights once per epoch with `sample_index=-1` because that row describes epoch-end model state rather than a single dataset row.
+Layer-local parameter traces live below the global traces:
+
+```text
+tb_data/training/dense0/weights.dat
+tb_data/training/dense0/biases.dat
+```
+
+Dense weight columns are named `weight_<input>_<output>` and follow the same row-major flattening as hls4ml dense kernels: flat index `input * n_out + output`.
+
+`epoch` and `sample` are one-based for readability. `global_step` and `sample_index` remain zero-based because they are counters and indexes into the original `.dat` dataset files. Repeating these columns in every trace file is deliberate: traces can be sparse. The current path logs loss and alpha every sample, and logs parameter traces once per epoch with `sample_index=-1` because that row describes epoch-end model state rather than a single dataset row.
 
 The generated console output is similarly compact:
 
@@ -188,7 +197,7 @@ tb = TestbenchData.from_dir(hls_model.config.get_output_dir())
 tb.plot_training(window_size=30)
 ```
 
-`TestbenchData.from_dir(...)` accepts the hls4ml output directory, `tb_data`, or `tb_data/training`. The returned object keeps the merged dataframe at `tb.frame`, parsed display metadata at `tb.metadata`, and per-trace metadata at `tb.metadata_by_trace`.
+`TestbenchData.from_dir(...)` accepts the hls4ml output directory, `tb_data`, or `tb_data/training`. The returned object recursively reads nested traces, keeps the merged dataframe at `tb.frame`, parsed display metadata at `tb.metadata`, and per-trace metadata at `tb.metadata_by_trace`. Top-level trace columns remain `loss` and `alpha`; nested parameter traces are namespaced by path, such as `dense0.weights.weight_0_0` and `dense0.biases.bias_0`.
 
 The generated metadata comments are emitted by the generated C++ CSIM testbench. Static values such as project, backend, controller, optimizer, loss, and learning rate are injected by the hls4ml writer when it writes `*_test.cpp`. Runtime values such as `User`, `Host`, and `Date` are read by that C++ testbench during CSIM from the process environment and local clock.
 
@@ -205,8 +214,8 @@ Controller IDs are normalized before trainable writer dispatch. For the currentl
 | [HLS4ML-020](/docs/status/tasks?query=HLS4ML-020) | 2026-05-23 | `enabol/compile.py` | Fixed the bridge build path so `build=True` writes the hls4ml project before Vitis runs, even when dataset staging already created the output directory. |
 | [HLS4ML-037](/docs/status/tasks?query=HLS4ML-037) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `hls4ml/model/graph.py`, `enabol/compile.py` | Replaced verbose prediction printing with compact progress logs and added metadata-bearing `.dat` traces under `tb_data/training/` for loss and alpha. |
 | [ENB-024](/docs/status/tasks?query=ENB-024) | 2026-05-23 | `enabol/testbench.py`, `enabol/history.py`, `tests/test_history.py` | Added ENABOL-side testbench trace loading and plotting through `TestbenchData.from_dir(...)` and `TestbenchData.plot_training(...)`, while keeping `FitHistory` scoped to software training. |
-| [HLS4ML-037](/docs/status/tasks?query=HLS4ML-037) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `test/pytest/test_trainable_config.py` | Added epoch-level `weights.dat` traces and normalized accepted no-controller spellings before writer dispatch. |
-| [ENB-024](/docs/status/tasks?query=ENB-024) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Added sparse-trace plotting support, table-style `TestbenchData.__repr__`, and per-trace metadata storage. |
+| [HLS4ML-037](/docs/status/tasks?query=HLS4ML-037) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `test/pytest/test_trainable_config.py` | Added per-layer epoch-level parameter traces, fixed testbench weight visibility through `extern`, and normalized accepted no-controller spellings before writer dispatch. |
+| [ENB-024](/docs/status/tasks?query=ENB-024) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Added recursive nested-trace loading, sparse-trace plotting support, table-style `TestbenchData.__repr__`, and per-trace metadata storage. |
 
 The first validation target should be:
 
