@@ -22,14 +22,14 @@ nnet::mse<CONFIG_T>(prediction, ground_truth, loss, loss_grad);
 nnet::half_mse<CONFIG_T>(prediction, ground_truth, loss, loss_grad);
 ```
 
-Both functions use the same `mse_core` implementation with compile-time numerator/denominator factors.
+Both functions use the same `mse_core` implementation with compile-time shifts. The template intentionally avoids denominator division because the first supported scalings are powers of two.
 
 ## Scaling
 
 | Function | Scalar loss | Gradient seed |
 |---|---|---|
-| `mse` | `sum((y_hat - y)^2)` | `2 * (y_hat - y)` |
-| `half_mse` | `0.5 * sum((y_hat - y)^2)` | `y_hat - y` |
+| `mse` | `sum((y_hat - y)^2)` | `(y_hat - y) << 1` |
+| `half_mse` | `sum((y_hat - y)^2) >> 1` | `y_hat - y` |
 
 For the first hardware/software trace comparison, `half_mse` is the cleaner default because its output gradient is exactly the prediction error.
 
@@ -44,4 +44,3 @@ The generated config struct must provide:
 - `grad_out_t`.
 
 When trainable tracing is enabled, the writer must also emit trace names for prediction, ground truth, loss, and loss gradient.
-

@@ -59,7 +59,7 @@ hls4ml/templates/vivado/trainable
     └── sgd.h
 ```
 
-See [Trainable Vivado Templates](./templates/index.md) for the file-by-file implementation notes.
+See [Trainable Vivado Templates](../../hls4ml/templates/index.md) for the file-by-file implementation notes.
 
 ## Template Policy
 

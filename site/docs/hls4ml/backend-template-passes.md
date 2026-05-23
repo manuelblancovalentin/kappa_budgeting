@@ -89,6 +89,8 @@ Use one trainable umbrella folder:
 
 The static headers should be generic and template-driven. Per-model constants and typedefs should come from generated config structs.
 
+The concrete file-by-file notes for the first static header tree live under this sidebar section in [Trainable Vivado Templates](./templates/index.md).
+
 ## Backward Function Shape
 
 For a dense layer, the generated call should be resolved by the template pass:
