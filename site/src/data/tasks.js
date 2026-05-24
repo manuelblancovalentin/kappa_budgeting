@@ -1319,13 +1319,13 @@ const tasks = [
   },
   {
     id: 'ENB-017',
-    title: 'Run CSIM validation with global throttle (CTRL-GT-ORDER-0)',
+    title: 'Run CSIM validation with global throttle (CTRL-GT-ORDER-0, division-free fix)',
     status: 'todo',
     priority: 'high',
     stage: 'validation',
     target: 'csim',
     action: 'testing',
-    summaryTags: ['csim', 'controller', 'fixed-point', 'GT0'],
+    summaryTags: ['csim', 'controller', 'fixed-point', 'GT0', 'division-free'],
     timeline: true,
     owners: ['mbvalentin'],
     created: '2026-05-20',
@@ -1335,10 +1335,10 @@ const tasks = [
     dependsOn: ['HLS4ML-021'],
     links: {
       docs: [
-        {label: 'CSIM-001', href: '/docs/experiments/csim-001-global-throttle-csim-sanity'},
+        {label: 'CTRL-GT-ORDER-0', href: '/docs/controllers/ctrl-gt-order-0'},
       ],
     },
-    notes: 'CSIM-001 validated CTRL-NONE (α=1). CSIM-002 must validate CTRL-GT-ORDER-0: compile the 1-Dense model with Kind: CTRL-GT-ORDER-0, run CSIM, confirm α < 1 when curvature is high, α ≈ 1 when curvature is low, loss drops, and 0 errors on training output.',
+    notes: 'GT-0 CSIM failed: two ap_fixed divisions (sqrt + divide) crashed CSIM at step 1. Fixed by replacing α = χ/(ηC+ε) with division-free inequality search α²·η²·||ΔG||² ≤ χ²·(||Δθ||² + ε²). Candidate table of 11 binary-fraction α values searched in descending order. Validate: compile 1-Dense model with Kind: CTRL-GT-ORDER-0, run CSIM, confirm α selection, no CSIM errors, loss drops.',
   },
   {
     id: 'ENB-018',

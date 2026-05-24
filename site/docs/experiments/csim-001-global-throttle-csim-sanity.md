@@ -492,6 +492,20 @@ In this case no controller was used, but the learning rate is not too high, and 
 
 --- 
 
+## Results: CTRL-GT-0
+The results for using the fast controller CTRL-GT-0 are shown in the plot below. We can see that the loss is decreasing and converging to a low value, which confirms that our simulation is working and that our compilation for this case is also okay. Also, note how the $\alpha$ value starts at $0$ (as expected), but then jumps quickly to $1$ and stays there.
+
+<Figure 
+  id="fig-loss-training-controller-ctrl-gt-0"
+  src="/img/results/pipe000_first_compilation_pipeline_gt_0_loss.png" 
+  alt="Loss results for the CTRL-GT-0 controller"
+  maxWidth="100%"
+  label="Figure 6"
+  caption="Loss results for the case where the CTRL-GT-0 controller is used." 
+/>
+
+---
+
 ## Conclusions
 
 

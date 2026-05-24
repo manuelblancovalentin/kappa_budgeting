@@ -2,11 +2,11 @@
 title: "CTRL-GT-ORDER-1"
 sidebar_label: "CTRL-GT-ORDER-1"
 status:
-  - planned
+  - inprogress
 tags:
   - controller
   - global-throttle
-last_modified: 2026-05-18
+last_modified: 2026-05-23
 author: mbvalentin
 ---
 # CTRL-GT-ORDER-1
@@ -15,29 +15,21 @@ author: mbvalentin
 
 <TBox type="summary" title="Purpose">
 
-`CTRL-GT-ORDER-1` treats $\alpha_t$ as a first-order dynamic state. It should smooth the instantaneous jumps of `CTRL-GT-ORDER-0`.
+`CTRL-GT-ORDER-1` treats $\alpha_t$ as a first-order dynamic state. It smooths the instantaneous jumps of `CTRL-GT-ORDER-0`.  The firmware uses the same division-free inequality search as GT-0, replacing the division-based margin with an attractor toward the largest feasible candidate.
 
 </TBox>
 
 ## Definition
 
-Define the stability margin:
+The controller searches the candidate table to find the largest $\alpha$ satisfying the stability constraint:
 
 ```math
-m_t
-=
-\eta\alpha_t C_t^{\mathrm{ctrl}}.
+\alpha^2 \cdot \eta^2 \cdot \|\Delta G\|^2
+\;\leq\;
+\chi^2 \cdot \bigl(\|\Delta\theta\|^2 + \varepsilon^2\bigr)
 ```
 
-The margin error is:
-
-```math
-e_t
-=
-\chi-m_t.
-```
-
-The controller update is:
+Denote this value $\alpha^{\text{feasible}}_t$.  The first-order update toward it:
 
 ```math
 \boxed{
@@ -47,7 +39,7 @@ The controller update is:
 +
 k_\alpha
 \left(
-\chi-\eta\alpha_t C_t^{\mathrm{ctrl}}
+\alpha^{\text{feasible}}_t - \alpha_t
 \right).
 }
 ```
@@ -57,8 +49,11 @@ Then clamp:
 ```math
 \alpha_{t+1}
 \leftarrow
-\operatorname{clip}(\alpha_{t+1},\alpha_{\min},1).
+\operatorname{clip}(\alpha_{t+1},\alpha_{\min},\alpha_{\max}).
 ```
+
+This replaces the continuous margin $m_t = \chi - \eta\alpha_t C$ with the gap
+$\alpha^{\text{feasible}}_t - \alpha_t$, avoiding the division in $C = \|\Delta G\| / (\|\Delta\theta\| + \varepsilon)$.
 
 ## Inputs
 
@@ -66,10 +61,11 @@ Then clamp:
 |---|---|
 | $\Delta\theta_t^{\mathrm{raw}}$ | raw optimizer update |
 | $\eta$ | base learning rate |
-| $C_t^{\mathrm{ctrl}}$ | curvature / sensitivity proxy |
+| $\|\Delta\theta\|^2$ | squared parameter delta |
+| $\|\Delta G\|^2$ | squared gradient delta |
 | $\chi$ | target stability margin |
 | $k_\alpha$ | controller adaptation gain |
-| $\alpha_{\min}$ | optional floor |
+| $\varepsilon$ | numerical guard |
 
 ## Outputs
 
@@ -85,23 +81,9 @@ Then clamp:
 |---|---|
 | $\alpha_t$ | controller gain state |
 
-## Stability Note
-
-For locally constant $C_t^{\mathrm{ctrl}}=C$, stable $\alpha$ adaptation requires:
-
-```math
-0<k_\alpha\eta C<2.
-```
-
-For non-oscillatory adaptation:
-
-```math
-0<k_\alpha\eta C<1.
-```
-
 ## Expected Behavior
 
-This controller should react more smoothly than `CTRL-GT-ORDER-0`, at the cost of slower response to sudden spikes.
+This controller reacts more smoothly than GT-0, at the cost of slower response to sudden spikes.  The attractor toward $\alpha^{\text{feasible}}$ acts as a first-order low-pass on the GT-0 decision, with $k_\alpha$ controlling the time constant.
 
 ## hls4ml Implementation
 
@@ -109,19 +91,17 @@ Kernel: `nnet::global_throttle_order1_law<CONFIG_T>(dtheta_sq, dgrad_sq, alpha, 
 
 Shares the `curvature_sensor_order0` (Phase 1) with GT-0. Maintains a static `alpha_state` variable. On `reset_numerator = true`, `alpha_state` reinitializes to 1.
 
-Law (from global squared norms):
+Law (division-free, on squared norms):
 ```math
-C = ||ΔG|| / (||Δθ|| + ε)
-m = χ - η·α·C
-α ← clip(α + k_α·m,  α_min,  α_max)
+\alpha_{\text{feasible}} = \max\{\alpha_{\text{cand}} \,|\, \alpha^2 \eta^2 \|\Delta G\|^2 \leq \chi^2 (\|\Delta\theta\|^2 + \varepsilon^2)\}
+\qquad
+\alpha \leftarrow \operatorname{clip}\bigl(\alpha + k_\alpha(\alpha_{\text{feasible}} - \alpha),\; \alpha_{\min},\; \alpha_{\max}\bigr)
 ```
 
 Config field `controller_k_alpha` (default `0.1`, key `KAlpha` in YAML).
 
-Trace logging provides curvature, ||dθ||, ||dG||, alpha_state, and alpha.
-
-CSIM validation is pending (follows `ENB-017` / `CSIM-002` pattern).
+Trace logging provides ||ΔG||², ||Δθ||², α_feasible, α_state, and α.
 
 ## Implementation Status
 
-Implemented in hls4ml-trainable (`HLS4ML-022`, inprogress).
+Implemented in hls4ml-trainable (`HLS4ML-022`, inprogress).  The original division-based GT-1 law was replaced with the division-free inequality-search approach, matching GT-0's fix.  CSIM validation is pending.

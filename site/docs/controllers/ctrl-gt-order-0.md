@@ -6,7 +6,7 @@ status:
 tags:
   - controller
   - global-throttle
-last_modified: 2026-05-18
+last_modified: 2026-05-23
 author: mbvalentin
 ---
 # CTRL-GT-ORDER-0
@@ -15,13 +15,13 @@ author: mbvalentin
 
 <TBox type="summary" title="Purpose">
 
-`CTRL-GT-ORDER-0` is the algebraic safe-gain global throttle. It computes $\alpha_t$ directly from the current stability margin estimate, with no controller state.
+`CTRL-GT-ORDER-0` is the algebraic safe-gain global throttle. It computes $\alpha_t$ directly from the current stability margin estimate, with no controller state.  The firmware implementation uses a **division-free candidate search** over a table of binary-fraction alpha values to avoid `ap_fixed` division crashes in CSIM.
 
 </TBox>
 
 ## Definition
 
-The controller tries to enforce:
+The controller enforces:
 
 ```math
 \alpha_t\eta C_t^{\mathrm{ctrl}}
@@ -29,19 +29,23 @@ The controller tries to enforce:
 \chi.
 ```
 
-It sets:
+In squared-norm form (no division, no sqrt):
 
 ```math
-\boxed{
-\alpha_t
-=
-\min
-\left(
-1,
-\frac{\chi}
-{\eta(C_t^{\mathrm{ctrl}}+\epsilon)}
-\right).
-}
+\alpha_t^2 \cdot \eta^2 \cdot \|\Delta G\|^2
+\;\leq\;
+\chi^2 \cdot \bigl(\|\Delta\theta\|^2 + \varepsilon^2\bigr)
+```
+
+A precomputed table of binary-fraction candidates is searched in descending order.  The first (largest) $\alpha$ satisfying the inequality is selected; if none satisfy, $\alpha = \alpha_{\min}$:
+
+```
+table = {1.0, 0.875, 0.75, 0.625, 0.5, 0.375, 0.25, 0.1875, 0.125, 0.0625, 0.03125}
+for each α_cand in table:
+    if α_cand² · η² · ||ΔG||²  ≤  χ² · (||Δθ||² + ε²):
+        α = α_cand (break)
+    else:
+        α = α_min (fallback)
 ```
 
 Then:
@@ -77,13 +81,14 @@ None.
 
 ## Expected Behavior
 
-This controller reacts immediately. If $C_t^{\mathrm{ctrl}}$ spikes, $\alpha_t$ drops in the same step.
+This controller reacts immediately. If $C_t^{\mathrm{ctrl}}$ spikes, $\alpha_t$ drops in the same step.  The binary-fraction candidate set produces alpha values representable as shift-add combinations.
 
 ## Known Failure Modes
 
 - can oscillate if $C_t^{\mathrm{ctrl}}$ is noisy,
 - can drive updates below the fixed-point quantum,
-- does not reason about the lower useful-update bound.
+- coarse candidate spacing (11 values between 1.0 and 0.03125) may produce visible alpha steps;
+  mitigated by adding more candidates at the cost of iteration cycles.
 
 ## hls4ml Implementation
 
@@ -103,24 +108,24 @@ On the first call or after `reset_numerator = true`, stores current values
 and emits zero squared-norm contributions. On subsequent calls:
 
 ```math
-||\Delta\theta||^2 = \sum (θ_t - θ_{t-1})^2
+\|\Delta\theta\|^2 = \sum (θ_t - θ_{t-1})^2
 \qquad
-||\Delta G||^2 = \sum (G_t - G_{t-1})^2
+\|\Delta G\|^2 = \sum (G_t - G_{t-1})^2
 ```
 
 **Phase 2 — Law** (`global_throttle_order0_law`, called once with global sums):
 
-```math
-C = \frac{||\Delta G||}{||\Delta\theta|| + \epsilon}
-\qquad
-\alpha = \text{clip}\!\left(\frac{\chi}{\eta C + \epsilon},\ \alpha_{\min},\ \alpha_{\max}\right)
-```
+The inequality $\alpha^2 \eta^2 \|\Delta G\|^2 \leq \chi^2 (\|\Delta\theta\|^2 + \varepsilon^2)$
+is evaluated directly on the squared norms — no division, no sqrt, no reciprocal.
+An 11-entry candidate table (descending) is searched via a fully unrolled loop.
+The `controller_alpha_min` field acts as fallback when no candidate satisfies
+the constraint.
 
-Sqrt is computed through `double` for CSIM (`std::sqrt`).
+**Phase 3 — SGD + apply** — shared across all controllers.
 
 ### Controller parameters in config struct
 
-The synthesized `trainable_configN` struct receives four new
+The synthesized `trainable_configN` struct receives four
 `static constexpr double` fields from the YAML `Controller` block:
 
 | Field | YAML key | Default |
@@ -134,7 +139,7 @@ These are emitted by `vivado_writer.py:_make_trainable_dense_config`.
 
 ### Call-chain emission
 
-The three-phase `batch_end` block (all global-throttle controllers):
+The three-phase `batch_end` block:
 
 ```cpp
 if (batch_end) {
@@ -150,7 +155,7 @@ if (batch_end) {
         global_dgrad_sq += __dg;
     }
 
-    // Phase 2 — Global controller law
+    // Phase 2 — Global controller law (division-free candidate search)
     nnet::global_throttle_order0_law<config>(global_dtheta_sq, global_dgrad_sq,
                                               alpha, reset_accumulators);
 
@@ -160,15 +165,11 @@ if (batch_end) {
 }
 ```
 
-For CTRL-NONE, phases 1 and 2 are replaced by a single `global_throttle_none` call (α=1).
-
-For CTRL-GT-ORDER-1, phase 2 uses `global_throttle_order1_law` instead.
-
 ## Implementation Status
 
-The CTRL-NONE CSIM (CSIM-001) validated the full Dense loss-backprop-SGD-apply
-pipeline with $\alpha = 1$. CTRL-GT-ORDER-0 has been implemented and wired
-(HLS4ML-021) but CSIM validation with GT-0 active is pending (planned as
-CSIM-002 / ENB-017).
-
-This is the controller used in the first global-throttle sanity experiments (EXP-000A, EXP-000B).
+The original division-based GT-0 law (`α = χ / (η·C + ε)`) crashed CSIM at step 1
+because `ap_fixed` division in the two `/` lines caused unrecoverable errors.
+The law was replaced with a division-free inequality candidate search over
+binary-fraction alpha values.  The fix is in `global_throttle_order0_law` in
+`global_throttle.h` (HLS4ML-021).  CSIM validation with GT-0 active is pending
+(ENB-017).

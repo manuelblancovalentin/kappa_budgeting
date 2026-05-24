@@ -59,7 +59,7 @@ This preserves the raw optimizer direction before fixed-point quantization effec
 ## Controller Table
 
 | Controller ID | Name | Dynamics | Quantization-aware | Direction-preserving | Status |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | [`CTRL-NONE`](./ctrl-none.md) | No controller | none | no | yes | <Badge status="valid" /> |
 | [`CTRL-GT-ORDER-0`](./ctrl-gt-order-0.md) | Algebraic global throttle | order 0 | no | yes | <Badge status="valid" /> |
 | [`CTRL-GT-ORDER-1`](./ctrl-gt-order-1.md) | First-order global throttle | order 1 | no | yes | <Badge status="planned" /> |
@@ -79,6 +79,7 @@ Examples:
 ```text
 CTRL-NONE
 CTRL-GT-ORDER-0
+CTRL-BINARY-THROTTLE
 CTRL-GT-ORDER-1
 CTRL-GT-ORDER-2
 CTRL-GT-ORDER-2-QA
