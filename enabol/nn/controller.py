@@ -315,6 +315,17 @@ class GlobalThrottleOrder0Controller(BaseController):
             "θ̇ = α θ̇_raw",
         )
 
+    def _alpha(
+        self,
+        *,
+        learning_rate: tf.Tensor,
+        curvature_for_control: tf.Tensor,
+        alpha_would: tf.Tensor,
+        grad_norm: tf.Tensor | float | None,
+        update_quantum: tf.Tensor | float | None,
+    ) -> tf.Tensor:
+        return alpha_would
+
 
 class GlobalThrottleOrder1Controller(BaseController):
     """CTRL-GT-ORDER-1: first-order alpha-state global throttle."""
