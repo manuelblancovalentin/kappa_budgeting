@@ -42,6 +42,7 @@ def _controller_config(controller: str | BaseController | None, *, learning_rate
         'CurvatureEmaRho': active_controller.curvature_ema_rho,
         'AlphaMin': active_controller.alpha_min,
         'AlphaMax': active_controller.alpha_max,
+        'KAlpha': getattr(active_controller, 'k_alpha', 0.1),
         'UseEmaMax': active_controller.use_ema_max,
         'SafetyBudget': {'Enabled': False},
     }
