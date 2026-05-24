@@ -1590,6 +1590,31 @@ const tasks = [
     },
     notes: 'TestbenchData.plot_training now promotes expected training panels before generic scalar traces: loss, alpha, and a twin-axis controller-norm panel for ||ΔG|| and ||Δθ||. The norms are derived from controller.dat squared accumulators, and callers can override y-axis scales with scales={metric: scale}.',
   },
+  {
+    id: 'ENB-028',
+    title: 'Document trainable precision schema relationships',
+    status: 'done',
+    priority: 'high',
+    stage: 'design',
+    target: 'precision',
+    action: 'documentation',
+    summaryTags: ['precision', 'schema', 'controller-metric', 'hls4ml'],
+    timeline: true,
+    owners: ['mbvalentin'],
+    created: '2026-05-23',
+    due_date: null,
+    start_date: '2026-05-23',
+    end_date: '2026-05-23',
+    dependsOn: ['ENB-023', 'HLS4ML-038'],
+    links: {
+      docs: [
+        {label: 'Trainable Precision Schema', href: '/docs/implementation/precision-schema'},
+        {label: 'precision.py', href: '/docs/implementation/precision'},
+        {label: 'Phase 1 Trainable Config', href: '/docs/implementation/hls4ml/phase-1-trainable-config'},
+      ],
+    },
+    notes: 'Added the first precision relationship document. Unknown trainable precision dependencies are explicitly marked with ?, and the known rule for controller_metric records that dtheta_sq needs fractional bits for squared parameter movement: F_controller_metric >= 2*F_theta + guard bits.',
+  },
 ];
 
 export default tasks;

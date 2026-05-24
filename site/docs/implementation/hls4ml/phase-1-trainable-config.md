@@ -140,6 +140,8 @@ Safety budget fields should exist, but the first correctness target can set them
 
 Precision fields should include at least weight, bias, result, gradient input, gradient output, weight gradient, bias gradient, raw update, applied update, gradient accumulator, loss, loss gradient, controller metric, alpha, and optimizer state. Some may alias in early configs, but they should be named separately because they answer different range questions.
 
+The evolving rules that relate these fields are tracked in [Trainable Precision Schema](/docs/implementation/precision-schema). In particular, `controller_metric` should not be treated as equivalent to `gradient_accum`: it stores squared controller geometry such as `dtheta_sq`, so its fractional bits must account for squared parameter movements.
+
 ## Accessors To Add
 
 The first accessor set is now implemented:

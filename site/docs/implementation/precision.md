@@ -20,6 +20,10 @@ source_url: "https://github.com/manuelblancovalentin/kappa_budgeting/blob/master
 This page is a coder-facing reference for `enabol/precision.py`: the explicit layer-indexed `PrecisionDict`, reserved precision scopes, dtype parsing, model validation, hls4ml precision translation, and usage patterns for per-layer quantization studies.
 </TBox>
 
+<TBox type="info" title="Precision relationship rules">
+This page documents the `PrecisionDict` API. The evolving trainable precision dependency rules live in [Trainable Precision Schema](/docs/implementation/precision-schema), including the first known controller rule for `weight_t -> dtheta_sq -> controller_metric`.
+</TBox>
+
 ## Module Map
 
 | Group | Objects | Purpose |

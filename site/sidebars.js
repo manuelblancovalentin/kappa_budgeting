@@ -81,6 +81,7 @@ const sidebars = {
         'implementation/testbench',
         'implementation/nn',
         'implementation/precision',
+        'implementation/precision-schema',
         'implementation/utils',
         'implementation/quantization',
         'implementation/architecture',
