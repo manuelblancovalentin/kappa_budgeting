@@ -116,7 +116,8 @@ This reconciles the submitted $\kappa$-budgeting formulation with the new global
 - <Badge status="valid" /> The floating-point one-layer sanity test shows that a global throttle can prevent divergence after input-gain drift.
 - <Badge status="valid" /> The fake-fixed-point path works for staged quantization experiments: weights, updates, activations, rails, saturation counters, and update distortion plots.
 - <Badge status="valid" /> The update-direction argument is clear: multiplying the flattened update by one scalar preserves the optimizer direction before fixed-point rounding and saturation.
-- <Badge status="preliminary" /> Quantized one-layer tests support the controller idea, but tight update precision can still distort late-stage learning when gradients become small.
+- <Badge status="valid" /> The CSIM CTRL-NONE pipeline (half_mse → dense_backpass → sgd → global_throttle_none → apply_dense_update) compiles and trains a 1-Dense linear model with 0 errors (`CSIM-001`).
+- <Badge status="preliminary" /> CTRL-GT-ORDER-0 is implemented in hls4ml as `global_throttle_order0` with internal curvature sensing; CSIM validation is pending (`CSIM-002`, `ENB-017`).
 - <Badge status="preliminary" /> The $\kappa$-aware global-alpha formulation reconciles $\kappa$ safety rails with global throttling, but has not yet been implemented or validated in hls4ml.
 - <Badge status="preliminary" /> The phase/cosine diagnostics are useful as software observability tools, but should not be treated as direct hardware controller inputs yet.
 
@@ -133,9 +134,12 @@ This reconciles the submitted $\kappa$-budgeting formulation with the new global
 ## What currently works
 
 - Custom training loop (loss, norms, curvature proxy, throttle, metrics...).
-- Global throttle controller with a simple curvature proxy.
+- Global throttle controller with a simple curvature proxy (software: GT-0/1/2/2-QA).
 - Single-layer affine dataset with input gain drift.
 - Fake quantization of weights, updates, activations, and rails.
+- hls4ml firmware chain for Dense: half_mse loss, dense_backpass, sgd optimizer, CTRL-NONE (α=1) controller, apply_dense_update.
+- hls4ml CTRL-GT-ORDER-0 C++ kernel with curvature sensor + algebraic safe-alpha law (pending CSIM validation).
+- CSIM-001: first compilation validation (1-Dense, batch-size-8, half_mse, sgd, CTRL-NONE, 0 errors).
 
 ## Main limitations
 
@@ -153,12 +157,13 @@ This reconciles the submitted $\kappa$-budgeting formulation with the new global
 
 <TBox type="todo" title="Near-term TODOs">
 
-- [ ] Start the hls4ml implementation with the direction-preserving trainable path: `HLS4ML-001` through `HLS4ML-006`.
-- [ ] Keep the first correctness target narrow: one Dense layer, one MSE or half-MSE loss, SGD, `CTRL-NONE`, and `CTRL-GT-ORDER-0`.
+- [x] Start the hls4ml implementation with the direction-preserving trainable path: `HLS4ML-001` through `HLS4ML-006` (**done**).
+- [x] Keep the first correctness target narrow: one Dense layer, half-MSE loss, SGD, `CTRL-NONE`, `CTRL-GT-ORDER-0`.
+- [x] Implement pure global throttle (CTRL-GT-ORDER-0) as the first non-trivial controller in hls4ml.
 - [ ] Add the trainable config schema so `SafetyBudget` and `Controller` can be selected independently later.
-- [ ] Implement pure global throttle first, then add $\kappa$-aware global alpha as the reconciliation mode.
 - [ ] Preserve legacy row/column $\kappa$ projection as a selectable reproduction/comparison mode, not as the default learning controller.
-- [ ] Run the one-layer Dense CSIM comparison against ENABOL software traces before optimizing the delayed-alpha schedule.
+- [ ] Run one-layer Dense CSIM comparison with CTRL-GT-ORDER-0 active (`CSIM-002` / `ENB-017`).
+- [ ] Add $\kappa$-aware global alpha as the reconciliation mode.
 
 </TBox>
 
