@@ -35,7 +35,7 @@ It preserves the same hardware data path as the future global throttling control
 ## `apply_dense_update`
 
 ```cpp
-nnet::apply_dense_update<CONFIG_T>(weights, biases, weight_update, bias_update, alpha);
+nnet::apply_dense_update<CONFIG_T>(weights, biases, weight_update, bias_update, alpha, actual_update_norm_sq);
 ```
 
 This applies the alpha-scaled raw updates:
@@ -46,44 +46,50 @@ biases  += alpha * bias_update
 ```
 
 The function converts through `update_t` before assigning back to `weight_t` or `bias_t`, so update precision can be controlled separately from stored parameter precision.
+It also returns the actual squared movement after fixed-point assignment so CSIM can compare raw, controlled, and quantized parameter motion.
 
 ## Three-Phase Architecture
 
 All non-NONE controllers use a three-phase `batch_end` block, emitted by the Vivado writer:
 
-### Phase 1 — Curvature accumulation (per layer)
+### Phase 1 — SGD proposal and raw-update sensing (per layer)
 
 ```cpp
-nnet::curvature_sensor_order0<CONFIG_T>(weights, biases, weight_grad, bias_grad,
-                                        &dtheta_sq_contrib, &dgrad_sq_contrib,
-                                        reset_accumulators);
+nnet::sgd<CONFIG_T>(weight_grad, bias_grad, weight_update, bias_update, learning_rate);
+nnet::raw_update_sensor_order0<CONFIG_T>(weight_update, bias_update, weight_grad, bias_grad,
+                                         raw_update_norm_sq_contrib, dgrad_norm_sq_contrib,
+                                         reset_accumulators);
 ```
 
-Maintains static `prev_weights`/`prev_biases`/`prev_weight_grad`/`prev_bias_grad` storage for the layer. Computes the squared L2 norm of the differences and outputs them as scalar references. The writer accumulates these into `global_dtheta_sq` / `global_dgrad_sq` across layers. The `has_prev` flag resets on `reset_numerator = true`.
+Maintains static previous-gradient storage for the layer. The controller uses the raw optimizer proposal as its denominator geometry, not the already-throttled actual parameter movement. For SGD, `weight_update` and `bias_update` already include the learning rate because `sgd.h` computes `-learning_rate * gradient`. The writer accumulates per-layer raw update and gradient-difference norms into `global_raw_update_norm_sq` / `global_dgrad_norm_sq` across layers.
 
 ### Phase 2 — Controller law (global, once)
 
 ```cpp
-nnet::global_throttle_order0_law<CONFIG_T>(global_dtheta_sq, global_dgrad_sq, alpha, reset);
-nnet::global_throttle_order1_law<CONFIG_T>(global_dtheta_sq, global_dgrad_sq, alpha, reset);
+nnet::global_throttle_order0_law<CONFIG_T>(global_raw_update_norm_sq, global_dgrad_norm_sq, alpha, ..., reset);
+nnet::global_throttle_order1_law<CONFIG_T>(global_raw_update_norm_sq, global_dgrad_norm_sq, alpha, ..., reset);
 ```
 
-Takes the globally accumulated squared norms, computes `C = ||ΔG|| / (||Δθ|| + ε)` via double-precision sqrt, then applies the order-specific law. GT-0 emits the algebraic safe gain; GT-1 maintains a static `alpha_state`.
+Takes the globally accumulated squared norms and searches a binary-fraction alpha candidate table with no division, reciprocal, or sqrt:
 
-### Phase 3 — SGD + alpha-scaled apply (per layer)
+```text
+alpha^2 * eta^2 * ||Delta G||^2 <= chi^2 * (||Delta theta_raw||^2 + epsilon^2)
+```
+
+If no candidate satisfies the inequality, the minimum nonzero candidate is used and `controller_feasible` is logged as `0`.
+
+### Phase 3 — Alpha-scaled apply (per layer)
 
 ```cpp
-nnet::sgd<CONFIG_T>(...);
-nnet::apply_dense_update<CONFIG_T>(weights, biases, weight_update, bias_update, alpha);
+nnet::apply_dense_update<CONFIG_T>(weights, biases, weight_update, bias_update, alpha, actual_update_norm_sq);
 ```
 
 The same alpha is broadcast to all layers within the same `batch_end` block.
 
 ## Trace Diagnostics
 
-When `!defined(__SYNTHESIS__) && defined(HLS4ML_TRAINABLE_TRACE)`, the law kernels log curvature, ||dθ||, ||dG||, alpha_state (GT-1) in addition to alpha.
+When `!defined(__SYNTHESIS__) && defined(HLS4ML_TRAINABLE_TRACE)`, the law kernels log controller internals in addition to alpha. The generated CSIM testbench also writes `controller.dat` with raw, controlled, and actual update norms, gradient-difference norm, stability inequality terms, alpha state, alpha code, alpha floor, and feasibility.
 
 ## Naming Note
 
 `global_throttle` is the code name for now. In prose, "global update throttle" or "global step throttle" is slightly more explicit, but the implementation name is short and matches the control signal we care about: one global `alpha`.
-

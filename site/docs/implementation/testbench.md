@@ -56,7 +56,7 @@ The first files are:
 |---|---|
 | `loss.dat` | every logged training sample | `loss` |
 | `alpha.dat` | every logged training sample | `alpha` |
-| `controller.dat` | every logged training sample | `dtheta_sq`, `dgrad_sq`, `lhs_sq`, `rhs_sq`, `alpha_feasible`, `alpha_state` |
+| `controller.dat` | every batch end | `raw_update_norm_sq`, `controlled_update_norm_sq`, `actual_update_norm_sq`, `dgrad_norm_sq`, `dtheta_for_control_sq`, `stability_lhs_raw`, `stability_lhs_ctrl`, `stability_rhs`, `alpha_feasible`, `alpha_state`, `alpha_code`, `alpha_min`, `controller_feasible` |
 | `<layer>/weights.dat` | once per epoch | one column per flattened matrix element, named `weight_<input>_<output>` |
 | `<layer>/biases.dat` | once per epoch | one column per bias element, named `bias_<output>` |
 
@@ -72,7 +72,7 @@ Dense weights use the same row-major flattening convention as hls4ml dense kerne
 
 `TestbenchData.from_dir(...)` recursively discovers trace files, but it does not put raw parameter matrices into the main dataframe. Top-level traces such as `loss.dat`, `alpha.dat`, and `controller.dat` are outer-merged into `tb.frame`. Per-layer parameter traces are loaded into `tb.layers[layer_name]` when `load_weights` allows that layer.
 
-`controller.dat` is the firmware-side controller diagnostic trace. For GT-0 and GT-1, `dtheta_sq` and `dgrad_sq` are the global summed curvature-sensor quantities, `lhs_sq` and `rhs_sq` are the inequality terms used by the division-free candidate search, `alpha_feasible` is the largest candidate accepted by the raw feasibility check, and `alpha_state` is the final controller state applied to the SGD update. For `CTRL-NONE`, the same columns are emitted with zero curvature terms and unit alpha-state values so downstream analysis can use a stable schema.
+`controller.dat` is the firmware-side controller diagnostic trace. For GT-0 and GT-1, the controller geometry is based on the raw optimizer proposal, not the already-throttled actual parameter movement. `raw_update_norm_sq` and `dtheta_for_control_sq` are therefore `||Delta theta_raw||^2`; for SGD, `Delta theta_raw = -eta G`, so the learning rate is already included. `dgrad_norm_sq` is `||Delta G||^2`, `stability_lhs_raw` and `stability_lhs_ctrl` are the unthrottled and alpha-scaled left-hand sides of the squared stability inequality, and `stability_rhs` is the right-hand side. `controller_feasible` is `0` when the candidate table could not satisfy the inequality and the nonzero `alpha_min` fallback was used.
 
 Parameter traces have their own raw dataframes and summary statistics. For example, `tb.layers["dense0"].weights` is the raw weights dataframe, and `tb.layers["dense0"].stats` is a dataframe of scalar summaries computed from weights and biases. Sparse traces therefore remain sparse at the layer level, while `tb.stats_frame` exposes scalar summaries with names such as `dense0.weights.mean` and `dense0.biases.norm_l2`.
 
@@ -156,10 +156,10 @@ The rail and underflow fractions are present now but return `NaN` until the read
 | Metadata | Compact run metadata parsed from trace comments. |
 | Loss | Rolling mean and quantile bands on a log scale. |
 | Alpha | Rolling mean and quantile bands for the controller output. |
-| Controller norms | Rolling mean and quantile bands for `||Delta G||` and `||Delta theta||` on twin y-axes. |
+| Controller norms | Rolling mean and quantile bands for `||Delta G||` and `||Delta theta_raw||` on twin y-axes. |
 | Parameter metrics | Rolling mean and quantile bands for loaded parameter summary statistics, after dropping missing sparse-trace rows. |
 
-The controller norm panel is derived from `controller.dat`: `dgrad_norm = sqrt(dgrad_sq)` and `dtheta_norm = sqrt(dtheta_sq)`. The raw squared metrics remain available in `tb.frame`, while the derived norms are exposed through `tb.scalar_frame`.
+The controller norm panel is derived from `controller.dat`: `dgrad_norm = sqrt(dgrad_norm_sq)` and `raw_update_norm = sqrt(raw_update_norm_sq)`. The raw squared metrics remain available in `tb.frame`, while the derived norms are exposed through `tb.scalar_frame`.
 
 The bottom x-axis is `global_step`. The top x-axis of the first metric panel marks epoch starts. By default, `plot_training()` promotes the expected firmware-training panels first: loss, alpha, controller norms, and then loaded parameter statistics. Pass `metrics=[...]` to inspect a smaller subset:
 
@@ -170,15 +170,15 @@ tb.plot_training(metrics=["loss", "dense0.weights.mean", "dense0.weights.norm_l2
 Controller diagnostics can be plotted with the standardized controller panel by requesting both norms:
 
 ```python
-tb.plot_training(metrics=["loss", "alpha", "dgrad_norm", "dtheta_norm"], window_size=1)
+tb.plot_training(metrics=["loss", "alpha", "dgrad_norm", "raw_update_norm"], window_size=1)
 ```
 
 Use `scales={...}` to override y-axis scales. `loss` defaults to `log`; all other metrics default to Matplotlib's linear scale unless specified:
 
 ```python
 tb.plot_training(
-    metrics=["loss", "alpha", "dgrad_norm", "dtheta_norm"],
-    scales={"dgrad_norm": "log", "dtheta_norm": "log"},
+    metrics=["loss", "alpha", "dgrad_norm", "raw_update_norm"],
+    scales={"dgrad_norm": "log", "raw_update_norm": "log"},
     window_size=30,
 )
 ```
@@ -200,3 +200,4 @@ fig, axes = tb.plot_training(show=False)
 | [ENB-025](/docs/status/tasks?query=ENB-025) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Moved raw parameter traces into per-layer objects, added `load_weights`, and computed per-layer parameter summary dataframes for plotting. |
 | [HLS4ML-038](/docs/status/tasks?query=HLS4ML-038) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `enabol/testbench.py`, `tests/test_history.py` | Added `controller.dat` as a top-level scalar trace for controller curvature diagnostics and alpha-state analysis. |
 | [ENB-027](/docs/status/tasks?query=ENB-027) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Standardized the training panel with derived controller norms, a twin-axis controller norm panel, and per-metric y-axis scale overrides. |
+| [HLS4ML-039](/docs/status/tasks?query=HLS4ML-039) | 2026-05-23 | `hls4ml/templates/vivado/trainable/controllers/global_throttle.h`, `hls4ml/writer/vivado_writer.py`, `enabol/testbench.py`, `tests/test_history.py` | Switched controller diagnostics and plotting to raw-update control geometry, added raw/controlled/actual update norm telemetry, and changed `controller.dat` to batch-end cadence. |

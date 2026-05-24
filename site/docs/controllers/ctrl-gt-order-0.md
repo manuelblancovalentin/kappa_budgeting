@@ -42,7 +42,7 @@ A precomputed table of binary-fraction candidates is searched in descending orde
 ```
 table = {1.0, 0.875, 0.75, 0.625, 0.5, 0.375, 0.25, 0.1875, 0.125, 0.0625, 0.03125}
 for each α_cand in table:
-    if α_cand² · η² · ||ΔG||²  ≤  χ² · (||Δθ||² + ε²):
+    if α_cand² · η² · ||ΔG||²  ≤  χ² · (||Δθ_raw||² + ε²):
         α = α_cand (break)
     else:
         α = α_min (fallback)
@@ -96,32 +96,37 @@ This controller reacts immediately. If $C_t^{\mathrm{ctrl}}$ spikes, $\alpha_t$ 
 
 GT-0 is implemented as two separate kernels in the three-phase `batch_end` block:
 
-**Phase 1 — Curvature sensor** (`curvature_sensor_order0`, shared with GT-1):
+**Phase 1 — Raw-update controller sensor** (`raw_update_sensor_order0`, shared with GT-1):
 
 ```
-nnet::curvature_sensor_order0<CONFIG>(weights, biases, wgrad, bgrad,
-                                       &dtheta_sq, &dgrad_sq, reset);
+nnet::raw_update_sensor_order0<CONFIG>(w_update, b_update, wgrad, bgrad,
+                                       &raw_update_norm_sq, &dgrad_norm_sq, reset);
 ```
 
-Maintains static `prev_weights`/`prev_biases`/`prev_weight_grad`/`prev_bias_grad`.
-On the first call or after `reset_numerator = true`, stores current values
-and emits zero squared-norm contributions. On subsequent calls:
+Maintains static `prev_weight_grad`/`prev_bias_grad`. The controller no longer
+uses actual/throttled parameter movement as its denominator. It uses the raw SGD
+proposal before alpha:
 
 ```math
-\|\Delta\theta\|^2 = \sum (θ_t - θ_{t-1})^2
+\|\Delta\theta_{\text{raw}}\|^2 = \sum (\Delta\theta_{\text{raw}})^2
 \qquad
 \|\Delta G\|^2 = \sum (G_t - G_{t-1})^2
 ```
 
+For SGD, `sgd.h` computes `Delta theta_raw = -learning_rate * gradient`, so the
+raw update norm already includes $\eta$.
+
 **Phase 2 — Law** (`global_throttle_order0_law`, called once with global sums):
 
-The inequality $\alpha^2 \eta^2 \|\Delta G\|^2 \leq \chi^2 (\|\Delta\theta\|^2 + \varepsilon^2)$
+The inequality $\alpha^2 \eta^2 \|\Delta G\|^2 \leq \chi^2 (\|\Delta\theta_{\text{raw}}\|^2 + \varepsilon^2)$
 is evaluated directly on the squared norms — no division, no sqrt, no reciprocal.
 An 11-entry candidate table (descending) is searched via a fully unrolled loop.
-The `controller_alpha_min` field acts as fallback when no candidate satisfies
-the constraint.
+If no candidate satisfies the constraint, the law uses a nonzero minimum
+candidate (`0.03125`, or a higher configured `AlphaMin`) and logs
+`controller_feasible = 0`.
 
-**Phase 3 — SGD + apply** — shared across all controllers.
+**Phase 3 — Apply** — shared across all controllers. The writer logs actual
+fixed-point movement after assignment separately as telemetry.
 
 ### Controller parameters in config struct
 
@@ -143,25 +148,26 @@ The three-phase `batch_end` block:
 
 ```cpp
 if (batch_end) {
-    // Phase 1 — Accumulate per-layer squared norms
-    metric_t global_dtheta_sq = 0, global_dgrad_sq = 0;
+    // Phase 1 — SGD proposal and raw-update norm reduction
+    metric_t global_raw_update_norm_sq = 0, global_dgrad_norm_sq = 0;
 
     // (per Dense layer in backward order)
+    nnet::sgd<config>(wgrad, bgrad, w_update, b_update, lr);
     {
-        metric_t __dt, __dg;
-        nnet::curvature_sensor_order0<config>(w, b, wgrad, bgrad,
-                                              __dt, __dg, reset_accumulators);
-        global_dtheta_sq += __dt;
-        global_dgrad_sq += __dg;
+        metric_t __raw, __dg;
+        nnet::raw_update_sensor_order0<config>(w_update, b_update, wgrad, bgrad,
+                                               __raw, __dg, reset_accumulators);
+        global_raw_update_norm_sq += __raw;
+        global_dgrad_norm_sq += __dg;
     }
 
     // Phase 2 — Global controller law (division-free candidate search)
-    nnet::global_throttle_order0_law<config>(global_dtheta_sq, global_dgrad_sq,
+    nnet::global_throttle_order0_law<config>(global_raw_update_norm_sq, global_dgrad_norm_sq,
                                               alpha, reset_accumulators);
 
-    // Phase 3 — SGD + apply per layer
-    nnet::sgd<config>(wgrad, bgrad, w_update, b_update, lr);
-    nnet::apply_dense_update<config>(w, b, w_update, b_update, alpha);
+    // Phase 3 — alpha-scaled apply per layer
+    metric_t actual_update_norm_sq;
+    nnet::apply_dense_update<config>(w, b, w_update, b_update, alpha, actual_update_norm_sq);
 }
 ```
 
@@ -170,6 +176,5 @@ if (batch_end) {
 The original division-based GT-0 law (`α = χ / (η·C + ε)`) crashed CSIM at step 1
 because `ap_fixed` division in the two `/` lines caused unrecoverable errors.
 The law was replaced with a division-free inequality candidate search over
-binary-fraction alpha values.  The fix is in `global_throttle_order0_law` in
-`global_throttle.h` (HLS4ML-021).  CSIM validation with GT-0 active is pending
-(ENB-017).
+binary-fraction alpha values. The raw-update geometry fix is tracked in
+HLS4ML-039.

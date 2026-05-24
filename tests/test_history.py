@@ -47,9 +47,9 @@ def write_controller_trace(path):
         '# Project: LinearBlockModel',
         '# Controller: CTRL-GT-ORDER-1',
         '# ---',
-        'epoch,sample,global_step,sample_index,dtheta_sq,dgrad_sq,lhs_sq,rhs_sq,alpha_feasible,alpha_state',
-        '1,1,0,0,0.0,0.0,0.0,0.0,1.0,1.0',
-        '1,2,1,1,0.25,0.5,0.00005,0.5625,0.875,0.9875',
+        'epoch,sample,global_step,sample_index,raw_update_norm_sq,controlled_update_norm_sq,actual_update_norm_sq,dgrad_norm_sq,dtheta_for_control_sq,stability_lhs_raw,stability_lhs_ctrl,stability_rhs,alpha_feasible,alpha_state,alpha_code,alpha_min,controller_feasible',
+        '1,1,0,0,0.25,0.25,0.25,0.0,0.25,0.0,0.0,0.25,1.0,1.0,32,0.03125,1',
+        '1,2,1,1,0.25,0.1904296875,0.1875,0.5,0.25,0.00005,0.000038,0.5625,0.875,0.9875,28,0.03125,1',
     ]
     path.write_text('\n'.join(rows) + '\n')
 
@@ -100,12 +100,13 @@ def test_testbench_data_loads_controller_trace_as_top_level_scalars(tmp_path):
     write_controller_trace(trace_dir / 'controller.dat')
 
     data = TestbenchData.from_dir(tmp_path)
-    fig, axes = data.plot_training(metrics=['loss', 'alpha', 'dtheta_sq', 'alpha_state'], window_size=1, show=False)
+    fig, axes = data.plot_training(metrics=['loss', 'alpha', 'raw_update_norm_sq', 'alpha_state'], window_size=1, show=False)
 
     assert 'controller' in data.metadata_by_trace
-    assert 'dtheta_sq' in data.frame.columns
+    assert 'raw_update_norm_sq' in data.frame.columns
     assert 'alpha_state' in data.scalar_metrics
     assert data.frame['alpha_feasible'].iloc[-1] == 0.875
+    assert data.frame['controller_feasible'].iloc[-1] == 1
     assert fig is not None
     assert len(axes) == 4
 
@@ -119,14 +120,14 @@ def test_testbench_data_promotes_controller_norm_panel_and_scales(tmp_path):
 
     data = TestbenchData.from_dir(tmp_path)
     fig, axes = data.plot_training(
-        metrics=['loss', 'alpha', 'dgrad_norm', 'dtheta_norm'],
-        scales={'dgrad_norm': 'log', 'dtheta_norm': 'log'},
+        metrics=['loss', 'alpha', 'dgrad_norm', 'raw_update_norm'],
+        scales={'dgrad_norm': 'log', 'raw_update_norm': 'log'},
         window_size=1,
         show=False,
     )
 
     assert 'dgrad_norm' in data.scalar_metrics
-    assert 'dtheta_norm' in data.scalar_metrics
+    assert 'raw_update_norm' in data.scalar_metrics
     assert len(axes) == 3
     assert axes[0].get_yscale() == 'log'
     assert axes[2].get_yscale() == 'log'

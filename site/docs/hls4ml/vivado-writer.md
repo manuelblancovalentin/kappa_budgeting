@@ -140,13 +140,13 @@ The first trainable trace files are:
 |---|---|
 | `tb_data/training/loss.dat` | every logged training sample | `epoch,sample,global_step,sample_index,loss` |
 | `tb_data/training/alpha.dat` | every logged training sample | `epoch,sample,global_step,sample_index,alpha` |
-| `tb_data/training/controller.dat` | every logged training sample | `epoch,sample,global_step,sample_index,dtheta_sq,dgrad_sq,lhs_sq,rhs_sq,alpha_feasible,alpha_state` |
+| `tb_data/training/controller.dat` | every batch end | `epoch,sample,global_step,sample_index,raw_update_norm_sq,controlled_update_norm_sq,actual_update_norm_sq,dgrad_norm_sq,dtheta_for_control_sq,stability_lhs_raw,stability_lhs_ctrl,stability_rhs,alpha_feasible,alpha_state,alpha_code,alpha_min,controller_feasible` |
 | `tb_data/training/<layer>/weights.dat` | once per epoch | `epoch,sample,global_step,sample_index,weight_<input>_<output>,...` |
 | `tb_data/training/<layer>/biases.dat` | once per epoch | `epoch,sample,global_step,sample_index,bias_<output>,...` |
 
 Each trace file repeats the index columns because future traces will not all have the same cadence. For example, loss may be logged every sample while weights are logged once per epoch.
 
-`controller.dat` is the global-throttle diagnostic file. The writer exposes the controller metrics as explicit top-level output arrays so the generated testbench can log the same values that were produced by the firmware call: the global `dtheta_sq`/`dgrad_sq` curvature-sensor totals, the candidate-search `lhs_sq`/`rhs_sq` terms, the raw `alpha_feasible` candidate, and the final `alpha_state`.
+`controller.dat` is the global-throttle diagnostic file. The writer exposes the controller metrics as explicit top-level output arrays so the generated testbench can log the same values that were produced by the firmware call. The controller uses raw optimizer update geometry for the law: `raw_update_norm_sq` and `dtheta_for_control_sq` are `||Delta theta_raw||^2`, where SGD already included the learning rate in `Delta theta_raw = -eta G`. `controlled_update_norm_sq` is the alpha-scaled proposed movement, and `actual_update_norm_sq` is measured after the fixed-point assignment back into stored parameters. `controller_feasible` is `0` when no candidate satisfied the inequality and the nonzero `alpha_min` fallback was used.
 
 Per-layer parameter traces keep layers separate so readers can load or plot only one layer. Dense weights use hls4ml's row-major dense convention: `weight_<input>_<output>` maps to flat index `input * n_out + output`.
 

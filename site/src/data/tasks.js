@@ -642,7 +642,7 @@ const tasks = [
         {label: 'Optimizer + Controller', href: '/docs/hls4ml/optimizer-controller'},
       ],
     },
-    notes: 'CTRL-NONE, CTRL-GT-ORDER-0, and CTRL-GT-ORDER-1 are implemented and wired. GT-0/GT-1 use the shared curvature_sensor_order0 plus division-free candidate search over α²·η²·||ΔG||² ≤ χ²·(||Δθ||²+ε²). CTRL-GT-ORDER-2/2-QA remain.',
+    notes: 'CTRL-NONE, CTRL-GT-ORDER-0, and CTRL-GT-ORDER-1 are implemented and wired. GT-0/GT-1 now use raw optimizer update geometry plus division-free candidate search over α²·η²·||ΔG||² ≤ χ²·(||Δθ_raw||²+ε²), with a nonzero alpha candidate floor. CTRL-GT-ORDER-2/2-QA remain.',
   },
   {
     id: 'HLS4ML-009',
@@ -666,7 +666,7 @@ const tasks = [
         {label: 'Global Throttle', href: '/docs/formulation/global-throttle'},
       ],
     },
-    notes: 'curvature_sensor_order0 separated from controller law (curvature_sensor_order0 → global_throttle_*_law). The three-phase writer emission (sensor → law → sgd+apply) supports multi-layer accumulation. Per-layer squared norms are summed into global accumulators before the law call. GT-0/GT-1 law kernels consume global norms. CTRL-NONE skips curvature sensing.',
+    notes: 'Raw-update controller sensing is separated from controller law (raw_update_sensor_order0 → global_throttle_*_law). The writer emission now runs backpass → SGD proposal → raw-update/dgrad reduction → law → alpha-scaled apply. Per-layer raw update norms and ΔG norms are summed into global accumulators before the law call. CTRL-NONE skips curvature sensing.',
   },
   {
     id: 'HLS4ML-010',
@@ -946,7 +946,7 @@ const tasks = [
         {label: 'Global Throttle', href: '/docs/formulation/global-throttle'},
       ],
     },
-    notes: 'Implemented CTRL-GT-ORDER-0 as a global law fed by the shared curvature_sensor_order0. The writer sums per-layer ||Δθ||² and ||ΔG||² contributions into global accumulators, then GT-0 selects the largest candidate alpha satisfying α²·η²·||ΔG||² ≤ χ²·(||Δθ||²+ε²). This avoids sqrt/division in CSIM/HLS and replaces the older internal-curvature algebraic division path.',
+    notes: 'Implemented CTRL-GT-ORDER-0 as a global law fed by raw_update_sensor_order0. The writer sums per-layer ||Δθ_raw||² and ||ΔG||² contributions into global accumulators, then GT-0 selects the largest candidate alpha satisfying α²·η²·||ΔG||² ≤ χ²·(||Δθ_raw||²+ε²). This avoids sqrt/division and avoids the self-locking actual-update denominator.',
   },
   {
     id: 'HLS4ML-022',
@@ -969,7 +969,7 @@ const tasks = [
         {label: 'Controllers', href: '/docs/controllers/'},
       ],
     },
-    notes: 'Implemented global_throttle_order1_law with persistent alpha_state. Uses the same curvature_sensor_order0 and three-phase writer emission as GT-0. KAlpha config field added to bridge and config struct. Pending CSIM validation.',
+    notes: 'Implemented global_throttle_order1_law with persistent alpha_state. Uses the same raw-update controller geometry and writer emission as GT-0. KAlpha config field added to bridge and config struct. Pending CSIM validation after the raw-update geometry fix.',
   },
   {
     id: 'HLS4ML-023',
@@ -1339,7 +1339,33 @@ const tasks = [
         {label: 'testbench.py', href: '/docs/implementation/testbench'},
       ],
     },
-    notes: 'Generated trainable top-level functions now expose controller metric outputs and the trainable CSIM testbench writes tb_data/training/controller.dat with dtheta_sq, dgrad_sq, lhs_sq, rhs_sq, alpha_feasible, and alpha_state. TestbenchData loads controller.dat as top-level scalar traces.',
+    notes: 'Generated trainable top-level functions now expose controller metric outputs and the trainable CSIM testbench writes tb_data/training/controller.dat. The current schema records raw_update_norm_sq, controlled_update_norm_sq, actual_update_norm_sq, dgrad_norm_sq, dtheta_for_control_sq, stability_lhs_raw, stability_lhs_ctrl, stability_rhs, alpha_feasible, alpha_state, alpha_code, alpha_min, and controller_feasible. TestbenchData loads controller.dat as top-level scalar traces.',
+  },
+  {
+    id: 'HLS4ML-039',
+    title: 'HLS4ML - Use raw-update geometry for global throttle control',
+    status: 'done',
+    priority: 'high',
+    stage: 'implementation',
+    target: 'controller_stack',
+    action: 'development',
+    summaryTags: ['hls4ml', 'controller', 'raw-update', 'global-throttle'],
+    timeline: true,
+    owners: ['mbvalentin'],
+    created: '2026-05-23',
+    due_date: null,
+    start_date: '2026-05-23',
+    end_date: '2026-05-23',
+    dependsOn: ['HLS4ML-021', 'HLS4ML-022', 'HLS4ML-038'],
+    links: {
+      docs: [
+        {label: 'GT-0', href: '/docs/controllers/ctrl-gt-order-0'},
+        {label: 'GT-1', href: '/docs/controllers/ctrl-gt-order-1'},
+        {label: 'Vivado Writer', href: '/docs/hls4ml/vivado-writer'},
+        {label: 'testbench.py', href: '/docs/implementation/testbench'},
+      ],
+    },
+    notes: 'Replaced actual/throttled parameter-delta controller geometry with raw optimizer update geometry. SGD now runs before the law, raw_update_sensor_order0 sums ||Δθ_raw||² and ||ΔG||² globally, GT-0/GT-1 keep the division-free squared inequality, alpha uses a nonzero candidate floor, and controller.dat logs raw/controlled/actual update norms plus feasibility telemetry.',
   },
   {
     id: 'ENB-017',
@@ -1362,7 +1388,7 @@ const tasks = [
         {label: 'CTRL-GT-ORDER-0', href: '/docs/controllers/ctrl-gt-order-0'},
       ],
     },
-    notes: 'GT-0 CSIM failed: two ap_fixed divisions (sqrt + divide) crashed CSIM at step 1. Fixed by replacing α = χ/(ηC+ε) with division-free inequality search α²·η²·||ΔG||² ≤ χ²·(||Δθ||² + ε²). Candidate table of 11 binary-fraction α values searched in descending order. Validate: compile 1-Dense model with Kind: CTRL-GT-ORDER-0, run CSIM, confirm α selection, no CSIM errors, loss drops.',
+    notes: 'GT-0 CSIM failed: two ap_fixed divisions (sqrt + divide) crashed CSIM at step 1. Fixed by replacing α = χ/(ηC+ε) with division-free inequality search α²·η²·||ΔG||² ≤ χ²·(||Δθ_raw||² + ε²). The raw update is the optimizer proposal before alpha/quantized assignment; for SGD it already includes η. Candidate table of binary-fraction α values is searched in descending order with a nonzero alpha floor. Validate: compile 1-Dense model with Kind: CTRL-GT-ORDER-0, run CSIM, confirm α selection, no CSIM errors, loss drops.',
   },
   {
     id: 'ENB-018',
@@ -1564,7 +1590,7 @@ const tasks = [
         {label: 'Global Throttle', href: '/docs/formulation/global-throttle'},
       ],
     },
-    notes: 'Split global_throttle_order0 into curvature_sensor_order0 (per-layer squared-norm contribution) and global_throttle_order0_law (global law from accumulated norms). Three-phase writer emission: Phase 1 accumulates per-layer squared norms into global_dtheta_sq/global_dgrad_sq, Phase 2 calls the law kernel, Phase 3 applies SGD + scaled update per layer. GT-1 built on the same architecture. Trace logging added for curvature, ||dθ||, ||dG||, alpha_state.',
+    notes: 'Split global_throttle_order0 into raw_update_sensor_order0 (per-layer raw update and ΔG squared-norm contribution) and global_throttle_order0_law (global law from accumulated norms). Writer emission: backpass, SGD raw proposal, raw-update/dgrad reduction, controller law, then scaled update per layer. GT-1 built on the same architecture.',
   },
   {
     id: 'ENB-027',
@@ -1588,7 +1614,7 @@ const tasks = [
         {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
       ],
     },
-    notes: 'TestbenchData.plot_training now promotes expected training panels before generic scalar traces: loss, alpha, and a twin-axis controller-norm panel for ||ΔG|| and ||Δθ||. The norms are derived from controller.dat squared accumulators, and callers can override y-axis scales with scales={metric: scale}.',
+    notes: 'TestbenchData.plot_training now promotes expected training panels before generic scalar traces: loss, alpha, and a twin-axis controller-norm panel for ||ΔG|| and ||Δθ_raw||. The norms are derived from controller.dat squared accumulators, and callers can override y-axis scales with scales={metric: scale}.',
   },
   {
     id: 'ENB-028',

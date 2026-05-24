@@ -175,11 +175,11 @@ epoch,sample,global_step,sample_index,loss
 The controller trace uses the same index columns and then appends the global controller metrics:
 
 ```text
-epoch,sample,global_step,sample_index,dtheta_sq,dgrad_sq,lhs_sq,rhs_sq,alpha_feasible,alpha_state
-1,1,0,37,0.25,0.5,0.00005,0.5625,0.875,0.9875
+epoch,sample,global_step,sample_index,raw_update_norm_sq,controlled_update_norm_sq,actual_update_norm_sq,dgrad_norm_sq,dtheta_for_control_sq,stability_lhs_raw,stability_lhs_ctrl,stability_rhs,alpha_feasible,alpha_state,alpha_code,alpha_min,controller_feasible
+1,8,7,37,0.25,0.19043,0.1875,0.5,0.25,0.00005,0.000038,0.5625,0.875,0.9875,28,0.03125,1
 ```
 
-For GT-0 and GT-1, `dtheta_sq` and `dgrad_sq` are the globally summed curvature-sensor terms. `lhs_sq` and `rhs_sq` are the two sides of the division-free candidate-search inequality. `alpha_feasible` is the raw accepted candidate, and `alpha_state` is the final alpha emitted by the controller. For `CTRL-NONE`, the file still exists with zero curvature terms and unit alpha-state values.
+For GT-0 and GT-1, `controller.dat` is written only on `batch_end`, because the controller law is only meaningful after the batch gradient is available. The control geometry uses the raw optimizer proposal: `raw_update_norm_sq` and `dtheta_for_control_sq` are `||Delta theta_raw||^2`. For SGD, `Delta theta_raw = -eta G`, so the learning rate is already included in that value. `controlled_update_norm_sq` is the alpha-scaled proposal, `actual_update_norm_sq` is measured after the fixed-point assignment back into stored parameters, and `controller_feasible` is `0` when the nonzero `alpha_min` fallback was used because no candidate satisfied the squared inequality.
 
 Layer-local parameter traces live below the global traces:
 
@@ -213,13 +213,13 @@ The default training panel treats the controller diagnostics as expected firmwar
 
 ```python
 tb.plot_training(
-    metrics=["loss", "alpha", "dgrad_norm", "dtheta_norm"],
-    scales={"dgrad_norm": "log", "dtheta_norm": "log"},
+    metrics=["loss", "alpha", "dgrad_norm", "raw_update_norm"],
+    scales={"dgrad_norm": "log", "raw_update_norm": "log"},
     window_size=30,
 )
 ```
 
-The norm columns are derived by ENABOL as `sqrt(dgrad_sq)` and `sqrt(dtheta_sq)`, so the generated firmware only needs to emit the squared accumulator values.
+The norm columns are derived by ENABOL as `sqrt(dgrad_norm_sq)` and `sqrt(raw_update_norm_sq)`, so the generated firmware only needs to emit the squared accumulator values.
 
 Per-layer parameter traces are loaded into `tb.layers` when `load_weights` is enabled. For example, `tb.layers["dense0"].weights` holds the raw weight evolution and `tb.layers["dense0"].stats` holds scalar summaries such as `weights.mean`, `weights.std`, and `weights.norm_l2`. `tb.stats_frame` merges those layer statistics with names such as `dense0.weights.mean`, and `tb.scalar_frame` combines top-level traces plus layer statistics for plotting.
 
@@ -243,6 +243,7 @@ Controller IDs are normalized before trainable writer dispatch. For the currentl
 | [ENB-025](/docs/status/tasks?query=ENB-025) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Split top-level traces from raw per-layer parameter traces, added `load_weights`, and exposed per-layer parameter summary statistics through `tb.stats_frame` and `tb.scalar_frame`. |
 | [HLS4ML-038](/docs/status/tasks?query=HLS4ML-038) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `hls4ml/templates/vivado/trainable/controllers/global_throttle.h`, `enabol/testbench.py`, `tests/test_history.py` | Added explicit controller metric outputs and `tb_data/training/controller.dat`, then documented and tested ENABOL-side loading as top-level scalar traces. |
 | [ENB-027](/docs/status/tasks?query=ENB-027) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Promoted controller diagnostics into the standard `TestbenchData.plot_training(...)` layout with derived norms, a twin-axis controller panel, and configurable y-axis scales. |
+| [HLS4ML-039](/docs/status/tasks?query=HLS4ML-039) | 2026-05-23 | `hls4ml/templates/vivado/trainable/controllers/global_throttle.h`, `hls4ml/writer/vivado_writer.py`, `enabol/testbench.py`, `tests/test_history.py` | Replaced actual-update denominator geometry with raw optimizer update geometry, enforced a nonzero alpha candidate floor, and expanded controller telemetry. |
 
 The first validation target should be:
 

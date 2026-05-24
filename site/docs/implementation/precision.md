@@ -21,7 +21,7 @@ This page is a coder-facing reference for `enabol/precision.py`: the explicit la
 </TBox>
 
 <TBox type="info" title="Precision relationship rules">
-This page documents the `PrecisionDict` API. The evolving trainable precision dependency rules live in [Trainable Precision Schema](/docs/implementation/precision-schema), including the first known controller rule for `weight_t -> dtheta_sq -> controller_metric`.
+This page documents the `PrecisionDict` API. The evolving trainable precision dependency rules live in [Trainable Precision Schema](/docs/implementation/precision-schema), including the first known controller rule for resolving squared update telemetry in `controller_metric`.
 </TBox>
 
 ## Module Map

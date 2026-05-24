@@ -87,21 +87,23 @@ This controller reacts more smoothly than GT-0, at the cost of slower response t
 
 ## hls4ml Implementation
 
-Kernel: `nnet::global_throttle_order1_law<CONFIG_T>(dtheta_sq, dgrad_sq, alpha, reset_numerator)`.
+Kernel: `nnet::global_throttle_order1_law<CONFIG_T>(raw_update_norm_sq, dgrad_norm_sq, alpha, ..., reset_numerator)`.
 
-Shares the `curvature_sensor_order0` (Phase 1) with GT-0. Maintains a static `alpha_state` variable. On `reset_numerator = true`, `alpha_state` reinitializes to 1.
+Shares the `raw_update_sensor_order0` (Phase 1) with GT-0. The law uses raw optimizer update geometry, not actual/throttled parameter movement. For SGD, `raw_update_norm_sq` already includes the learning rate because the raw update is `-eta * gradient`. Maintains a static `alpha_state` variable. On `reset_numerator = true`, `alpha_state` reinitializes to 1.
 
 Law (division-free, on squared norms):
 ```math
-\alpha_{\text{feasible}} = \max\{\alpha_{\text{cand}} \,|\, \alpha^2 \eta^2 \|\Delta G\|^2 \leq \chi^2 (\|\Delta\theta\|^2 + \varepsilon^2)\}
+\alpha_{\text{feasible}} = \max\{\alpha_{\text{cand}} \,|\, \alpha^2 \eta^2 \|\Delta G\|^2 \leq \chi^2 (\|\Delta\theta_{\text{raw}}\|^2 + \varepsilon^2)\}
 \qquad
 \alpha \leftarrow \operatorname{clip}\bigl(\alpha + k_\alpha(\alpha_{\text{feasible}} - \alpha),\; \alpha_{\min},\; \alpha_{\max}\bigr)
 ```
 
 Config field `controller_k_alpha` (default `0.1`, key `KAlpha` in YAML).
 
-Trace logging provides ||ΔG||², ||Δθ||², α_feasible, α_state, and α.
+The candidate table does not use zero as a normal candidate. If no candidate satisfies the inequality, the law uses the nonzero minimum candidate and logs `controller_feasible = 0`.
+
+Trace logging provides raw, controlled, and actual update squared norms, ||ΔG||², the squared stability terms, α_feasible, α_state, α_code, α_min, and feasibility.
 
 ## Implementation Status
 
-Implemented in hls4ml-trainable (`HLS4ML-022`, inprogress).  The original division-based GT-1 law was replaced with the division-free inequality-search approach, matching GT-0's fix.  CSIM validation is pending.
+Implemented in hls4ml-trainable (`HLS4ML-022`, inprogress). The original division-based GT-1 law was replaced with the division-free inequality-search approach, matching GT-0's fix. HLS4ML-039 replaced actual-update denominator geometry with raw-update control geometry to avoid alpha self-locking.

@@ -83,18 +83,20 @@ For a Dense layer, the trainable path currently uses these tensor families:
 | Controller alpha | `alpha` | Global scalar throttle. | `alpha` or default | ? |
 | Controller metric | `m_ctrl` | Squared norms and inequality terms used by controller laws. | `controller_metric`, currently aliased from `accumulator` if omitted | Known partial rule below |
 
-## Known Rule: Parameter Precision To `dtheta_sq`
+## Known Rule: Parameter Precision To Actual Update Telemetry
 
-The controller metric stores squared geometry. For GT-0 and GT-1, the controller trace includes:
+The controller metric stores squared geometry. For GT-0 and GT-1, the controller law now uses raw optimizer update geometry:
 
 ```text
-dtheta_sq = ||theta_t - theta_{t-1}||^2
-dgrad_sq  = ||G_t - G_{t-1}||^2
-lhs_sq    = learning_rate^2 * dgrad_sq
-rhs_sq    = chi^2 * (dtheta_sq + epsilon^2)
+raw_update_norm_sq    = ||Delta theta_raw||^2
+dgrad_norm_sq         = ||G_t - G_{t-1}||^2
+stability_lhs_raw     = learning_rate^2 * dgrad_norm_sq
+stability_lhs_ctrl    = alpha^2 * stability_lhs_raw
+stability_rhs         = chi^2 * (raw_update_norm_sq + epsilon^2)
+actual_update_norm_sq = ||theta_after - theta_before||^2
 ```
 
-This means `controller_metric` cannot be copied blindly from `gradient_accum`, and it usually needs more fractional bits than the stored weight.
+For SGD, `raw_update_norm_sq` already contains the learning rate because the raw update is `-learning_rate * gradient`. The separate `actual_update_norm_sq` telemetry measures the movement after alpha and fixed-point assignment. These squared quantities mean `controller_metric` cannot be copied blindly from `gradient_accum`, and it usually needs more fractional bits than the stored weight.
 
 Let a stored parameter type have:
 
@@ -111,7 +113,7 @@ The smallest nonzero one-parameter movement is approximately `q_theta`, so the s
 q_theta^2 = 2^(-2 * F_theta)
 ```
 
-Therefore, `controller_metric` must have enough fractional bits to represent at least that squared movement:
+Therefore, if we want actual movement telemetry to resolve one stored-parameter LSB, `controller_metric` must have enough fractional bits to represent at least that squared movement:
 
 ```text
 F_controller_metric >= 2 * F_theta + guard_bits
@@ -164,7 +166,7 @@ This table is the starting point for the final precision inference pass.
 | `update` | raw update precision, alpha precision, stored parameter precision | ? |
 | `optimizer_state` | optimizer kind, raw update precision, gradient precision | ? |
 | `alpha` | controller kind, controller rails, smoothing rule | ? |
-| `controller_metric` | stored parameter precision, gradient precision, learning rate, controller law | `F_controller_metric >= 2 * F_theta + guard_bits` for `dtheta_sq`; more rules pending |
+| `controller_metric` | stored parameter precision, gradient precision, learning rate, controller law | `F_controller_metric >= 2 * F_theta + guard_bits` for actual update telemetry; raw-update controller law also depends on update/gradient precision |
 
 ## Notebook Guidance For Now
 
@@ -205,4 +207,4 @@ This belongs to [ENB-023](/docs/status/tasks?query=ENB-023): infer hls4ml traina
 
 | Task | Date | Files | Summary |
 |---|---|---|---|
-| [ENB-028](/docs/status/tasks?query=ENB-028) | 2026-05-23 | `site/docs/implementation/precision-schema.md` | Added the first trainable precision relationship document and recorded the `weight_t -> dtheta_sq -> controller_metric` fractional-bit rule. |
+| [ENB-028](/docs/status/tasks?query=ENB-028) | 2026-05-23 | `site/docs/implementation/precision-schema.md` | Added the first trainable precision relationship document and recorded the stored-parameter movement telemetry to `controller_metric` fractional-bit rule. |

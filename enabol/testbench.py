@@ -33,8 +33,13 @@ PARAMETER_STAT_COLUMNS = [
 CONTROLLER_SQUARED_TO_NORM = {
     'dtheta_sq': 'dtheta_norm',
     'dgrad_sq': 'dgrad_norm',
+    'raw_update_norm_sq': 'raw_update_norm',
+    'controlled_update_norm_sq': 'controlled_update_norm',
+    'actual_update_norm_sq': 'actual_update_norm',
+    'dgrad_norm_sq': 'dgrad_norm',
+    'dtheta_for_control_sq': 'dtheta_for_control_norm',
 }
-DEFAULT_CONTROLLER_PANEL = ('dgrad_norm', 'dtheta_norm')
+DEFAULT_CONTROLLER_PANEL = ('dgrad_norm', 'raw_update_norm')
 
 
 @dataclass
@@ -320,7 +325,26 @@ def _training_panels(frame: pd.DataFrame, metrics: list[str] | None) -> list[dic
 
 
 def _default_reserved_metrics(frame: pd.DataFrame) -> set[str]:
-    reserved = {'loss', 'alpha', 'dtheta_sq', 'dgrad_sq', 'lhs_sq', 'rhs_sq', 'alpha_feasible', 'alpha_state'}
+    reserved = {
+        'loss',
+        'alpha',
+        'raw_update_norm_sq',
+        'controlled_update_norm_sq',
+        'actual_update_norm_sq',
+        'dgrad_norm_sq',
+        'dtheta_for_control_sq',
+        'stability_lhs_raw',
+        'stability_lhs_ctrl',
+        'stability_rhs',
+        'alpha_feasible',
+        'alpha_state',
+        'alpha_code',
+        'alpha_min',
+        'controller_feasible',
+        'controlled_update_norm',
+        'actual_update_norm',
+        'dtheta_for_control_norm',
+    }
     if all(metric in frame.columns for metric in DEFAULT_CONTROLLER_PANEL):
         reserved.update(DEFAULT_CONTROLLER_PANEL)
     return reserved
@@ -565,7 +589,7 @@ def _plot_controller_norms(
         right_ax,
         frame,
         right_metric,
-        label=r'$||\Delta \theta||$',
+        label=r'$||\Delta \theta_{raw}||$',
         color='#008837',
         shade_color='#a6dba0',
         window_size=window_size,
@@ -575,7 +599,7 @@ def _plot_controller_norms(
     _apply_metric_scale(ax, left_metric, scales)
     _apply_metric_scale(right_ax, right_metric, scales)
     ax.set_ylabel(r'$||\Delta G||$', color='#7b3294')
-    right_ax.set_ylabel(r'$||\Delta \theta||$', color='#008837')
+    right_ax.set_ylabel(r'$||\Delta \theta_{raw}||$', color='#008837')
     ax.tick_params(axis='y', labelcolor='#7b3294')
     right_ax.tick_params(axis='y', labelcolor='#008837')
 
