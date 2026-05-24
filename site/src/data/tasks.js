@@ -642,7 +642,7 @@ const tasks = [
         {label: 'Optimizer + Controller', href: '/docs/hls4ml/optimizer-controller'},
       ],
     },
-    notes: 'CTRL-NONE and CTRL-GT-ORDER-0 are implemented and wired. CTRL-GT-ORDER-0 includes the per-layer curvature sensor (||ΔG||/||Δθ|| + ε) and algebraic safe-alpha law (χ/(ηC+ε) clipped to [α_min, α_max]). CTRL-GT-ORDER-1/2/2-QA remain.',
+    notes: 'CTRL-NONE, CTRL-GT-ORDER-0, and CTRL-GT-ORDER-1 are implemented and wired. GT-0/GT-1 use the shared curvature_sensor_order0 plus division-free candidate search over α²·η²·||ΔG||² ≤ χ²·(||Δθ||²+ε²). CTRL-GT-ORDER-2/2-QA remain.',
   },
   {
     id: 'HLS4ML-009',
@@ -946,7 +946,7 @@ const tasks = [
         {label: 'Global Throttle', href: '/docs/formulation/global-throttle'},
       ],
     },
-    notes: 'Implemented global_throttle_order0 C++ kernel with internal curvature sensor (persistent prev_θ/prev_G storage, ||ΔG||/(||Δθ||+ε), α=χ/(ηC+ε) clipped to [α_min,α_max]). Wired into vivado_writer.py: config struct gets controller_chi/epsilon/alpha_min/alpha_max fields; call chain emits GT-0 before SGD for CTRL-GT-ORDER-0. CSIM validation under ENB-017 or CSIM-002.',
+    notes: 'Implemented CTRL-GT-ORDER-0 as a global law fed by the shared curvature_sensor_order0. The writer sums per-layer ||Δθ||² and ||ΔG||² contributions into global accumulators, then GT-0 selects the largest candidate alpha satisfying α²·η²·||ΔG||² ≤ χ²·(||Δθ||²+ε²). This avoids sqrt/division in CSIM/HLS and replaces the older internal-curvature algebraic division path.',
   },
   {
     id: 'HLS4ML-022',
@@ -1316,6 +1316,30 @@ const tasks = [
       ],
     },
     notes: 'Current slice implemented: generated trainable CSIM writes metadata-bearing comma-delimited .dat traces under tb_data/training/ for loss, alpha, and per-layer epoch-level parameter traces such as dense0/weights.dat and dense0/biases.dat. Repeated epoch/sample/global_step/sample_index columns allow sparse traces with different cadences. Broader trace selection for gradients and controller internals remains open.',
+  },
+  {
+    id: 'HLS4ML-038',
+    title: 'HLS4ML - Emit controller metric trace from trainable CSIM',
+    status: 'done',
+    priority: 'high',
+    stage: 'validation',
+    target: 'csim',
+    action: 'development',
+    summaryTags: ['hls4ml', 'controller', 'trace', 'curvature'],
+    timeline: true,
+    owners: ['mbvalentin'],
+    created: '2026-05-23',
+    due_date: null,
+    start_date: '2026-05-23',
+    end_date: '2026-05-23',
+    dependsOn: ['HLS4ML-009', 'HLS4ML-037'],
+    links: {
+      docs: [
+        {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
+        {label: 'testbench.py', href: '/docs/implementation/testbench'},
+      ],
+    },
+    notes: 'Generated trainable top-level functions now expose controller metric outputs and the trainable CSIM testbench writes tb_data/training/controller.dat with dtheta_sq, dgrad_sq, lhs_sq, rhs_sq, alpha_feasible, and alpha_state. TestbenchData loads controller.dat as top-level scalar traces.',
   },
   {
     id: 'ENB-017',

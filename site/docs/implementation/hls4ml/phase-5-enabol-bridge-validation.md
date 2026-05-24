@@ -144,6 +144,7 @@ The generated trainable testbench:
 - writes predictions to the normal CSIM result log
 - writes loss to `tb_data/training/loss.dat`
 - writes alpha to `tb_data/training/alpha.dat`
+- writes controller diagnostics to `tb_data/training/controller.dat`
 - writes trainable weights and biases once per epoch to per-layer files under `tb_data/training/<layer>/`
 - prints compact progress every `Model.Training.LogEvery` global train steps
 
@@ -171,6 +172,15 @@ epoch,sample,global_step,sample_index,loss
 1,1,0,37,2.02597
 ```
 
+The controller trace uses the same index columns and then appends the global controller metrics:
+
+```text
+epoch,sample,global_step,sample_index,dtheta_sq,dgrad_sq,lhs_sq,rhs_sq,alpha_feasible,alpha_state
+1,1,0,37,0.25,0.5,0.00005,0.5625,0.875,0.9875
+```
+
+For GT-0 and GT-1, `dtheta_sq` and `dgrad_sq` are the globally summed curvature-sensor terms. `lhs_sq` and `rhs_sq` are the two sides of the division-free candidate-search inequality. `alpha_feasible` is the raw accepted candidate, and `alpha_state` is the final alpha emitted by the controller. For `CTRL-NONE`, the file still exists with zero curvature terms and unit alpha-state values.
+
 Layer-local parameter traces live below the global traces:
 
 ```text
@@ -197,7 +207,7 @@ tb = TestbenchData.from_dir(hls_model.config.get_output_dir())
 tb.plot_training(window_size=30)
 ```
 
-`TestbenchData.from_dir(...)` accepts the hls4ml output directory, `tb_data`, or `tb_data/training`. The returned object keeps top-level traces such as `loss` and `alpha` at `tb.frame`, parsed display metadata at `tb.metadata`, and per-trace metadata at `tb.metadata_by_trace`.
+`TestbenchData.from_dir(...)` accepts the hls4ml output directory, `tb_data`, or `tb_data/training`. The returned object keeps top-level traces such as `loss`, `alpha`, and the columns from `controller.dat` at `tb.frame`, parsed display metadata at `tb.metadata`, and per-trace metadata at `tb.metadata_by_trace`.
 
 Per-layer parameter traces are loaded into `tb.layers` when `load_weights` is enabled. For example, `tb.layers["dense0"].weights` holds the raw weight evolution and `tb.layers["dense0"].stats` holds scalar summaries such as `weights.mean`, `weights.std`, and `weights.norm_l2`. `tb.stats_frame` merges those layer statistics with names such as `dense0.weights.mean`, and `tb.scalar_frame` combines top-level traces plus layer statistics for plotting.
 
@@ -219,6 +229,7 @@ Controller IDs are normalized before trainable writer dispatch. For the currentl
 | [HLS4ML-037](/docs/status/tasks?query=HLS4ML-037) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `test/pytest/test_trainable_config.py` | Added per-layer epoch-level parameter traces, fixed testbench weight visibility through `extern`, and normalized accepted no-controller spellings before writer dispatch. |
 | [ENB-024](/docs/status/tasks?query=ENB-024) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Added recursive nested-trace loading, sparse-trace plotting support, table-style `TestbenchData.__repr__`, and per-trace metadata storage. |
 | [ENB-025](/docs/status/tasks?query=ENB-025) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Split top-level traces from raw per-layer parameter traces, added `load_weights`, and exposed per-layer parameter summary statistics through `tb.stats_frame` and `tb.scalar_frame`. |
+| [HLS4ML-038](/docs/status/tasks?query=HLS4ML-038) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `hls4ml/templates/vivado/trainable/controllers/global_throttle.h`, `enabol/testbench.py`, `tests/test_history.py` | Added explicit controller metric outputs and `tb_data/training/controller.dat`, then documented and tested ENABOL-side loading as top-level scalar traces. |
 
 The first validation target should be:
 

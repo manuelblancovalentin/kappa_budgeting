@@ -56,6 +56,7 @@ The first files are:
 |---|---|
 | `loss.dat` | every logged training sample | `loss` |
 | `alpha.dat` | every logged training sample | `alpha` |
+| `controller.dat` | every logged training sample | `dtheta_sq`, `dgrad_sq`, `lhs_sq`, `rhs_sq`, `alpha_feasible`, `alpha_state` |
 | `<layer>/weights.dat` | once per epoch | one column per flattened matrix element, named `weight_<input>_<output>` |
 | `<layer>/biases.dat` | once per epoch | one column per bias element, named `bias_<output>` |
 
@@ -69,7 +70,9 @@ The repeated index columns are intentional. Traces are allowed to have different
 
 Dense weights use the same row-major flattening convention as hls4ml dense kernels: `weight_<input>_<output>` maps to flat index `input * n_out + output`.
 
-`TestbenchData.from_dir(...)` recursively discovers trace files, but it does not put raw parameter matrices into the main dataframe. Top-level traces such as `loss.dat` and `alpha.dat` are outer-merged into `tb.frame`. Per-layer parameter traces are loaded into `tb.layers[layer_name]` when `load_weights` allows that layer.
+`TestbenchData.from_dir(...)` recursively discovers trace files, but it does not put raw parameter matrices into the main dataframe. Top-level traces such as `loss.dat`, `alpha.dat`, and `controller.dat` are outer-merged into `tb.frame`. Per-layer parameter traces are loaded into `tb.layers[layer_name]` when `load_weights` allows that layer.
+
+`controller.dat` is the firmware-side controller diagnostic trace. For GT-0 and GT-1, `dtheta_sq` and `dgrad_sq` are the global summed curvature-sensor quantities, `lhs_sq` and `rhs_sq` are the inequality terms used by the division-free candidate search, `alpha_feasible` is the largest candidate accepted by the raw feasibility check, and `alpha_state` is the final controller state applied to the SGD update. For `CTRL-NONE`, the same columns are emitted with zero curvature terms and unit alpha-state values so downstream analysis can use a stable schema.
 
 Parameter traces have their own raw dataframes and summary statistics. For example, `tb.layers["dense0"].weights` is the raw weights dataframe, and `tb.layers["dense0"].stats` is a dataframe of scalar summaries computed from weights and biases. Sparse traces therefore remain sparse at the layer level, while `tb.stats_frame` exposes scalar summaries with names such as `dense0.weights.mean` and `dense0.biases.norm_l2`.
 
@@ -113,7 +116,7 @@ Trace comments are parsed into dictionaries:
 | Attribute | Meaning |
 |---|---|
 | `tb.metadata` | Metadata from the first trace file, normally enough for display. |
-| `tb.metadata_by_trace` | Metadata keyed by trace name, for example `loss`, `alpha`, `dense0/weights`, and `dense0/biases`. |
+| `tb.metadata_by_trace` | Metadata keyed by trace name, for example `loss`, `alpha`, `controller`, `dense0/weights`, and `dense0/biases`. |
 | `tb.layers` | Mapping from layer name to `TestbenchLayerData`. |
 | `tb.stats_frame` | Scalar summaries computed from loaded layer parameter traces. |
 | `tb.scalar_frame` | `tb.frame` plus `tb.stats_frame`, used by `plot_training(...)`. |
@@ -161,6 +164,12 @@ The bottom x-axis is `global_step`. The top x-axis of the first metric panel mar
 tb.plot_training(metrics=["loss", "dense0.weights.mean", "dense0.weights.norm_l2"], window_size=1)
 ```
 
+Controller diagnostics can be plotted the same way because `controller.dat` is a top-level scalar trace:
+
+```python
+tb.plot_training(metrics=["loss", "alpha", "dtheta_sq", "dgrad_sq", "alpha_state"], window_size=1)
+```
+
 Raw individual parameter values remain available through `tb.layers[layer].weights` and `tb.layers[layer].biases`. For larger networks, scalar summaries are the default plot backend. More specialized views can be layered on top later: selected element line plots, before/after histograms, and weight-matrix heatmaps.
 
 Use `show=False` in tests or scripts that need the figure object:
@@ -176,3 +185,4 @@ fig, axes = tb.plot_training(show=False)
 | [ENB-024](/docs/status/tasks?query=ENB-024) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Added `TestbenchData.from_dir(...)`, metadata parsing, merged trace dataframe storage, and `plot_training(...)` for hls4ml trainable CSIM traces. |
 | [HLS4ML-037](/docs/status/tasks?query=HLS4ML-037) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `enabol/testbench.py`, `tests/test_history.py` | Added per-layer epoch-level parameter traces, sparse nested-trace loading, default all-metric plotting, and a table-style `TestbenchData` representation. |
 | [ENB-025](/docs/status/tasks?query=ENB-025) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Moved raw parameter traces into per-layer objects, added `load_weights`, and computed per-layer parameter summary dataframes for plotting. |
+| [HLS4ML-038](/docs/status/tasks?query=HLS4ML-038) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `enabol/testbench.py`, `tests/test_history.py` | Added `controller.dat` as a top-level scalar trace for controller curvature diagnostics and alpha-state analysis. |
