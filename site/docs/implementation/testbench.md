@@ -156,18 +156,31 @@ The rail and underflow fractions are present now but return `NaN` until the read
 | Metadata | Compact run metadata parsed from trace comments. |
 | Loss | Rolling mean and quantile bands on a log scale. |
 | Alpha | Rolling mean and quantile bands for the controller output. |
+| Controller norms | Rolling mean and quantile bands for `||Delta G||` and `||Delta theta||` on twin y-axes. |
 | Parameter metrics | Rolling mean and quantile bands for loaded parameter summary statistics, after dropping missing sparse-trace rows. |
 
-The bottom x-axis is `global_step`. The top x-axis of the first metric panel marks epoch starts. By default, `plot_training()` plots every loaded scalar metric in `tb.scalar_frame`, including parameter statistics. Pass `metrics=[...]` to inspect a smaller subset:
+The controller norm panel is derived from `controller.dat`: `dgrad_norm = sqrt(dgrad_sq)` and `dtheta_norm = sqrt(dtheta_sq)`. The raw squared metrics remain available in `tb.frame`, while the derived norms are exposed through `tb.scalar_frame`.
+
+The bottom x-axis is `global_step`. The top x-axis of the first metric panel marks epoch starts. By default, `plot_training()` promotes the expected firmware-training panels first: loss, alpha, controller norms, and then loaded parameter statistics. Pass `metrics=[...]` to inspect a smaller subset:
 
 ```python
 tb.plot_training(metrics=["loss", "dense0.weights.mean", "dense0.weights.norm_l2"], window_size=1)
 ```
 
-Controller diagnostics can be plotted the same way because `controller.dat` is a top-level scalar trace:
+Controller diagnostics can be plotted with the standardized controller panel by requesting both norms:
 
 ```python
-tb.plot_training(metrics=["loss", "alpha", "dtheta_sq", "dgrad_sq", "alpha_state"], window_size=1)
+tb.plot_training(metrics=["loss", "alpha", "dgrad_norm", "dtheta_norm"], window_size=1)
+```
+
+Use `scales={...}` to override y-axis scales. `loss` defaults to `log`; all other metrics default to Matplotlib's linear scale unless specified:
+
+```python
+tb.plot_training(
+    metrics=["loss", "alpha", "dgrad_norm", "dtheta_norm"],
+    scales={"dgrad_norm": "log", "dtheta_norm": "log"},
+    window_size=30,
+)
 ```
 
 Raw individual parameter values remain available through `tb.layers[layer].weights` and `tb.layers[layer].biases`. For larger networks, scalar summaries are the default plot backend. More specialized views can be layered on top later: selected element line plots, before/after histograms, and weight-matrix heatmaps.
@@ -186,3 +199,4 @@ fig, axes = tb.plot_training(show=False)
 | [HLS4ML-037](/docs/status/tasks?query=HLS4ML-037) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `enabol/testbench.py`, `tests/test_history.py` | Added per-layer epoch-level parameter traces, sparse nested-trace loading, default all-metric plotting, and a table-style `TestbenchData` representation. |
 | [ENB-025](/docs/status/tasks?query=ENB-025) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Moved raw parameter traces into per-layer objects, added `load_weights`, and computed per-layer parameter summary dataframes for plotting. |
 | [HLS4ML-038](/docs/status/tasks?query=HLS4ML-038) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `enabol/testbench.py`, `tests/test_history.py` | Added `controller.dat` as a top-level scalar trace for controller curvature diagnostics and alpha-state analysis. |
+| [ENB-027](/docs/status/tasks?query=ENB-027) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Standardized the training panel with derived controller norms, a twin-axis controller norm panel, and per-metric y-axis scale overrides. |

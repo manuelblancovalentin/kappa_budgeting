@@ -110,6 +110,29 @@ def test_testbench_data_loads_controller_trace_as_top_level_scalars(tmp_path):
     assert len(axes) == 4
 
 
+def test_testbench_data_promotes_controller_norm_panel_and_scales(tmp_path):
+    trace_dir = tmp_path / 'tb_data' / 'training'
+    trace_dir.mkdir(parents=True)
+    write_trace(trace_dir / 'loss.dat', 'loss', 'loss', [1.0, 0.5])
+    write_trace(trace_dir / 'alpha.dat', 'alpha', 'alpha', [1.0, 0.9875])
+    write_controller_trace(trace_dir / 'controller.dat')
+
+    data = TestbenchData.from_dir(tmp_path)
+    fig, axes = data.plot_training(
+        metrics=['loss', 'alpha', 'dgrad_norm', 'dtheta_norm'],
+        scales={'dgrad_norm': 'log', 'dtheta_norm': 'log'},
+        window_size=1,
+        show=False,
+    )
+
+    assert 'dgrad_norm' in data.scalar_metrics
+    assert 'dtheta_norm' in data.scalar_metrics
+    assert len(axes) == 3
+    assert axes[0].get_yscale() == 'log'
+    assert axes[2].get_yscale() == 'log'
+    assert fig is not None
+
+
 def test_testbench_data_handles_sparse_trace_cadences(tmp_path):
     trace_dir = tmp_path / 'tb_data' / 'training'
     trace_dir.mkdir(parents=True)

@@ -209,6 +209,18 @@ tb.plot_training(window_size=30)
 
 `TestbenchData.from_dir(...)` accepts the hls4ml output directory, `tb_data`, or `tb_data/training`. The returned object keeps top-level traces such as `loss`, `alpha`, and the columns from `controller.dat` at `tb.frame`, parsed display metadata at `tb.metadata`, and per-trace metadata at `tb.metadata_by_trace`.
 
+The default training panel treats the controller diagnostics as expected firmware-training signals rather than arbitrary traces. `loss` is plotted first, `alpha` is plotted as the controller output, and the global controller norms are plotted together on a twin-axis panel:
+
+```python
+tb.plot_training(
+    metrics=["loss", "alpha", "dgrad_norm", "dtheta_norm"],
+    scales={"dgrad_norm": "log", "dtheta_norm": "log"},
+    window_size=30,
+)
+```
+
+The norm columns are derived by ENABOL as `sqrt(dgrad_sq)` and `sqrt(dtheta_sq)`, so the generated firmware only needs to emit the squared accumulator values.
+
 Per-layer parameter traces are loaded into `tb.layers` when `load_weights` is enabled. For example, `tb.layers["dense0"].weights` holds the raw weight evolution and `tb.layers["dense0"].stats` holds scalar summaries such as `weights.mean`, `weights.std`, and `weights.norm_l2`. `tb.stats_frame` merges those layer statistics with names such as `dense0.weights.mean`, and `tb.scalar_frame` combines top-level traces plus layer statistics for plotting.
 
 The generated metadata comments are emitted by the generated C++ CSIM testbench. Static values such as project, backend, controller, optimizer, loss, and learning rate are injected by the hls4ml writer when it writes `*_test.cpp`. Runtime values such as `User`, `Host`, and `Date` are read by that C++ testbench during CSIM from the process environment and local clock.
@@ -230,6 +242,7 @@ Controller IDs are normalized before trainable writer dispatch. For the currentl
 | [ENB-024](/docs/status/tasks?query=ENB-024) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Added recursive nested-trace loading, sparse-trace plotting support, table-style `TestbenchData.__repr__`, and per-trace metadata storage. |
 | [ENB-025](/docs/status/tasks?query=ENB-025) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Split top-level traces from raw per-layer parameter traces, added `load_weights`, and exposed per-layer parameter summary statistics through `tb.stats_frame` and `tb.scalar_frame`. |
 | [HLS4ML-038](/docs/status/tasks?query=HLS4ML-038) | 2026-05-23 | `hls4ml/writer/vivado_writer.py`, `hls4ml/templates/vivado/trainable/controllers/global_throttle.h`, `enabol/testbench.py`, `tests/test_history.py` | Added explicit controller metric outputs and `tb_data/training/controller.dat`, then documented and tested ENABOL-side loading as top-level scalar traces. |
+| [ENB-027](/docs/status/tasks?query=ENB-027) | 2026-05-23 | `enabol/testbench.py`, `tests/test_history.py` | Promoted controller diagnostics into the standard `TestbenchData.plot_training(...)` layout with derived norms, a twin-axis controller panel, and configurable y-axis scales. |
 
 The first validation target should be:
 

@@ -1566,6 +1566,30 @@ const tasks = [
     },
     notes: 'Split global_throttle_order0 into curvature_sensor_order0 (per-layer squared-norm contribution) and global_throttle_order0_law (global law from accumulated norms). Three-phase writer emission: Phase 1 accumulates per-layer squared norms into global_dtheta_sq/global_dgrad_sq, Phase 2 calls the law kernel, Phase 3 applies SGD + scaled update per layer. GT-1 built on the same architecture. Trace logging added for curvature, ||dθ||, ||dG||, alpha_state.',
   },
+  {
+    id: 'ENB-027',
+    title: 'Standardize TestbenchData training panels for controller diagnostics',
+    status: 'done',
+    priority: 'medium',
+    stage: 'validation',
+    target: 'plots',
+    action: 'development',
+    summaryTags: ['TestbenchData', 'controller', 'plots', 'diagnostics'],
+    timeline: true,
+    owners: ['mbvalentin'],
+    created: '2026-05-23',
+    due_date: null,
+    start_date: '2026-05-23',
+    end_date: '2026-05-23',
+    dependsOn: ['ENB-024', 'HLS4ML-038'],
+    links: {
+      docs: [
+        {label: 'testbench.py', href: '/docs/implementation/testbench'},
+        {label: 'Phase 5 Bridge + Validation', href: '/docs/implementation/hls4ml/phase-5-enabol-bridge-validation'},
+      ],
+    },
+    notes: 'TestbenchData.plot_training now promotes expected training panels before generic scalar traces: loss, alpha, and a twin-axis controller-norm panel for ||ΔG|| and ||Δθ||. The norms are derived from controller.dat squared accumulators, and callers can override y-axis scales with scales={metric: scale}.',
+  },
 ];
 
 export default tasks;

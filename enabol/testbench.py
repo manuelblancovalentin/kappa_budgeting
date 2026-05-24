@@ -30,6 +30,11 @@ PARAMETER_STAT_COLUMNS = [
     'near_rail_fraction',
     'underflow_fraction',
 ]
+CONTROLLER_SQUARED_TO_NORM = {
+    'dtheta_sq': 'dtheta_norm',
+    'dgrad_sq': 'dgrad_norm',
+}
+DEFAULT_CONTROLLER_PANEL = ('dgrad_norm', 'dtheta_norm')
 
 
 @dataclass
@@ -124,9 +129,10 @@ class TestbenchData:
     @property
     def scalar_frame(self) -> pd.DataFrame:
         stats = self.stats_frame
+        frame = _add_controller_derived_metrics(self.frame)
         if stats.empty:
-            return self.frame
-        return pd.concat([self.frame, stats], axis=1).sort_index()
+            return frame
+        return pd.concat([frame, stats], axis=1).sort_index()
 
     @property
     def layer_metrics(self) -> list[str]:
@@ -215,20 +221,21 @@ class TestbenchData:
         *,
         window_size: int = 30,
         levels: int = 3,
+        scales: dict[str, str] | None = None,
         show_metadata: bool = True,
         title: str | None = None,
         figsize: tuple[float, float] | None = None,
         show: bool = True,
     ):
         plot_frame = self.scalar_frame
-        if metrics is None:
-            metrics = list(plot_frame.columns)
-        metrics = [metric for metric in metrics if metric in plot_frame.columns]
-        if not metrics:
+        requested_metrics = list(metrics) if metrics is not None else None
+        panels = _training_panels(plot_frame, requested_metrics)
+        if not panels:
             raise ValueError(f'None of the requested metrics are available. Available metrics: {list(plot_frame.columns)}')
 
+        scales = dict(scales or {})
         metadata_lines = _metadata_lines(self.metadata) if show_metadata else []
-        n_metric_axes = len(metrics)
+        n_metric_axes = len(panels)
         nrows = n_metric_axes + (1 if metadata_lines else 0)
         if figsize is None:
             figsize = (11, 3.8 * n_metric_axes + (1.1 if metadata_lines else 0.4))
@@ -244,18 +251,21 @@ class TestbenchData:
             row += 1
 
         axes = []
-        for i, metric in enumerate(metrics):
+        for i, panel in enumerate(panels):
             ax = fig.add_subplot(grid[row + i, 0], sharex=axes[0] if axes else None)
             axes.append(ax)
             _turn_grid_on(ax)
-            _plot_metric(ax, plot_frame, metric, window_size=window_size, levels=levels)
-            if metric == 'loss':
-                ax.set_yscale('log')
-                ax.set_ylabel('Loss')
-            elif metric == 'alpha':
-                ax.set_ylabel(r'Alpha ($\alpha$)')
+            if panel['kind'] == 'controller_norms':
+                _plot_controller_norms(ax, plot_frame, window_size=window_size, levels=levels, scales=scales)
             else:
-                ax.set_ylabel(metric)
+                metric = panel['metric']
+                _plot_metric(ax, plot_frame, metric, window_size=window_size, levels=levels, scales=scales)
+                if metric == 'loss':
+                    ax.set_ylabel('Loss')
+                elif metric == 'alpha':
+                    ax.set_ylabel(r'Alpha ($\alpha$)')
+                else:
+                    ax.set_ylabel(metric)
 
         _add_epoch_axis(axes[0], plot_frame)
         axes[-1].set_xlabel('Global Step')
@@ -265,6 +275,55 @@ class TestbenchData:
         if show:
             plt.show()
         return fig, axes
+
+
+def _add_controller_derived_metrics(frame: pd.DataFrame) -> pd.DataFrame:
+    if frame.empty:
+        return frame
+
+    out = frame.copy()
+    for squared_metric, norm_metric in CONTROLLER_SQUARED_TO_NORM.items():
+        if squared_metric in out.columns and norm_metric not in out.columns:
+            values = pd.to_numeric(out[squared_metric], errors='coerce').clip(lower=0)
+            out[norm_metric] = np.sqrt(values)
+    return out
+
+
+def _training_panels(frame: pd.DataFrame, metrics: list[str] | None) -> list[dict[str, Any]]:
+    if metrics is None:
+        panels: list[dict[str, Any]] = []
+        for metric in ['loss', 'alpha']:
+            if metric in frame.columns:
+                panels.append({'kind': 'metric', 'metric': metric})
+        if all(metric in frame.columns for metric in DEFAULT_CONTROLLER_PANEL):
+            panels.append({'kind': 'controller_norms', 'metrics': DEFAULT_CONTROLLER_PANEL})
+        for metric in frame.columns:
+            if metric not in _default_reserved_metrics(frame):
+                panels.append({'kind': 'metric', 'metric': metric})
+        return panels
+
+    available_metrics = [metric for metric in metrics if metric in frame.columns]
+    panels = []
+    if all(metric in available_metrics for metric in DEFAULT_CONTROLLER_PANEL):
+        consumed_controller = set(DEFAULT_CONTROLLER_PANEL)
+    else:
+        consumed_controller = set()
+
+    for metric in available_metrics:
+        if metric == DEFAULT_CONTROLLER_PANEL[0] and consumed_controller:
+            panels.append({'kind': 'controller_norms', 'metrics': DEFAULT_CONTROLLER_PANEL})
+            continue
+        if metric in consumed_controller:
+            continue
+        panels.append({'kind': 'metric', 'metric': metric})
+    return panels
+
+
+def _default_reserved_metrics(frame: pd.DataFrame) -> set[str]:
+    reserved = {'loss', 'alpha', 'dtheta_sq', 'dgrad_sq', 'lhs_sq', 'rhs_sq', 'alpha_feasible', 'alpha_state'}
+    if all(metric in frame.columns for metric in DEFAULT_CONTROLLER_PANEL):
+        reserved.update(DEFAULT_CONTROLLER_PANEL)
+    return reserved
 
 
 def _resolve_training_trace_dir(path: str | Path) -> Path:
@@ -447,7 +506,15 @@ def _rolling_statistics(series: pd.Series, window_size: int, levels: int) -> dic
     return stats
 
 
-def _plot_metric(ax, frame: pd.DataFrame, metric: str, *, window_size: int, levels: int) -> None:
+def _plot_metric(
+    ax,
+    frame: pd.DataFrame,
+    metric: str,
+    *,
+    window_size: int,
+    levels: int,
+    scales: dict[str, str],
+) -> None:
     series = frame[metric].dropna()
     x = series.index.get_level_values('global_step').to_numpy()
     stats = _rolling_statistics(series, window_size=window_size, levels=levels)
@@ -468,6 +535,98 @@ def _plot_metric(ax, frame: pd.DataFrame, metric: str, *, window_size: int, leve
         )
 
     ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', title=f'Smoothed {label}')
+    _apply_metric_scale(ax, metric, scales)
+
+
+def _plot_controller_norms(
+    ax,
+    frame: pd.DataFrame,
+    *,
+    window_size: int,
+    levels: int,
+    scales: dict[str, str],
+) -> None:
+    left_metric, right_metric = DEFAULT_CONTROLLER_PANEL
+    right_ax = ax.twinx()
+    _turn_grid_on(right_ax)
+    right_ax.grid(False)
+
+    _plot_metric_series(
+        ax,
+        frame,
+        left_metric,
+        label=r'$||\Delta G||$',
+        color='#7b3294',
+        shade_color='#c2a5cf',
+        window_size=window_size,
+        levels=levels,
+    )
+    _plot_metric_series(
+        right_ax,
+        frame,
+        right_metric,
+        label=r'$||\Delta \theta||$',
+        color='#008837',
+        shade_color='#a6dba0',
+        window_size=window_size,
+        levels=levels,
+    )
+
+    _apply_metric_scale(ax, left_metric, scales)
+    _apply_metric_scale(right_ax, right_metric, scales)
+    ax.set_ylabel(r'$||\Delta G||$', color='#7b3294')
+    right_ax.set_ylabel(r'$||\Delta \theta||$', color='#008837')
+    ax.tick_params(axis='y', labelcolor='#7b3294')
+    right_ax.tick_params(axis='y', labelcolor='#008837')
+
+    left_handles, left_labels = ax.get_legend_handles_labels()
+    right_handles, right_labels = right_ax.get_legend_handles_labels()
+    ax.legend(
+        left_handles + right_handles,
+        left_labels + right_labels,
+        bbox_to_anchor=(1.12, 1),
+        loc='upper left',
+        title='Controller Norms',
+    )
+
+
+def _plot_metric_series(
+    ax,
+    frame: pd.DataFrame,
+    metric: str,
+    *,
+    label: str,
+    color: str,
+    shade_color: str,
+    window_size: int,
+    levels: int,
+) -> None:
+    series = frame[metric].dropna()
+    x = series.index.get_level_values('global_step').to_numpy()
+    stats = _rolling_statistics(series, window_size=window_size, levels=levels)
+
+    ax.plot(x, stats['mean'].to_numpy(), '-', label=rf'{label} ($\mu$)', color=color, linewidth=1.8)
+    for level in range(levels, 0, -1):
+        interval = stats[level]
+        ax.fill_between(
+            x,
+            interval['lower'].to_numpy(),
+            interval['upper'].to_numpy(),
+            alpha=0.055 * (levels - level + 1),
+            color=shade_color,
+            label=rf'{label} $\pm$ {level}$-\sigma$',
+        )
+
+
+def _apply_metric_scale(ax, metric: str, scales: dict[str, str]) -> None:
+    scale = scales.get(metric)
+    if scale is None and metric == 'loss':
+        scale = 'log'
+    if scale is not None:
+        if scale == 'log':
+            ax.set_yscale(scale, nonpositive='clip')
+        else:
+            ax.set_yscale(scale)
 
 
 def _add_epoch_axis(ax, frame: pd.DataFrame) -> None:
