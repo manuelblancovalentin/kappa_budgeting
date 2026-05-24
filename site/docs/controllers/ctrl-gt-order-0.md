@@ -87,30 +87,36 @@ This controller reacts immediately. If $C_t^{\mathrm{ctrl}}$ spikes, $\alpha_t$ 
 
 ## hls4ml Implementation
 
-The hls4ml firmware kernel lives in `templates/vivado/trainable/controllers/global_throttle.h` as
-`nnet::global_throttle_order0<CONFIG_T>(weights, biases, weight_grad, bias_grad, alpha, reset_numerator)`.
+### Architecture
 
-### Internal curvature sensor
+GT-0 is implemented as two separate kernels in the three-phase `batch_end` block:
 
-The kernel maintains static persistent storage for the previous parameter vector
-(`prev_weights`, `prev_biases`) and previous gradient vector
-(`prev_weight_grad`, `prev_bias_grad`). On the first call or after
-`reset_numerator = true` it stores the current values and emits $\alpha = 1$.
-On subsequent calls it computes:
+**Phase 1 — Curvature sensor** (`curvature_sensor_order0`, shared with GT-1):
 
-```math
-||\Delta\theta||^2 = \sum_{\text{all params}} (\theta_t - \theta_{t-1})^2
-\qquad
-||\Delta G||^2 = \sum_{\text{all params}} (G_t - G_{t-1})^2
+```
+nnet::curvature_sensor_order0<CONFIG>(weights, biases, wgrad, bgrad,
+                                       &dtheta_sq, &dgrad_sq, reset);
 ```
 
-then:
+Maintains static `prev_weights`/`prev_biases`/`prev_weight_grad`/`prev_bias_grad`.
+On the first call or after `reset_numerator = true`, stores current values
+and emits zero squared-norm contributions. On subsequent calls:
+
+```math
+||\Delta\theta||^2 = \sum (θ_t - θ_{t-1})^2
+\qquad
+||\Delta G||^2 = \sum (G_t - G_{t-1})^2
+```
+
+**Phase 2 — Law** (`global_throttle_order0_law`, called once with global sums):
 
 ```math
 C = \frac{||\Delta G||}{||\Delta\theta|| + \epsilon}
 \qquad
 \alpha = \text{clip}\!\left(\frac{\chi}{\eta C + \epsilon},\ \alpha_{\min},\ \alpha_{\max}\right)
 ```
+
+Sqrt is computed through `double` for CSIM (`std::sqrt`).
 
 ### Controller parameters in config struct
 
@@ -128,25 +134,35 @@ These are emitted by `vivado_writer.py:_make_trainable_dense_config`.
 
 ### Call-chain emission
 
-In `_make_trainable_call_chain`, if the normalized controller kind is
-`ctrl_gt_order_0`, the generated `batch_end` block emits:
+The three-phase `batch_end` block (all global-throttle controllers):
 
 ```cpp
-// (1) Compute curvature and safe alpha from accumulated gradient
-nnet::global_throttle_order0<config>(w, b, w_grad, b_grad, alpha, reset_accumulators);
+if (batch_end) {
+    // Phase 1 — Accumulate per-layer squared norms
+    metric_t global_dtheta_sq = 0, global_dgrad_sq = 0;
 
-// (2) Produce raw update direction
-nnet::sgd<config>(w_grad, b_grad, w_update, b_update, lr);
+    // (per Dense layer in backward order)
+    {
+        metric_t __dt, __dg;
+        nnet::curvature_sensor_order0<config>(w, b, wgrad, bgrad,
+                                              __dt, __dg, reset_accumulators);
+        global_dtheta_sq += __dt;
+        global_dgrad_sq += __dg;
+    }
 
-// (3) Apply alpha-scaled update
-nnet::apply_dense_update<config>(w, b, w_update, b_update, alpha);
+    // Phase 2 — Global controller law
+    nnet::global_throttle_order0_law<config>(global_dtheta_sq, global_dgrad_sq,
+                                              alpha, reset_accumulators);
+
+    // Phase 3 — SGD + apply per layer
+    nnet::sgd<config>(wgrad, bgrad, w_update, b_update, lr);
+    nnet::apply_dense_update<config>(w, b, w_update, b_update, alpha);
+}
 ```
 
-### Square-root for CSIM vs synthesis
+For CTRL-NONE, phases 1 and 2 are replaced by a single `global_throttle_none` call (α=1).
 
-For C simulation (`!defined(__SYNTHESIS__)`) the kernel uses
-`std::sqrt(double(...))`. For synthesis, `nnet::sqrt(...)` is the
-placeholder until a fixed-point-safe sqrt is validated.
+For CTRL-GT-ORDER-1, phase 2 uses `global_throttle_order1_law` instead.
 
 ## Implementation Status
 

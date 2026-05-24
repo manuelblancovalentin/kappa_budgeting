@@ -103,6 +103,25 @@ For non-oscillatory adaptation:
 
 This controller should react more smoothly than `CTRL-GT-ORDER-0`, at the cost of slower response to sudden spikes.
 
+## hls4ml Implementation
+
+Kernel: `nnet::global_throttle_order1_law<CONFIG_T>(dtheta_sq, dgrad_sq, alpha, reset_numerator)`.
+
+Shares the `curvature_sensor_order0` (Phase 1) with GT-0. Maintains a static `alpha_state` variable. On `reset_numerator = true`, `alpha_state` reinitializes to 1.
+
+Law (from global squared norms):
+```math
+C = ||ΔG|| / (||Δθ|| + ε)
+m = χ - η·α·C
+α ← clip(α + k_α·m,  α_min,  α_max)
+```
+
+Config field `controller_k_alpha` (default `0.1`, key `KAlpha` in YAML).
+
+Trace logging provides curvature, ||dθ||, ||dG||, alpha_state, and alpha.
+
+CSIM validation is pending (follows `ENB-017` / `CSIM-002` pattern).
+
 ## Implementation Status
 
-Planned.
+Implemented in hls4ml-trainable (`HLS4ML-022`, inprogress).
